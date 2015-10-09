@@ -39,6 +39,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.FragmentGridPagerAdapter;
 import android.support.wearable.view.GridViewPager;
 import android.text.TextUtils;
@@ -120,12 +121,12 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     private GridViewPager mPager;
 
 
-    Map<Integer, Integer> allrecords = new HashMap<Integer, Integer>();
-    ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
+    private Map<Integer, Integer> allrecords = new HashMap<Integer, Integer>();
+    private ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
     private BluetoothAdapter mBluetoothAdapter;
 
-    ArrayList<String> listItems=new ArrayList<String>();
-    ArrayAdapter<String> adapter;
+    private ArrayList<String> listItems=new ArrayList<String>();
+    private ArrayAdapter<String> adapter;
 
 
     @Override
@@ -298,7 +299,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
 
         }
     };
-
 
     public int ReadHeartRateData(BluetoothGattCharacteristic characteristic){
 

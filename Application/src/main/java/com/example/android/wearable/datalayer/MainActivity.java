@@ -285,9 +285,9 @@ public class MainActivity extends Activity implements DataApi.DataListener,
         if (messageEvent.getPath().equals("data"))
         {
             byte [] data = messageEvent.getData();
-            OutputEvent("Read data from the watch of size " + data.length);
             try {
                 alldata = (ArrayList<ISSRecordData>)convertFromBytes(data);
+                OutputEvent("Read data from the watch of size " + alldata.size());
                 ClearWatchData();
             } catch (Exception e) {
                 e.printStackTrace();
