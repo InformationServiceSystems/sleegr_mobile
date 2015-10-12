@@ -32,8 +32,10 @@ import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
@@ -67,9 +69,12 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInput;
@@ -82,6 +87,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -288,11 +294,39 @@ public class MainActivity extends Activity implements DataApi.DataListener,
             try {
                 alldata = (ArrayList<ISSRecordData>)convertFromBytes(data);
                 OutputEvent("Read data from the watch of size " + alldata.size());
+                SaveBytesToFile(data);
                 ClearWatchData();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
+        }
+
+    }
+
+    File dataFile =new File(Environment.getExternalStorageDirectory(), "data.bin");
+
+    private void SaveBytesToFile(byte [] data ){
+
+        if (dataFile.exists()) {
+            dataFile.delete();
+        }
+
+        if (!dataFile.exists()) {
+            try {
+                dataFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dataFile.getPath()));
+            bos.write(data);
+            bos.flush();
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }
@@ -416,8 +450,16 @@ public class MainActivity extends Activity implements DataApi.DataListener,
         String text;
 
         public Event(String title, String text) {
-            this.title = title;
+            this.title = GetTimeNow();
             this.text = text;
+        }
+
+        public String GetTimeNow(){
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HH:mm:ss");
+            String currentDateandTime = sdf.format(new Date());
+            return currentDateandTime;
+
         }
     }
 
@@ -602,11 +644,30 @@ public class MainActivity extends Activity implements DataApi.DataListener,
     public void onSendToServerClick(View view) {
 
         //SendToServer(watchData);
-        ShareDataWithServer();
+        //ShareDataWithServer();
+        SendDataFileToEmail();
+
+    }
+
+    private void SendDataFileToEmail(){
+
+        String filelocation=dataFile.toString();
+
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+// set the type to 'email'
+        emailIntent .setType("vnd.android.cursor.dir/email");
+        String to[] = {"iaroslogos@gmail.com"};
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, to);
+// the attachment
+        emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + filelocation));
+// the mail subject
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
+        startActivity(Intent.createChooser(emailIntent , "Send email..."));
 
     }
 
     private void ShareDataWithServer(){
+
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 

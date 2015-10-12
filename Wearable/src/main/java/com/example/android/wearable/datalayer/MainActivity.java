@@ -13,14 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.example.android.wearable.datalayer;
 
 import static com.example.android.wearable.datalayer.DataLayerListenerService.LOGD;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -30,7 +43,10 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
@@ -39,19 +55,15 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.wearable.activity.WearableActivity;
-import android.support.wearable.view.FragmentGridPagerAdapter;
+import android.os.PowerManager;
 import android.support.wearable.view.GridViewPager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -81,7 +93,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -109,6 +120,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         OnConnectionFailedListener, DataApi.DataListener, MessageApi.MessageListener,
         NodeApi.NodeListener, SensorEventListener {
 
+
     private static final String TAG = "MainActivity";
     private int SamplingRateMS  = 1000;
     private int UserID = 1;
@@ -128,205 +140,62 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     private ArrayList<String> listItems=new ArrayList<String>();
     private ArrayAdapter<String> adapter;
 
+    PowerManager.WakeLock wakeLock = null;
 
     @Override
     public void onCreate(Bundle b) {
         super.onCreate(b);
+
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setupViews();
+
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyWakelockTag");
+
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
 
-        try {
-            mSensorManager = ((SensorManager) getSystemService(SENSOR_SERVICE));
-
-            int [] sensorIDs = new int[]{Sensor.TYPE_STEP_DETECTOR, Sensor.TYPE_LIGHT, Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_SIGNIFICANT_MOTION};
-
-            for (int sensorID : sensorIDs)
-            {
-                mHeartRateSensor = mSensorManager.getDefaultSensor(sensorID);
-                mSensorManager.registerListener(this, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
-            }
-
-            /*List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
-            for (Sensor sensor : sensors)
-            {
-                //mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-            }*/
-        }catch (Exception ex){
-            System.out.println(ex.toString());
+        if (SensorsDataService.itself == null){
+            Intent intent = new Intent(this, SensorsDataService.class);
+            startService(intent);
         }
 
-        new Timer().schedule(timerTask, 0, SamplingRateMS);
-
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-
-
-        // creates list of events
-
-        adapter=new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1,
-                listItems);
-
-        ListView list = (ListView ) findViewById(R.id.listView);
-        list.setAdapter(adapter);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems);
+        ListView listView = (ListView) findViewById(R.id.listView);
+        listView.setAdapter(adapter);
 
     }
 
+    // this is used to communicate with Service
+    private class DataUpdateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
 
-    // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
+                OutputEvent(SensorsDataService.Message);
 
-                @Override
-                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String name = device.getName();
-
-                            if (name == null){
-                                return;
-                            }
-
-                            if (name.contains("RHYTHM")){
-                                connectDevice(device);
-                            }
-                        }
-                    }).run();
-                }
-            };
-
-    BluetoothGatt mBluetoothGatt = null;
-
-    public void connectDevice(BluetoothDevice device) {
-        mBluetoothGatt = device.connectGatt(this, true, mGattCallback);
+            }
+        }
     }
 
-
-    private static final UUID UUID_HRS =
-            UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb");
-    private static final UUID UUID_HRD =
-            UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb");
-
-    public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
-
-    BluetoothGattService heartRateService = null;
-    BluetoothGattCharacteristic heartRateCharacteristic = null;
-
-    private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            String intentAction;
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                mBluetoothGatt.discoverServices();
-                OutputEvent("HRM detected");
-                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                OutputEvent("HRM Lost");
-                mBluetoothAdapter.startLeScan(mLeScanCallback);
-            }
-        }
-
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                heartRateService = gatt.getService(UUID_HRS);
-
-
-
-                if (heartRateService != null){
-
-                    heartRateCharacteristic =
-                            heartRateService.getCharacteristic(UUID_HRD);
-
-                    gatt.setCharacteristicNotification(heartRateCharacteristic,true);
-                    //boolean result = gatt.readCharacteristic(heartRateCharacteristic);
-
-                    try {
-                        BluetoothGattDescriptor descriptor = heartRateCharacteristic.getDescriptor(
-                                UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
-                        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                        mBluetoothGatt.writeDescriptor(descriptor);
-                        OutputEvent("Reading HRM");
-                    }catch (Exception ex){
-                        Log.e(TAG, "wuuuuut?");
-
-                    }
-                }
-
-            } else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
-            }
-        }
-
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic characteristic,
-                                         int status) {
-
-            Log.v(TAG, "Characteristic read");
-
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-
-            }
-        }
-
-        @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic characteristic) {
-
-
-
-            int result = ReadHeartRateData(characteristic);
-
-            if (allrecords.containsKey( Sensor.TYPE_HEART_RATE )){
-                return;
-            }
-            allrecords.put(Sensor.TYPE_HEART_RATE, 1);
-
-            long unixTime = System.currentTimeMillis() / 1000L;
-            ISSRecordData data = new ISSRecordData(UserID, Sensor.TYPE_HEART_RATE, unixTime, null, result);
-
-            alldata.add(data);
-
-        }
-    };
-
-    public int ReadHeartRateData(BluetoothGattCharacteristic characteristic){
-
-        int flag = characteristic.getProperties();
-        int format = -1;
-        if ((flag & 0x01) != 0) {
-            format = BluetoothGattCharacteristic.FORMAT_UINT16;
-            Log.d(TAG, "Heart rate format UINT16.");
-        } else {
-            format = BluetoothGattCharacteristic.FORMAT_UINT8;
-            Log.d(TAG, "Heart rate format UINT8.");
-        }
-        final int heartRate = characteristic.getIntValue(format, 1);
-        return heartRate;
-
-    }
-
-
-    TimerTask timerTask = new TimerTask() {
-        public void run() {
-            allrecords.clear();
-        }
-    };
+    private DataUpdateReceiver dataUpdateReceiver;
 
     @Override
     protected void onResume() {
         super.onResume();
         mGoogleApiClient.connect();
+        if (dataUpdateReceiver == null) dataUpdateReceiver = new DataUpdateReceiver();
+        IntentFilter intentFilter = new IntentFilter(SensorsDataService.NEW_MESSAGE_AVAILABLE);
+        registerReceiver(dataUpdateReceiver, intentFilter);
+        if (wakeLock.isHeld()){
+            wakeLock.release();
+        }
     }
 
     @Override
@@ -337,6 +206,8 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         Wearable.NodeApi.removeListener(mGoogleApiClient, this);
         mGoogleApiClient.disconnect();
         //mSensorManager.unregisterListener(this);
+        if (dataUpdateReceiver != null) unregisterReceiver(dataUpdateReceiver);
+        wakeLock.acquire();
     }
 
 
@@ -345,14 +216,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-        if (allrecords.containsKey( event.sensor.getType() )){
-            return;
-        }
-        allrecords.put(event.sensor.getType(), 1);
 
-        // data format: UserID, MeasurementType, Timestamp, ExtraData, MeasurementValue
-        ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), event.timestamp, null, event.values[0] );
-        alldata.add(data);
 
     }
 
@@ -427,7 +291,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     float heartbeat = 10;
     int steps = 1000;
 
-    boolean hrmenabled = false;
+    boolean allowHRM = false;
 
     public void onClicked(View view) {
         switch (view.getId()) {
@@ -435,72 +299,13 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
 
                 Button btn = (Button ) findViewById(R.id.capability_2_btn);
 
-                if (!hrmenabled)
-                {
-                    mBluetoothAdapter.startLeScan(mLeScanCallback);
-                    btn.setText("Disable HRM");
+                if (SensorsDataService.itself != null){
+                    SensorsDataService.itself.SwitchHRM();
                 }
-                else
-                {
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    btn.setText("Enable HRM");
-                    if (mBluetoothGatt != null){
-                        mBluetoothGatt.close();
-                        mBluetoothGatt = null;
-                    }
-                }
-
-                hrmenabled = !hrmenabled;
 
                 break;
             default:
                 Log.e(TAG, "Unknown click event registered");
-        }
-    }
-
-    public void SendCollectedData(){
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //mGoogleApiClient.blockingConnect(3000, TimeUnit.MILLISECONDS);
-                NodeApi.GetConnectedNodesResult result =
-                        Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-                List<Node> nodes = result.getNodes();
-                String nodeId = null;
-
-                byte[] data = null;
-
-                try {
-                    data = convertToBytes(alldata);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                if (nodes.size() > 0) {
-                    for (int i = 0; i < nodes.size(); i++){
-                        nodeId = nodes.get(i).getId();
-                        Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "data", data);
-                    }
-                }
-
-            }
-        }).start();
-
-    }
-
-    private byte[] convertToBytes(Object object) throws IOException {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutput out = new ObjectOutputStream(bos)) {
-            out.writeObject(object);
-            return bos.toByteArray();
-        }
-    }
-
-    private Object convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-             ObjectInput in = new ObjectInputStream(bis)) {
-            return in.readObject();
         }
     }
 
@@ -577,21 +382,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     @Override
     public void onMessageReceived(MessageEvent event) {
         LOGD(TAG, "onMessageReceived: " + event);
-        byte [] data = event.getData();
 
-        if (data != null){
-            if (data[0] == 1){
-                // send available data
-                OutputEvent("Sending data ...");
-                SendCollectedData();
-            }
-
-            if (data[0] == 2){
-                // send available data
-                OutputEvent("Data saved on Smarpthone");
-                alldata.clear();
-            }
-        }
     }
 
     @Override
@@ -604,9 +395,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         generateEvent("Node Disconnected", node.getId());
     }
 
-    private void setupViews() {
 
-    }
 
     /**
      * Switches to the page {@code index}. The first page has index 0.
