@@ -83,6 +83,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -644,8 +645,8 @@ public class MainActivity extends Activity implements DataApi.DataListener,
     public void onSendToServerClick(View view) {
 
         //SendToServer(watchData);
-        //ShareDataWithServer();
-        SendDataFileToEmail();
+        ShareDataWithServer();
+        //SendDataFileToEmail();
 
     }
 
@@ -662,7 +663,7 @@ public class MainActivity extends Activity implements DataApi.DataListener,
         emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + filelocation));
 // the mail subject
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
-        startActivity(Intent.createChooser(emailIntent , "Send email..."));
+        startActivity(Intent.createChooser(emailIntent, "Send email..."));
 
     }
 
@@ -679,39 +680,76 @@ public class MainActivity extends Activity implements DataApi.DataListener,
 
         String data = null;
         String serveroutput = "";
+
+
+
+                        final long startTime = System.currentTimeMillis();
+
         try {
-            data = URLEncoder.encode("user", "UTF-8") + "=" + URLEncoder.encode("insert data here", "UTF-8");
 
-            URL url = new URL("http://46.101.214.58:8082/");
-            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-            conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            conn.setRequestProperty("charset", "utf-8");
-            conn.connect();
 
-            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-            wr.write(data);
-            wr.flush();
-            wr.close();
+            //
 
-            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            while ((line = rd.readLine()) != null) {
-                serveroutput += line;
+            if (alldata == null){
+                return;
             }
-            rd.close();
+
+
+            for (int i = 0; i < alldata.size(); i ++){
+
+                ISSRecordData recordData = alldata.get(i);
+
+                String urlstr  = "http://46.101.214.58:8082/sendData/?type=7" +
+                        "&userid=" + recordData.UserID +
+                        "&sensortype=" + recordData.MeasurementType +
+                        "&time=" + recordData.Timestamp +
+                        "&value=" + round(recordData.Value, 2) +
+                        "&metadata=null";
+
+                URL url = new URL(urlstr);
+                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+               /* conn.setRequestMethod("GET");
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+                conn.connect();*/
+/*
+                // optional default is GET
+                conn.setRequestMethod("GET");
+
+                //add request header
+                conn.setRequestProperty("User-Agent",  "Mozilla/5.0");
+
+                int responseCode = conn.getResponseCode();*/
+
+            }
+
+            alldata.clear();
+
+                /*OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                wr.write(data);
+                wr.flush();
+                wr.close();
+
+                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line;
+                while ((line = rd.readLine()) != null) {
+                    serveroutput += line;
+                }
+                rd.close();*/
 
         } catch (Exception e) {
             e.printStackTrace();
             serveroutput = e.toString();
         }
 
+
+                        long endTime = System.currentTimeMillis();
+
+                        final String totalTime = (endTime - startTime) + " ms";
         final String servout = serveroutput;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mDataItemListAdapter.add(new Event("Sent data to server", "Server response: " + servout));
+                mDataItemListAdapter.add(new Event("Sent data to server, " , "Server response: " + servout + totalTime));
             }
         });
 
@@ -719,6 +757,12 @@ public class MainActivity extends Activity implements DataApi.DataListener,
             }
         }).start();
 
+    }
+
+    public static float round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        return bd.floatValue();
     }
 
     /**

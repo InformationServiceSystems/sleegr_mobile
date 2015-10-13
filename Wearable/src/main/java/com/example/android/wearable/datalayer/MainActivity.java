@@ -295,12 +295,16 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
 
     public void onClicked(View view) {
         switch (view.getId()) {
-            case R.id.capability_2_btn:
+            case R.id.switchTraining:
 
-                Button btn = (Button ) findViewById(R.id.capability_2_btn);
+                Button btn = (Button ) findViewById(R.id.switchTraining);
 
                 if (SensorsDataService.itself != null){
                     SensorsDataService.itself.SwitchHRM();
+                    allowHRM = !allowHRM;
+
+                    String outputString = allowHRM ? "Stop training" : "Start training";
+                    btn.setText(outputString);
                 }
 
                 break;

@@ -19,30 +19,22 @@
                 android:layout_height="match_parent"
                 android:background="@color/black">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Switch HRM"
-        android:onClick="onClicked"
-        android:id="@+id/capability_2_btn"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true" />
-
 
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/listView"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/capability_2_btn" />
+        android:layout_below="@+id/switchTraining" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=" "
-        android:id="@+id/button"
-        android:layout_alignParentBottom="true"
+        android:text="Start training"
+        android:onClick="onClicked"
+        android:id="@+id/switchTraining"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true" />
 
 
