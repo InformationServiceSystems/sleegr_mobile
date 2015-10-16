@@ -53,7 +53,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         GoogleApiClient.OnConnectionFailedListener {
 
     public static DataSyncService itself = null;
-    public static String message = "";
+    public static String Message = "";
 
     private static final String TAG = "MainActivity";
 
@@ -80,6 +80,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 .build();
 
         mGoogleApiClient.connect();
+
+        itself = this;
 
     }
 
@@ -135,15 +137,14 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
-
     }
 
-    public void OutputEvent(String content){
+    public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
-
-
+    public void OutputEvent(String str){
+        this.Message = str;
+        sendBroadcast(new Intent(this.NEW_MESSAGE_AVAILABLE));
     }
 
     File dataFile =new File(Environment.getExternalStorageDirectory(), "data.bin");
@@ -162,6 +163,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             return in.readObject();
         }
     }
+
+
 
     private void SaveBytesToFile(byte [] data ){
 
@@ -255,7 +258,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    private void ShareDataWithServer(){
+    public void ShareDataWithServer(){
 
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -415,4 +418,5 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             Log.d(tag, message);
         }
     }
+
 }
