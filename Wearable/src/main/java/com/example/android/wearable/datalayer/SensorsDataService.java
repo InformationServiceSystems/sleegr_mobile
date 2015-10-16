@@ -19,6 +19,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.wearable.view.GridViewPager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -64,7 +65,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     private int UserID = 1;
 
     private SensorManager mSensorManager;
-    private Sensor mHeartRateSensor;/**/
+    private Sensor androidSensor;/**/
 
 
     private GoogleApiClient mGoogleApiClient;
@@ -77,20 +78,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     TimerTask timerTask = new TimerTask() {
         public void run() {
 
-            mSensorManager = ((SensorManager) getSystemService(SENSOR_SERVICE));
 
-            for (int sensorID : sensorIDs)
-            {
-                mHeartRateSensor = mSensorManager.getDefaultSensor(sensorID);
-                mSensorManager.unregisterListener(sensorEventListener, mHeartRateSensor);
-                mSensorManager.registerListener(sensorEventListener, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
-            }
-
-            /*if (mBluetoothGatt != null ){
-                mBluetoothGatt.connect();
-            }*/
-
-            recordedSensorTypes.clear();
 
         }
     };
@@ -104,6 +92,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     int [] sensorIDs = new int[]{Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE};//,
     //int [] sensorIDs = new int[]{ Sensor.TYPE_SIGNIFICANT_MOTION};
+
+    PowerManager.WakeLock wakeLock = null;
+    // this wakes CPU for sensor measuring
+    Alarm alarm = new Alarm();
 
     @Override
     public void onCreate() {
@@ -120,12 +112,50 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         mGoogleApiClient.connect();
 
 
+        mSensorManager = ((SensorManager) getSystemService(SENSOR_SERVICE));
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyWakelockTag");
+
 
         new Timer().schedule(timerTask, 0, SamplingRateMS);
 
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
+
+
+
+    }
+
+    public void ResetSensors(){
+
+        if (!wakeLock.isHeld()){
+            wakeLock.acquire();
+        }
+
+        for (int sensorID : sensorIDs)
+        {
+            androidSensor = mSensorManager.getDefaultSensor(sensorID);
+            mSensorManager.unregisterListener(sensorEventListener, androidSensor);
+            mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
+            /*if (mBluetoothGatt != null ){
+                mBluetoothGatt.connect();
+            }*/
+
+        recordedSensorTypes.clear();
+
+        for ( int sensor: sensorIDs){
+            recordedSensorTypes.put(sensor,1);
+        }
+
+        if (allowHRM){
+            recordedSensorTypes.put(Sensor.TYPE_HEART_RATE,1);
+        }
+
     }
 
     SensorEventListener sensorEventListener = new SensorEventListener(){
@@ -133,15 +163,21 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         @Override
         public void onSensorChanged(SensorEvent event) {
 
-            if (recordedSensorTypes.containsKey( event.sensor.getType() )){
+            if (!recordedSensorTypes.containsKey( event.sensor.getType() )){
                 return;
             }
-            recordedSensorTypes.put(event.sensor.getType(), 1);
+            recordedSensorTypes.remove(event.sensor.getType());
             mSensorManager.unregisterListener(sensorEventListener, event.sensor);
 
             // data format: UserID, MeasurementType, Timestamp, ExtraData, MeasurementValue
             ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetTimeNow() , null, event.values[0] );
             alldata.add(data);
+
+            if (recordedSensorTypes.isEmpty()){
+                if (wakeLock.isHeld()){
+                    wakeLock.release();
+                }
+            }
 
         }
 
@@ -282,10 +318,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
 
-            if (recordedSensorTypes.containsKey( Sensor.TYPE_HEART_RATE )){
+            if (!recordedSensorTypes.containsKey( Sensor.TYPE_HEART_RATE )){
                 return;
             }
-            recordedSensorTypes.put(Sensor.TYPE_HEART_RATE, 1);
+            recordedSensorTypes.remove(Sensor.TYPE_HEART_RATE);
 
             int result = ReadHeartRateData(characteristic);
 
@@ -437,7 +473,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        alarm.SetAlarm(this);
         return START_STICKY;
+
     }
 
     @Override

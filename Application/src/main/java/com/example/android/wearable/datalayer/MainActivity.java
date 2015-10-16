@@ -48,6 +48,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -69,22 +70,29 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -146,8 +154,6 @@ public class MainActivity extends Activity implements DataApi.DataListener,
     public void onCreate(Bundle b) {
         super.onCreate(b);
         mHandler = new Handler();
-        LOGD(TAG, "onCreate");
-        mCameraSupported = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
         setContentView(R.layout.main_activity);
         setupViews();
 
@@ -155,15 +161,11 @@ public class MainActivity extends Activity implements DataApi.DataListener,
         mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
         mDataItemList.setAdapter(mDataItemListAdapter);
 
-        mGeneratorExecutor = new ScheduledThreadPoolExecutor(1);
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-
-
 
     }
 
@@ -180,22 +182,18 @@ public class MainActivity extends Activity implements DataApi.DataListener,
     @Override
     protected void onStart() {
         super.onStart();
-        if (!mResolvingError) {
-            mGoogleApiClient.connect();
-        }
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mDataItemGeneratorFuture = mGeneratorExecutor.scheduleWithFixedDelay(
-                new DataItemGenerator(), 1, 100, TimeUnit.SECONDS);
+
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mDataItemGeneratorFuture.cancel(true /* mayInterruptIfRunning */);
     }
 
     @Override
@@ -674,55 +672,96 @@ public class MainActivity extends Activity implements DataApi.DataListener,
 
         StrictMode.setThreadPolicy(policy);
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        String data = null;
-        String serveroutput = "";
+                String data = null;
+                String serveroutput = "";
 
+                // load the sleep file contents
 
-
-                        final long startTime = System.currentTimeMillis();
-
-        try {
-
-
-            //
-
-            if (alldata == null){
-                return;
-            }
+                String SD_CARD_PATH = Environment.getExternalStorageDirectory().toString();
+                File sleepdata = new File(SD_CARD_PATH + "/sleep-data/sleep-export.csv");
 
 
-            for (int i = 0; i < alldata.size(); i ++){
 
-                ISSRecordData recordData = alldata.get(i);
+                File file = sleepdata;
+                InputStream in = null;
+                try {
+                    in = new BufferedInputStream(new FileInputStream(file));
 
-                String urlstr  = "http://46.101.214.58:8082/sendData/?type=7" +
-                        "&userid=" + recordData.UserID +
-                        "&sensortype=" + recordData.MeasurementType +
-                        "&time=" + recordData.Timestamp +
-                        "&value=" + round(recordData.Value, 2) +
-                        "&metadata=null";
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                        if (in != null) {
+                            try {
+                                in.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
 
-                URL url = new URL(urlstr);
-                HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-               /* conn.setRequestMethod("GET");
-                conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-                conn.connect();*/
+
+                final long startTime = System.currentTimeMillis();
+
+                try {
+                    uploadFile(sleepdata.getAbsolutePath());
+                    /*
+                    if (alldata == null){
+                        return;
+                    }
+
+
+                    for (int i = 0; i < alldata.size(); i ++){
+                        ISSRecordData recordData = alldata.get(i);
+                        String urlstr  = "http://46.101.214.58:8082/sendData/?type=7" +
+                                "&userid=" + recordData.UserID +
+                                "&sensortype=" + recordData.MeasurementType +
+                                "&time=" + recordData.Timestamp +
+                                "&value=" + round(recordData.Value, 2) +
+                                "&metadata=null";
+
+                        URL url = new URL(urlstr);
+                        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                        conn.setRequestMethod("GET");
+                        conn.setRequestProperty("User-Agent",  "Mozilla/5.0");
+                        int responseCode = conn.getResponseCode();
+                    }
+
+                    alldata.clear();*/
+
 /*
-                // optional default is GET
-                conn.setRequestMethod("GET");
+                    String url="http://46.101.214.58:5000/sendPost";
+                    URL object=new URL(url);
 
-                //add request header
-                conn.setRequestProperty("User-Agent",  "Mozilla/5.0");
+                    HttpURLConnection con = (HttpURLConnection) object.openConnection();
+                    con.setDoOutput(true);
+                    con.setDoInput(true);
+                    con.setRequestProperty("Content-Type", "application/json");
+                    con.setRequestProperty("Accept", "application/json");
+                    con.setRequestMethod("POST");
 
-                int responseCode = conn.getResponseCode();*/
+                    OutputStream wr = con.getOutputStream();
+                    String jsondata = "{ \"user\":\"data\" }";
+                    wr.write(jsondata.getBytes("UTF-8"));
+                    wr.flush();
 
-            }
+//display what returns the POST request
 
-            alldata.clear();
+                    StringBuilder sb = new StringBuilder();
+                    int HttpResult = con.getResponseCode();
+                    if(HttpResult == HttpURLConnection.HTTP_OK) {
+                        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+                        String line = null;
+                        while ((line = br.readLine()) != null) {
+                            sb.append(line + "\n");
+                        }
+                    }
+
+                    String strdata = sb.toString();*/
+
 
                 /*OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
                 wr.write(data);
@@ -736,27 +775,128 @@ public class MainActivity extends Activity implements DataApi.DataListener,
                 }
                 rd.close();*/
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            serveroutput = e.toString();
-        }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    serveroutput = e.toString();
+                }
 
 
-                        long endTime = System.currentTimeMillis();
+                long endTime = System.currentTimeMillis();
 
-                        final String totalTime = (endTime - startTime) + " ms";
-        final String servout = serveroutput;
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mDataItemListAdapter.add(new Event("Sent data to server, " , "Server response: " + servout + totalTime));
-            }
-        });
+                final String totalTime = (endTime - startTime) + " ms";
+                final String servout = serveroutput;
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDataItemListAdapter.add(new Event("Sent data to server, " , "Server response: " + servout + totalTime));
+                    }
+                });
 
 
             }
         }).start();
 
+    }
+
+
+    public int uploadFile(String sourceFileUri) {
+
+
+        String fileName = sourceFileUri;
+
+        HttpURLConnection conn = null;
+        DataOutputStream dos = null;
+        String lineEnd = "\r\n";
+        String twoHyphens = "--";
+        String boundary = "*****";
+        int bytesRead, bytesAvailable, bufferSize;
+        byte[] buffer;
+        int maxBufferSize = 1 * 1024 * 1024;
+        File sourceFile = new File(sourceFileUri);
+
+        if (!sourceFile.isFile()) {
+
+
+
+            return 0;
+
+        }
+        else
+        {
+            try {
+
+                // open a URL connection to the Servlet
+                FileInputStream fileInputStream = new FileInputStream(sourceFile);
+                URL url = new URL("http://46.101.214.58:5000/upload");
+
+                // Open a HTTP  connection to  the URL
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoInput(true); // Allow Inputs
+                conn.setDoOutput(true); // Allow Outputs
+                conn.setUseCaches(false); // Don't use a Cached Copy
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Connection", "Keep-Alive");
+                conn.setRequestProperty("ENCTYPE", "multipart/form-data");
+                conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                conn.setRequestProperty("file", fileName);
+
+                dos = new DataOutputStream(conn.getOutputStream());
+
+                dos.writeBytes(twoHyphens + boundary + lineEnd);
+                dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
+                                + fileName + "\"" + lineEnd);
+
+                        dos.writeBytes(lineEnd);
+
+                // create a buffer of  maximum size
+                bytesAvailable = fileInputStream.available();
+
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                buffer = new byte[bufferSize];
+
+                // read file and write it into form...
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                while (bytesRead > 0) {
+
+                    dos.write(buffer, 0, bufferSize);
+                    bytesAvailable = fileInputStream.available();
+                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                }
+
+                // send multipart form data necesssary after file data...
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+                // Responses from the server (code and message)
+                int serverResponseCode = conn.getResponseCode();
+                String serverResponseMessage = conn.getResponseMessage();
+
+                Log.i("uploadFile", "HTTP Response is : "
+                        + serverResponseMessage + ": " + serverResponseCode);
+
+                if(serverResponseCode == 200){
+
+
+                }
+
+                //close the streams //
+                fileInputStream.close();
+                dos.flush();
+                dos.close();
+
+            } catch (MalformedURLException ex) {
+                Log.e("Upload file to server", "error: " + ex.getMessage(), ex);
+            } catch (Exception e) {
+                Log.e("Upload file ", "Exception : "
+                        + e.getMessage(), e);
+            }
+
+            return 1;
+
+        } // End else block
     }
 
     public static float round(float d, int decimalPlace) {

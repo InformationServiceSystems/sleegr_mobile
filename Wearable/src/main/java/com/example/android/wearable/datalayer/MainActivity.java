@@ -140,20 +140,12 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     private ArrayList<String> listItems=new ArrayList<String>();
     private ArrayAdapter<String> adapter;
 
-    PowerManager.WakeLock wakeLock = null;
-
     @Override
     public void onCreate(Bundle b) {
         super.onCreate(b);
 
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
-
-
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MyWakelockTag");
-
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -193,9 +185,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         if (dataUpdateReceiver == null) dataUpdateReceiver = new DataUpdateReceiver();
         IntentFilter intentFilter = new IntentFilter(SensorsDataService.NEW_MESSAGE_AVAILABLE);
         registerReceiver(dataUpdateReceiver, intentFilter);
-        if (wakeLock.isHeld()){
-            wakeLock.release();
-        }
+
     }
 
     @Override
@@ -207,7 +197,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         mGoogleApiClient.disconnect();
         //mSensorManager.unregisterListener(this);
         if (dataUpdateReceiver != null) unregisterReceiver(dataUpdateReceiver);
-        wakeLock.acquire();
+
     }
 
 
