@@ -326,8 +326,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         final File file = fileToUpload;
         final String serverurl = uploadUrl;
 
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
+        /*StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);*/
 
         new Thread(new Runnable() {
             @Override
@@ -416,7 +416,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
 
             }
-        }).run();
+        }).start();
 
 
     }

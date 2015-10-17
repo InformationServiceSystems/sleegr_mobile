@@ -175,7 +175,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     @Override
     protected void onResume() {
         super.onResume();
-        mGoogleApiClient.connect();
+        //mGoogleApiClient.connect();
         if (dataUpdateReceiver == null) dataUpdateReceiver = new DataUpdateReceiver();
         IntentFilter intentFilter = new IntentFilter(SensorsDataService.NEW_MESSAGE_AVAILABLE);
         registerReceiver(dataUpdateReceiver, intentFilter);
@@ -185,10 +185,10 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     @Override
     protected void onPause() {
         super.onPause();
-        Wearable.DataApi.removeListener(mGoogleApiClient, this);
+        /*Wearable.DataApi.removeListener(mGoogleApiClient, this);
         Wearable.MessageApi.removeListener(mGoogleApiClient, this);
         Wearable.NodeApi.removeListener(mGoogleApiClient, this);
-        mGoogleApiClient.disconnect();
+        mGoogleApiClient.disconnect();*/
         //mSensorManager.unregisterListener(this);
         if (dataUpdateReceiver != null) unregisterReceiver(dataUpdateReceiver);
 
