@@ -29,8 +29,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sync with watch"
-            android:id="@+id/sendPhoto"
-            android:onClick="onSendPhotoClick"
+            android:id="@+id/syncWithWatchButton"
+            android:onClick="onSyncClick"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true" />
@@ -39,9 +39,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sync with server"
-            android:id="@+id/sendToServer"
+            android:id="@+id/sendToServerButton"
             android:onClick="onSendToServerClick"
-            android:layout_below="@+id/sendPhoto"
+            android:layout_below="@+id/syncWithWatchButton"
             android:layout_alignParentEnd="true"
             android:layout_alignParentStart="true" />
 

@@ -2,20 +2,14 @@ package com.example.android.wearable.datalayer;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.IntentSender;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.StrictMode;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ListView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -28,25 +22,18 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimerTask;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class DataSyncService extends Service implements DataApi.DataListener,
         MessageApi.MessageListener, NodeApi.NodeListener, GoogleApiClient.ConnectionCallbacks,
@@ -57,21 +44,25 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     private static final String TAG = "MainActivity";
 
-    /**
-     * Request code for launching the Intent to resolve Google Play services errors.
-     */
-
-
-
     private GoogleApiClient mGoogleApiClient;
     private boolean mResolvingError = false;
     private Handler mHandler;
+
+    public static String NEW_MESSAGE_AVAILABLE = "log the output";
+
+    File sensorsData =new File(Environment.getExternalStorageDirectory(), "tri.bin");
+    File sleepData = new File(Environment.getExternalStorageDirectory().toString() + "/sleep-data/sleep-export.csv");
+    String uploadUrl = "http://46.101.214.58:5000/upload";
+
+
 
     @Override
     public void onCreate() {
 
         super.onCreate();
         mHandler = new Handler();
+
+
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -81,7 +72,23 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         mGoogleApiClient.connect();
 
+        /*PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyWakelockTag");
+
+        wakeLock.acquire();*/
+
         itself = this;
+
+    }
+
+    SyncAlarm alarm = new SyncAlarm();
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        alarm.SetAlarm(this);
+        return START_STICKY;
 
     }
 
@@ -110,83 +117,49 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
-
     @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
-        LOGD(TAG, "onMessageReceived() A message from watch was received:" + messageEvent
-                .getRequestId() + " " + messageEvent.getPath());
-
-        /*mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mDataItemListAdapter.add(new Event("Message from watch", messageEvent.getPath()));
-                watchData = messageEvent.getPath();
-                byte[] data = messageEvent.getData();
-            }
-        });*/
 
         if (messageEvent.getPath().equals("data"))
         {
             byte [] data = messageEvent.getData();
             try {
-                alldata = (ArrayList<ISSRecordData>)convertFromBytes(data);
-                OutputEvent("Read data from the watch of size " + alldata.size());
-                SaveBytesToFile(data);
+                ArrayList<ISSRecordData> receivedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data);
+                OutputEvent("Read data from the watch of size " + receivedData.size());
+                SaveNewDataToFile(receivedData);
                 ClearWatchData();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+
     }
 
-    public static String NEW_MESSAGE_AVAILABLE = "log the output";
+
 
     public void OutputEvent(String str){
         this.Message = str;
         sendBroadcast(new Intent(this.NEW_MESSAGE_AVAILABLE));
     }
 
-    File dataFile =new File(Environment.getExternalStorageDirectory(), "data.bin");
-
-    private byte[] convertToBytes(Object object) throws IOException {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutput out = new ObjectOutputStream(bos)) {
-            out.writeObject(object);
-            return bos.toByteArray();
-        }
-    }
-
-    private Object convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-             ObjectInput in = new ObjectInputStream(bis)) {
-            return in.readObject();
-        }
-    }
 
 
-
-    private void SaveBytesToFile(byte [] data ){
-
-        if (dataFile.exists()) {
-            dataFile.delete();
-        }
-
-        if (!dataFile.exists()) {
-            try {
-                dataFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    private void SaveNewDataToFile(ArrayList<ISSRecordData> data){
 
         try {
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dataFile.getPath()));
-            bos.write(data);
-            bos.flush();
-            bos.close();
-        } catch (IOException e) {
+
+            if (!sensorsData.exists()) {
+                Serializer.SerializeToFile(new ArrayList<ISSRecordData>(), sensorsData);
+            }
+
+            ArrayList<ISSRecordData> savedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromFile(sensorsData);
+            savedData.addAll(data);
+            Serializer.SerializeToFile(savedData, sensorsData);
+
+        } catch (Exception e) {
+
             e.printStackTrace();
+
         }
 
     }
@@ -211,8 +184,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                         Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "Please send data", new byte[]{1});
                     }
                 }
-
-
             }
         }).start();
 
@@ -243,7 +214,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     private void SendDataFileToEmail(){
 
-        String filelocation=dataFile.toString();
+        String filelocation= sensorsData.toString();
 
         Intent emailIntent = new Intent(Intent.ACTION_SEND);
 // set the type to 'email'
@@ -258,10 +229,137 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    public void ShareDataWithServer(){
+    public byte [] FileToBytes(File file){
 
+        int size = (int) file.length();
+        byte[] bytes = new byte[size];
+
+        try {
+            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+            buf.read(bytes, 0, bytes.length);
+            buf.close();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return bytes;
+
+    }
+
+    // Returns String which is a server response
+    public void UploadFileToServer(File fileToUpload, String uploadUrl) {
+
+        final File file = fileToUpload;
+        final String serverurl = uploadUrl;
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+
+                    // Static stuff:
+
+                    String attachmentName = "file";
+                    String attachmentFileName = file.getName();
+                    String crlf = "\r\n";
+                    String twoHyphens = "--";
+                    String boundary = "*****";
+
+                    //Setup the request:
+
+                    HttpURLConnection httpUrlConnection = null;
+                    URL url = new URL(serverurl);
+                    httpUrlConnection = (HttpURLConnection) url.openConnection();
+                    httpUrlConnection.setUseCaches(false);
+                    httpUrlConnection.setDoOutput(true);
+
+                    httpUrlConnection.setRequestMethod("POST");
+                    httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
+                    httpUrlConnection.setRequestProperty("Cache-Control", "no-cache");
+                    httpUrlConnection.setRequestProperty(
+                            "Content-Type", "multipart/form-data;boundary=" + boundary);
+
+                    // Start content wrapper:
+
+                    DataOutputStream request = new DataOutputStream(
+                            httpUrlConnection.getOutputStream());
+
+                    request.writeBytes(twoHyphens + boundary + crlf);
+                    request.writeBytes("Content-Disposition: form-data; name=\"" +
+                            attachmentName + "\";filename=\"" +
+                            attachmentFileName + "\"" + crlf);
+                    request.writeBytes(crlf);
+
+                    // read all file bytes
+
+                    byte[] filecontents = FileToBytes(file);
+
+                    // end content wrapper
+
+                    request.write(filecontents);
+
+                    request.writeBytes(crlf);
+                    request.writeBytes(twoHyphens + boundary +
+                            twoHyphens + crlf);
+
+                    // flush the output buffer
+
+                    request.flush();
+                    request.close();
+
+                    // Get server response:
+
+                    InputStream responseStream = new
+                            BufferedInputStream(httpUrlConnection.getInputStream());
+
+                    BufferedReader responseStreamReader =
+                            new BufferedReader(new InputStreamReader(responseStream));
+
+                    String line = "";
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    while ((line = responseStreamReader.readLine()) != null) {
+                        stringBuilder.append(line).append("\n");
+                    }
+                    responseStreamReader.close();
+
+                    String response = stringBuilder.toString();
+
+                    OutputEvent("Server says: " + response);
+
+                    // release resources:
+
+                    responseStream.close();
+                    httpUrlConnection.disconnect();
+
+                }catch (Exception ex){
+                    OutputEvent("Exception during sync: " + ex.toString());
+                }
+
+
+            }
+        }).run();
+
+
+    }
+
+    public void ShareDataWithServer(){
+
+        UploadFileToServer(sleepData, uploadUrl);
+        UploadFileToServer(sensorsData, uploadUrl);
+
+
+        // <<<<<<<<<<<<< some deprecated code >>>>>>>>>>>>>>>>>>>
+
+        /*StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
 
@@ -274,34 +372,14 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
                 // load the sleep file contents
 
-                String SD_CARD_PATH = Environment.getExternalStorageDirectory().toString();
-                File sleepdata = new File(SD_CARD_PATH + "/sleep-data/sleep-export.csv");
 
-
-
-                File file = sleepdata;
-                InputStream in = null;
-                try {
-                    in = new BufferedInputStream(new FileInputStream(file));
-
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } finally {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
 
 
                 final long startTime = System.currentTimeMillis();
 
                 try {
 
-                    /*
+
                     if (alldata == null){
                         return;
                     }
@@ -366,7 +444,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 while ((line = rd.readLine()) != null) {
                     serveroutput += line;
                 }
-                rd.close();*/
+                rd.close();
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -374,26 +452,21 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 }
 
 
-                long endTime = System.currentTimeMillis();
-
-                final String totalTime = (endTime - startTime) + " ms";
-                final String servout = serveroutput;
-
 
 
             }
-        }).start();
+        }).start();*/
 
     }
 
     @Override
     public void onPeerConnected(Node node) {
-
+        OutputEvent("Peer connected: " + node.toString());
     }
 
     @Override
     public void onPeerDisconnected(Node node) {
-
+        OutputEvent("Peer disconnected: " + node.toString());
     }
 
     @Override

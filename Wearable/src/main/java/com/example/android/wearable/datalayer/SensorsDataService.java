@@ -74,15 +74,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     // map below allows to reduce amount of collected data
     private Map<Integer, Integer> recordedSensorTypes = new HashMap<Integer, Integer>();
-
-    TimerTask timerTask = new TimerTask() {
-        public void run() {
-
-
-
-        }
-    };
-
     private ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
     private BluetoothAdapter mBluetoothAdapter;
 
@@ -96,6 +87,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     PowerManager.WakeLock wakeLock = null;
     // this wakes CPU for sensor measuring
     Alarm alarm = new Alarm();
+
+    TimerTask timerTask = new TimerTask() {
+        public void run() {
+            ResetSensors();
+        }
+    };
+
+    Timer timer = new Timer();
 
     @Override
     public void onCreate() {
@@ -117,9 +116,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "MyWakelockTag");
-
-
-        new Timer().schedule(timerTask, 0, SamplingRateMS);
 
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -374,7 +370,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 }
             }, 10000);
 
+
             OutputEvent("Searching HRM ... ");
+
+            timer.schedule(timerTask, 0, SamplingRateMS);
+
         }
         else
         {
@@ -387,6 +387,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             }
 
             OutputEvent("HRM off");
+
+            timer.cancel();
         }
 
         allowHRM = !allowHRM;
@@ -406,7 +408,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 byte[] data = null;
 
                 try {
-                    data = convertToBytes(alldata);
+                    data = Serializer.SerializeToBytes(alldata);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -423,20 +425,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    private byte[] convertToBytes(Object object) throws IOException {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutput out = new ObjectOutputStream(bos)) {
-            out.writeObject(object);
-            return bos.toByteArray();
-        }
-    }
 
-    private Object convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-             ObjectInput in = new ObjectInputStream(bis)) {
-            return in.readObject();
-        }
-    }
 
     public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
