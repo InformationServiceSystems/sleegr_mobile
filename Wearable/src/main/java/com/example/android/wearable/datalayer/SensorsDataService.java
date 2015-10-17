@@ -26,12 +26,16 @@ import android.widget.ArrayAdapter;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.ByteArrayInputStream;
@@ -74,7 +78,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     // map below allows to reduce amount of collected data
     private Map<Integer, Integer> recordedSensorTypes = new HashMap<Integer, Integer>();
-    private ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
+    public ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
     private BluetoothAdapter mBluetoothAdapter;
 
     private ArrayList<String> listItems=new ArrayList<String>();
@@ -123,6 +127,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
 
 
+
     }
 
     public void ResetSensors(){
@@ -166,7 +171,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             mSensorManager.unregisterListener(sensorEventListener, event.sensor);
 
             // data format: UserID, MeasurementType, Timestamp, ExtraData, MeasurementValue
-            ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetTimeNow() , null, event.values[0] );
+            ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetTimeNow() , null, event.values[0],event.values[1],event.values[1] );
             alldata.add(data);
 
             if (recordedSensorTypes.isEmpty()){
@@ -208,17 +213,13 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                                 return;
                             }
 
-                            String name = device.getName();
+                            String name = device.getAddress();
 
-                            if (name == null){
-                                return;
-                            }
-
-
-                            if (name.contains("RHYTHM")){
+                            if (name.equals("F1:67:AA:46:BB:52")){
                                 hrmDevice = device;
                                 connectDevice(device);
                             }
+
                         }
                     }).run();
                 }
@@ -322,7 +323,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             int result = ReadHeartRateData(characteristic);
 
             long unixTime = System.currentTimeMillis() / 1000L;
-            ISSRecordData data = new ISSRecordData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result);
+            ISSRecordData data = new ISSRecordData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result, 0, 0);
 
             alldata.add(data);
 
@@ -407,31 +408,53 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                 byte[] data = null;
 
+                OutputEvent("Preparing data ...");
+
+                long startTime = System.currentTimeMillis();
+
                 try {
                     data = Serializer.SerializeToBytes(alldata);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
+                long totalTime = System.currentTimeMillis() - startTime;
+
+                OutputEvent("Data prepared in " + totalTime + " ms");
+
                 if (nodes.size() > 0) {
                     for (int i = 0; i < nodes.size(); i++){
                         nodeId = nodes.get(i).getId();
-                        Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "data", data);
+
+                        Asset asset = Asset.createFromBytes(data);
+
+                        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensorData");
+                        dataMap.getDataMap().putAsset("sensorData", asset);
+                        PutDataRequest request = dataMap.asPutDataRequest();
+                        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
+                                .putDataItem(mGoogleApiClient, request);
+
+                        /*PutDataRequest request = PutDataRequest.create("/sensorData");
+                        request.putAsset("sensorData", asset);
+                        Wearable.DataApi.putDataItem(mGoogleApiClient, request);*/
+
+                        //Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "data", data);
                     }
                 }
+
+                OutputEvent("Sending data ...");
 
             }
         }).start();
 
     }
 
-
-
     public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
     public void OutputEvent(String str){
-        this.Message = str;
-        sendBroadcast(new Intent(SensorsDataService.NEW_MESSAGE_AVAILABLE));
+        Intent intent = new Intent(this.NEW_MESSAGE_AVAILABLE);
+        intent.putExtra("message", str);
+        sendBroadcast(intent);
     }
 
     @Override
@@ -442,7 +465,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         if (data != null){
             if (data[0] == 1){
                 // send available data
-                OutputEvent("Sending data ...");
                 SendCollectedData();
             }
 
@@ -464,6 +486,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         alarm.SetAlarm(this);
+
         return START_STICKY;
 
     }

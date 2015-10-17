@@ -22,13 +22,14 @@ public class SyncAlarm extends BroadcastReceiver
         wl.acquire();
         wl.release();*/
 
-
-
         if (DataSyncService.itself != null) {
-            if (!serverSync)
+
+            if (!DataSyncService.itself.serverSync)
                 DataSyncService.itself.RequestDataFromWatch();
             else
                 DataSyncService.itself.ShareDataWithServer();
+
+            DataSyncService.itself.serverSync = !DataSyncService.itself.serverSync;
         }
 
     }
@@ -39,7 +40,7 @@ public class SyncAlarm extends BroadcastReceiver
         Intent intent = new Intent(context, SyncAlarm.class);
         intent.setAction("com.example.android.wearable.datalayer.ALARM");
         PendingIntent broadcast = PendingIntent.getBroadcast(context, 0, intent, 0);
-        am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000 * 60 * 1 , broadcast); // Millisec * Second * Minute
+        am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000 * 1 * 1 , broadcast); // Millisec * Second * Minute
     }
 
     public void CancelAlarm(Context context)

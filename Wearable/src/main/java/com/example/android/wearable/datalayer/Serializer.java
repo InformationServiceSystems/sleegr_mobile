@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
@@ -19,41 +20,37 @@ import java.io.ObjectOutputStream;
 
 /**
  * @author Iaroslav
+ * WARNING: (DE)SERIALIZATION IS PERFORMED IN MEMORY FOR BETTER PERFORMANCE
  */
 public class Serializer {
+
+
 
     public static void SerializeToFile(Object obj, File file) throws IOException {
 
         FileOutputStream fileOut;
 
-
         if (!file.exists()) {
-            //file.mkdirs();
             file.createNewFile();
         }
 
         fileOut = new FileOutputStream(file);
-        ObjectOutputStream out = new ObjectOutputStream(fileOut);
-        out.writeObject(obj);
-        out.close();
-        fileOut.close();
+        byte [] data = SerializeToBytes(obj);
 
+        fileOut.write(data);
+        fileOut.close();
 
     }
 
     public static Object DeserializeFromFile(File file) throws FileNotFoundException, IOException, ClassNotFoundException {
 
-        Object result = null;
-
         FileInputStream fileIn;
 
         fileIn = new FileInputStream(file);
-        ObjectInputStream in = new ObjectInputStream(fileIn);
-        result = in.readObject();
-        in.close();
+        byte [] data = InputStreamToByte(fileIn);
         fileIn.close();
 
-        return result;
+        return DeserializeFromBytes(data);
     }
 
     public static byte[] SerializeToBytes(Object object) throws IOException {
@@ -69,6 +66,23 @@ public class Serializer {
              ObjectInput in = new ObjectInputStream(bis)) {
             return in.readObject();
         }
+    }
+
+    public static byte [] InputStreamToByte(InputStream is) throws IOException {
+
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        int nRead;
+        byte[] data = new byte[16384];
+
+        while ((nRead = is.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+
+        buffer.flush();
+
+        return buffer.toByteArray();
+
     }
 
 }

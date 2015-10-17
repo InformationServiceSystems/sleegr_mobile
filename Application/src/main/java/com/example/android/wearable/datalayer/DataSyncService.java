@@ -13,8 +13,11 @@ import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
@@ -23,6 +26,7 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,12 +38,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class DataSyncService extends Service implements DataApi.DataListener,
         MessageApi.MessageListener, NodeApi.NodeListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
     public static DataSyncService itself = null;
+    public boolean serverSync = false;
     public static String Message = "";
 
     private static final String TAG = "MainActivity";
@@ -50,10 +56,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
-    File sensorsData =new File(Environment.getExternalStorageDirectory(), "tri.bin");
+    File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon.bin");
     File sleepData = new File(Environment.getExternalStorageDirectory().toString() + "/sleep-data/sleep-export.csv");
     String uploadUrl = "http://46.101.214.58:5000/upload";
-
 
 
     @Override
@@ -61,7 +66,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         super.onCreate();
         mHandler = new Handler();
-
 
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -79,6 +83,10 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         wakeLock.acquire();*/
 
         itself = this;
+
+        /*if (sensorsData.exists()) {
+            sensorsData.delete();
+        }*/
 
     }
 
@@ -113,16 +121,10 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     }
 
     @Override
-    public void onDataChanged(DataEventBuffer dataEventBuffer) {
-
-    }
-
-    @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
 
-        if (messageEvent.getPath().equals("data"))
-        {
-            byte [] data = messageEvent.getData();
+       /*if (messageEvent.getPath().equals("data")) {
+            byte[] data = messageEvent.getData();
             try {
                 ArrayList<ISSRecordData> receivedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data);
                 OutputEvent("Read data from the watch of size " + receivedData.size());
@@ -131,20 +133,77 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }*/
+
+    }
+
+
+    @Override
+    public void onDataChanged(DataEventBuffer dataEvents) {
+        for (DataEvent event : dataEvents) {
+            if (event.getType() == DataEvent.TYPE_CHANGED &&
+                    event.getDataItem().getUri().getPath().equals("/sensorData")) {
+                try {
+                    DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
+                    Asset asset = dataMapItem.getDataMap().getAsset("sensorData");
+                    SaveDataFromAsset(asset);
+
+                }catch(Exception ex){
+                    ex.printStackTrace();
+                }
+
+            }
+        }
+    }
+
+    public void SaveDataFromAsset(Asset asset) {
+
+        if (asset == null) {
+            throw new IllegalArgumentException("Asset must be non-null");
+        }
+
+        ConnectionResult result =
+                mGoogleApiClient.blockingConnect(1000 * 100, TimeUnit.MILLISECONDS);
+
+        if (!result.isSuccess()) {
+            return;
+        }
+        // convert asset into a file descriptor and block until it's ready
+        InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
+                mGoogleApiClient, asset).await().getInputStream();
+
+        if (assetInputStream == null) {
+            Log.w(TAG, "Requested an unknown Asset.");
+            return;
+        }
+
+
+        try {
+
+            byte[] data = Serializer.InputStreamToByte(assetInputStream);
+
+            ArrayList<ISSRecordData> receivedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data);
+            OutputEvent("Read data from the watch of size " + receivedData.size());
+            SaveNewDataToFile(receivedData);
+            ClearWatchData();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            OutputEvent(e.toString());
         }
 
     }
 
+    public void OutputEvent(String str) {
 
+        Intent intent = new Intent(this.NEW_MESSAGE_AVAILABLE);
+        intent.putExtra("message", str);
+        sendBroadcast(intent);
 
-    public void OutputEvent(String str){
-        this.Message = str;
-        sendBroadcast(new Intent(this.NEW_MESSAGE_AVAILABLE));
     }
 
 
-
-    private void SaveNewDataToFile(ArrayList<ISSRecordData> data){
+    private void SaveNewDataToFile(ArrayList<ISSRecordData> data) {
 
         try {
 
@@ -152,9 +211,21 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 Serializer.SerializeToFile(new ArrayList<ISSRecordData>(), sensorsData);
             }
 
+            OutputEvent("Started saving the data ... ");
+
+            long startTime = System.currentTimeMillis();
+
             ArrayList<ISSRecordData> savedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromFile(sensorsData);
             savedData.addAll(data);
+
+            OutputEvent("Overall items so far: " + savedData.size());
+
             Serializer.SerializeToFile(savedData, sensorsData);
+
+            long totalTime = System.currentTimeMillis() - startTime;
+
+            OutputEvent("Total saving time: " + totalTime + " ms");
+
 
         } catch (Exception e) {
 
@@ -166,7 +237,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // interation with the watch procecdures
 
-    public void RequestDataFromWatch(){
+    public void RequestDataFromWatch() {
 
         OutputEvent("Requested data from the watch ... ");
 
@@ -179,7 +250,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 List<Node> nodes = result.getNodes();
                 String nodeId = null;
                 if (nodes.size() > 0) {
-                    for (int i = 0; i < nodes.size(); i++){
+                    for (int i = 0; i < nodes.size(); i++) {
                         nodeId = nodes.get(i).getId();
                         Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "Please send data", new byte[]{1});
                     }
@@ -189,7 +260,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    public void ClearWatchData(){
+    public void ClearWatchData() {
 
         OutputEvent("Data saved. Clearing data on the watch");
 
@@ -202,7 +273,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 List<Node> nodes = result.getNodes();
                 String nodeId = null;
                 if (nodes.size() > 0) {
-                    for (int i = 0; i < nodes.size(); i++){
+                    for (int i = 0; i < nodes.size(); i++) {
                         nodeId = nodes.get(i).getId();
                         Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "Clear the data", new byte[]{2});
                     }
@@ -212,13 +283,13 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }).start();
     }
 
-    private void SendDataFileToEmail(){
+    private void SendDataFileToEmail() {
 
-        String filelocation= sensorsData.toString();
+        String filelocation = sensorsData.toString();
 
         Intent emailIntent = new Intent(Intent.ACTION_SEND);
 // set the type to 'email'
-        emailIntent .setType("vnd.android.cursor.dir/email");
+        emailIntent.setType("vnd.android.cursor.dir/email");
         String to[] = {"iaroslogos@gmail.com"};
         emailIntent.putExtra(Intent.EXTRA_EMAIL, to);
 // the attachment
@@ -229,7 +300,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    public byte [] FileToBytes(File file){
+    public byte[] FileToBytes(File file) {
 
         int size = (int) file.length();
         byte[] bytes = new byte[size];
@@ -247,7 +318,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }
 
         return bytes;
-
     }
 
     // Returns String which is a server response
@@ -340,7 +410,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                     responseStream.close();
                     httpUrlConnection.disconnect();
 
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     OutputEvent("Exception during sync: " + ex.toString());
                 }
 
@@ -351,7 +421,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    public void ShareDataWithServer(){
+    public void ShareDataWithServer() {
 
         UploadFileToServer(sleepData, uploadUrl);
         UploadFileToServer(sensorsData, uploadUrl);

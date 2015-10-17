@@ -120,7 +120,7 @@ public class MainActivity extends Activity implements DataApi.DataListener,
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(DataSyncService.NEW_MESSAGE_AVAILABLE)) {
-                OutputEvent(DataSyncService.Message);
+                OutputEvent(intent.getExtras().getString("message"));
             }
         }
     }
@@ -201,8 +201,15 @@ public class MainActivity extends Activity implements DataApi.DataListener,
 
     }
 
-    public void OutputEvent(String content){
+    public void OutputEvent(final String content){
 
+        final String cont = content;
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mDataItemListAdapter.add( new Event( "Event", content ));
+            }
+        });
 
     }
 

@@ -133,10 +133,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     private GridViewPager mPager;
 
 
-    private Map<Integer, Integer> allrecords = new HashMap<Integer, Integer>();
-    private ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
-    private BluetoothAdapter mBluetoothAdapter;
-
     private ArrayList<String> listItems=new ArrayList<String>();
     private ArrayAdapter<String> adapter;
 
@@ -169,9 +165,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
-
-                OutputEvent(SensorsDataService.Message);
-
+                OutputEvent(intent.getExtras().getString("message"));
             }
         }
     }
@@ -298,6 +292,16 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
                 }
 
                 break;
+            /*case R.id.buttonFake:
+
+                for (int i = 0; i < 10000; i++){
+                    ISSRecordData data = new ISSRecordData(1,1, "yyyy.MM.dd_HH:mm:ss", null, 3.1415926535f,0,0);
+                    SensorsDataService.itself.alldata.add(data);
+                }
+
+                OutputEvent("Created fake data");
+
+                break;*/
             default:
                 Log.e(TAG, "Unknown click event registered");
         }
