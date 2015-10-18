@@ -215,7 +215,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                             String name = device.getAddress();
 
-                            if (name.equals("F1:67:AA:46:BB:52")){
+                            // Myo Alpha:   F1:67:AA:46:BB:52
+                            // Scosche:     DA:2B:64:87:44:35
+                            if (name.equals("DA:2B:64:87:44:35")){
                                 hrmDevice = device;
                                 connectDevice(device);
                             }

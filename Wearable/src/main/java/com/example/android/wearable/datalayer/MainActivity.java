@@ -142,6 +142,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
 
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)

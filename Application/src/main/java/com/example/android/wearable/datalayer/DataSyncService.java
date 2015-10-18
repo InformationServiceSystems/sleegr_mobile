@@ -329,6 +329,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         /*StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);*/
 
+        OutputEvent("Starting to sync with server ... ");
+
         new Thread(new Runnable() {
             @Override
             public void run() {
