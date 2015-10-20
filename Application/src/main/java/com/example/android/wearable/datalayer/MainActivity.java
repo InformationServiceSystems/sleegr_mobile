@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -97,7 +96,6 @@ public class MainActivity extends Activity implements DataApi.DataListener,
             Intent intent = new Intent(this, DataSyncService.class);
             startService(intent);
         }
-
 
 
 

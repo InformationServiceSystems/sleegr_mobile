@@ -16,14 +16,12 @@
 -->
 
 <resources>
-    <string name="app_name">DataLayer</string>
+    <string name="app_name">Triathlon</string>
     <string name="intro_message">
         <![CDATA[
         
             
-            Sample demonstrating the usage of the GoogleApiClient in order to send data
-            from a handheld device to a wearable. The data transmitted is a picture taken by
-            the user of the sample.
+            This app is a bridge app between the watch app and the triathlon app server.
             
         
         ]]>

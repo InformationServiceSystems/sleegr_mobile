@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.support.wearable.view.GridViewPager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -38,13 +39,7 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,7 +61,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     private static final String TAG = "MainActivity";
     private int SamplingRateMS  = 10000;
-    private int UserID = 1;
+    private int UserID = -1;
+    private String UserHRM = "";
 
     private SensorManager mSensorManager;
     private Sensor androidSensor;/**/
@@ -92,13 +88,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     // this wakes CPU for sensor measuring
     Alarm alarm = new Alarm();
 
-    TimerTask timerTask = new TimerTask() {
-        public void run() {
-            ResetSensors();
-        }
-    };
+    TimerTask timerTask = null;
 
-    Timer timer = new Timer();
+    Timer timer = null;
 
     @Override
     public void onCreate() {
@@ -215,9 +207,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                             String name = device.getAddress();
 
-                            // Myo Alpha:   F1:67:AA:46:BB:52
-                            // Scosche:     DA:2B:64:87:44:35
-                            if (name.equals("DA:2B:64:87:44:35")){
+                            if (name.equals(UserHRM)){
                                 hrmDevice = device;
                                 connectDevice(device);
                             }
@@ -363,6 +353,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         if (!allowHRM)
         {
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
             mBluetoothAdapter.startLeScan(mLeScanCallback);
 
             mHandler.postDelayed(new Runnable() {
@@ -373,8 +364,15 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 }
             }, 10000);
 
-
             OutputEvent("Searching HRM ... ");
+
+            timerTask = new TimerTask() {
+                public void run() {
+                    ResetSensors();
+                }
+            };
+
+            timer = new Timer();
 
             timer.schedule(timerTask, 0, SamplingRateMS);
 
@@ -488,6 +486,22 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         alarm.SetAlarm(this);
+
+        // get unique id of the device
+        String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        OutputEvent(android_id);
+
+        Log.d("ISS", "Adroid ID: " + android_id);
+
+        switch (android_id){
+            case "760bd2c1de704a18":
+                UserID = 256;
+                UserHRM = "DA:2B:64:87:44:35";
+                break;
+            default:
+                OutputEvent("Unknown android ID! Please report this error to admins.");
+                break;
+        }
 
         return START_STICKY;
 

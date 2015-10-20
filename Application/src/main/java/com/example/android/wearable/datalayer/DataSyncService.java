@@ -7,8 +7,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.PowerManager;
-import android.os.StrictMode;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -26,7 +25,6 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -92,10 +90,27 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     SyncAlarm alarm = new SyncAlarm();
 
+    public int UserID = -1;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         alarm.SetAlarm(this);
+
+        String android_id = Settings.Secure.getString(this.getContentResolver(),Settings.Secure.ANDROID_ID);
+        OutputEvent(android_id);
+
+        Log.d("ISS", "Adroid ID: " + android_id );
+
+        switch (android_id){
+            case "867ee27023b1f8b7":
+                UserID = 256;
+                break;
+            default:
+                OutputEvent("Unknown android ID! Please report this error to admins.");
+                break;
+        }
+
         return START_STICKY;
 
     }
@@ -340,7 +355,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                     // Static stuff:
 
                     String attachmentName = "file";
-                    String attachmentFileName = file.getName();
+                    String attachmentFileName = "User_" + UserID + "_" + file.getName();
                     String crlf = "\r\n";
                     String twoHyphens = "--";
                     String boundary = "*****";
@@ -405,7 +420,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
                     String response = stringBuilder.toString();
 
-                    OutputEvent("Server says: " + response);
+                    OutputEvent("Sent " + filecontents.length + " bytes. Server responded: " + response);
 
                     // release resources:
 

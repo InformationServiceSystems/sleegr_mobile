@@ -1,7 +1,6 @@
 package com.example.android.wearable.datalayer;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Created by Euler on 10/8/2015.

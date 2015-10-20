@@ -29,7 +29,6 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
