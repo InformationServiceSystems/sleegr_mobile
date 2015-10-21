@@ -76,6 +76,7 @@
         <service
             android:name=".DataSyncService"
             android:enabled="true"
+            android:process=":remote"
             android:exported="true" >
         </service>
     </application>
