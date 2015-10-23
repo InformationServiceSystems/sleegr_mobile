@@ -198,7 +198,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         ISSRecordData data = new ISSRecordData(uid, sensortype, timenow, extras, v0, v1, v2);
         alldata.add(data);
 
-        if (alldata.size() % 100 == 0){
+        if (alldata.size() % 30 == 0){
 
             SaveNewDataToFile(alldata);
             alldata.clear();
