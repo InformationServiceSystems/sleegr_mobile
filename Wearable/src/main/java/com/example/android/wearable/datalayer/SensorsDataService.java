@@ -17,6 +17,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -39,6 +40,7 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -92,6 +94,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     Timer timer = null;
 
+    File mutexFile = new File(Environment.getExternalStorageDirectory(), "/mutex.bin");
+    File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon.bin");
+
     @Override
     public void onCreate() {
 
@@ -119,6 +124,15 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
 
 
+        // create sensor data file
+
+        if (!sensorsData.exists()){
+            try {
+                Serializer.SerializeToFile(alldata,sensorsData);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 
@@ -146,7 +160,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
 
         if (allowHRM){
-            recordedSensorTypes.put(Sensor.TYPE_HEART_RATE,1);
+            recordedSensorTypes.put(Sensor.TYPE_HEART_RATE, 1);
         }
 
     }
@@ -162,9 +176,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             recordedSensorTypes.remove(event.sensor.getType());
             mSensorManager.unregisterListener(sensorEventListener, event.sensor);
 
-            // data format: UserID, MeasurementType, Timestamp, ExtraData, MeasurementValue
-            ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetTimeNow() , null, event.values[0],event.values[1],event.values[1] );
-            alldata.add(data);
+            AddNewData(UserID, event.sensor.getType(), GetTimeNow() , null, event.values[0],event.values[1],event.values[1] );
 
             if (recordedSensorTypes.isEmpty()){
                 if (wakeLock.isHeld()){
@@ -179,6 +191,55 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         }
     };
+
+    public void AddNewData(int uid, int sensortype, String timenow, String extras, float v0, float v1, float v2){
+
+        // data format: UserID, MeasurementType, Timestamp, ExtraData, MeasurementValue
+        ISSRecordData data = new ISSRecordData(uid, sensortype, timenow, extras, v0, v1, v2);
+        alldata.add(data);
+
+        if (alldata.size() % 100 == 0){
+
+            SaveNewDataToFile(alldata);
+            alldata.clear();
+            System.gc();
+
+        }
+
+    }
+
+
+    private void SaveNewDataToFile(ArrayList<ISSRecordData> data) {
+
+        try {
+
+            if (!sensorsData.exists()) {
+                Serializer.SerializeToFile(new ArrayList<ISSRecordData>(), sensorsData);
+            }
+
+            OutputEvent("Started saving the data ... ");
+
+            long startTime = System.currentTimeMillis();
+
+            ArrayList<ISSRecordData> savedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromFile(sensorsData);
+            savedData.addAll(data);
+
+            OutputEvent("Overall items so far: " + savedData.size());
+
+            Serializer.SerializeToFile(savedData, sensorsData);
+
+            long totalTime = System.currentTimeMillis() - startTime;
+
+            OutputEvent("Total saving time: " + totalTime + " ms");
+
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+    }
 
     public String GetTimeNow(){
 
@@ -314,10 +375,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
             int result = ReadHeartRateData(characteristic);
 
-            long unixTime = System.currentTimeMillis() / 1000L;
-            ISSRecordData data = new ISSRecordData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result, 0, 0);
-
-            alldata.add(data);
+            AddNewData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result, 0, 0);
 
             OutputEvent("HR: " + result);
 
@@ -353,29 +411,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         if (!allowHRM)
         {
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    OutputEvent("HRM serach stop.");
-                }
-            }, 10000);
-
-            OutputEvent("Searching HRM ... ");
-
-            timerTask = new TimerTask() {
-                public void run() {
-                    ResetSensors();
-                }
-            };
-
-            timer = new Timer();
-
-            timer.schedule(timerTask, 0, SamplingRateMS);
-
+            SwitchHRM_ON();
         }
         else
         {
@@ -393,6 +429,35 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
 
         allowHRM = !allowHRM;
+
+        try {
+            Serializer.SerializeToFile(allowHRM,mutexFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void SwitchHRM_ON(){
+        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        mBluetoothAdapter.startLeScan(mLeScanCallback);
+
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                OutputEvent("HRM serach stop.");
+            }
+        }, 10000);
+
+        OutputEvent("Searching HRM ... ");
+        timerTask = new TimerTask() {
+            public void run() {
+                ResetSensors();
+            }
+        };
+        timer = new Timer();
+        timer.schedule(timerTask, 0, SamplingRateMS);
     }
 
     public void SendCollectedData(){
@@ -408,19 +473,16 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                 byte[] data = null;
 
-                OutputEvent("Preparing data ...");
-
                 long startTime = System.currentTimeMillis();
 
                 try {
-                    data = Serializer.SerializeToBytes(alldata);
-                } catch (IOException e) {
+                    data = Serializer.FileToBytes(sensorsData);
+                    //data = Serializer.SerializeToBytes(alldata);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
                 long totalTime = System.currentTimeMillis() - startTime;
-
-                OutputEvent("Data prepared in " + totalTime + " ms");
 
                 if (nodes.size() > 0) {
                     for (int i = 0; i < nodes.size(); i++){
@@ -431,8 +493,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                         PutDataMapRequest dataMap = PutDataMapRequest.create("/sensorData");
                         dataMap.getDataMap().putAsset("sensorData", asset);
                         PutDataRequest request = dataMap.asPutDataRequest();
-                        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
-                                .putDataItem(mGoogleApiClient, request);
+                        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+
 
                         /*PutDataRequest request = PutDataRequest.create("/sensorData");
                         request.putAsset("sensorData", asset);
@@ -472,6 +534,16 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 // send available data
                 OutputEvent("Data saved on Smarpthone");
                 alldata.clear();
+
+                if (sensorsData.exists()){
+                    sensorsData.delete();
+                    try {
+                        Serializer.SerializeToFile(new ArrayList<ISSRecordData>(), sensorsData);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
             }
         }
     }
@@ -498,12 +570,47 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 UserID = 256;
                 UserHRM = "DA:2B:64:87:44:35";
                 break;
+            case "1ccb3fb5f594467b":
+                UserID = 256;
+                UserHRM = "CC:1F:BD:F5:24:FA";
+                break;
             default:
                 OutputEvent("Unknown android ID! Please report this error to admins.");
                 break;
         }
 
+        InitializeMutexRecovery();
+
         return START_STICKY;
+
+    }
+
+    // in case app crashes, its state is restored automatically
+    public void InitializeMutexRecovery(){
+
+        // create mutex file
+
+        if (!mutexFile.exists() ){
+            try {
+                Serializer.SerializeToFile(allowHRM, mutexFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            allowHRM = (boolean) Serializer.DeserializeFromFile(mutexFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        OutputEvent("Mutex state: " + allowHRM);
+
+        if (allowHRM){
+            SwitchHRM_ON();
+        }
 
     }
 

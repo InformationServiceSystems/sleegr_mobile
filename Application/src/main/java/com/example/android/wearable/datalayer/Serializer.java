@@ -5,6 +5,7 @@
  */
 package com.example.android.wearable.datalayer;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -83,6 +84,26 @@ public class Serializer {
 
         return buffer.toByteArray();
 
+    }
+
+    public byte[] FileToBytes(File file) {
+
+        int size = (int) file.length();
+        byte[] bytes = new byte[size];
+
+        try {
+            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+            buf.read(bytes, 0, bytes.length);
+            buf.close();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return bytes;
     }
 
 }

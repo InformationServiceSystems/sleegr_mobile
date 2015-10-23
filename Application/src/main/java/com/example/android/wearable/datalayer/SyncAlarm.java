@@ -43,18 +43,10 @@ public class SyncAlarm extends BroadcastReceiver
         intent.setAction("com.example.android.wearable.datalayer.ALARM");
         PendingIntent broadcast = PendingIntent.getBroadcast(context, 0, intent, 0);
         //am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000 * 1 * 10 , broadcast); // Millisec * Second * Minute
-
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        for (int i = 0; i < 14; i++){
-            calendar.set(Calendar.HOUR_OF_DAY, 8 + i);
-        }
-
         // With setInexactRepeating(), you have to use one of the AlarmManager interval
         // constants--in this case, AlarmManager.INTERVAL_DAY.
-        am.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, broadcast);
+        am.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                AlarmManager.INTERVAL_HOUR, broadcast);
 
 
     }

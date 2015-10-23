@@ -65,7 +65,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         super.onCreate();
         mHandler = new Handler();
 
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
@@ -74,13 +73,13 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         mGoogleApiClient.connect();
 
+        itself = this;
+
         /*PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "MyWakelockTag");
 
         wakeLock.acquire();*/
-
-        itself = this;
 
         /*if (sensorsData.exists()) {
             sensorsData.delete();
@@ -106,10 +105,14 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             case "867ee27023b1f8b7":
                 UserID = 256;
                 break;
+            case "65e9172b7bb0638d":
+                UserID = 512;
+                break;
             default:
                 OutputEvent("Unknown android ID! Please report this error to admins.");
                 break;
         }
+
 
         return START_STICKY;
 
@@ -155,9 +158,10 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
+        int a = 1;
+        a = a +1;
         for (DataEvent event : dataEvents) {
-            if (event.getType() == DataEvent.TYPE_CHANGED &&
-                    event.getDataItem().getUri().getPath().equals("/sensorData")) {
+            if (event.getType() == DataEvent.TYPE_CHANGED && event.getDataItem().getUri().getPath().equals("/sensorData")) {
                 try {
                     DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
                     Asset asset = dataMapItem.getDataMap().getAsset("sensorData");

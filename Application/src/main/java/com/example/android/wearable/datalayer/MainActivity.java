@@ -17,6 +17,8 @@
 package com.example.android.wearable.datalayer;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,6 +48,9 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,9 +63,7 @@ import java.util.List;
  * item every second while it is open. Also allows user to take a photo and send that as an asset
  * to the paired wearable.
  */
-public class MainActivity extends Activity implements DataApi.DataListener,
-        MessageApi.MessageListener, NodeApi.NodeListener, ConnectionCallbacks,
-        OnConnectionFailedListener {
+public class MainActivity extends Activity  {
 
     private static final String TAG = "MainActivity";
 
@@ -86,11 +89,7 @@ public class MainActivity extends Activity implements DataApi.DataListener,
         mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
         mDataItemList.setAdapter(mDataItemListAdapter);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+
 
         if (DataSyncService.itself == null){
             Intent intent = new Intent(this, DataSyncService.class);
@@ -98,8 +97,23 @@ public class MainActivity extends Activity implements DataApi.DataListener,
         }
 
 
+        pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
+        // start handler which starts pending-intent after Application-Crash
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+
+                AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 2000, pendingInt);
+                System.exit(2);
+
+            }
+        });
+
 
     }
+
+    PendingIntent pendingInt = null;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -145,59 +159,7 @@ public class MainActivity extends Activity implements DataApi.DataListener,
         super.onStop();
     }
 
-    @Override //ConnectionCallbacks
-    public void onConnected(Bundle connectionHint) {
 
-    }
-
-    @Override //ConnectionCallbacks
-    public void onConnectionSuspended(int cause) {
-
-    }
-
-    @Override //OnConnectionFailedListener
-    public void onConnectionFailed(ConnectionResult result) {
-
-    }
-
-    @Override //DataListener
-    public void onDataChanged(DataEventBuffer dataEvents) {
-        LOGD(TAG, "onDataChanged: " + dataEvents);
-        // Need to freeze the dataEvents so they will exist later on the UI thread
-        final List<DataEvent> events = FreezableUtils.freezeIterable(dataEvents);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                for (DataEvent event : events) {
-                    if (event.getType() == DataEvent.TYPE_CHANGED) {
-                        mDataItemListAdapter.add(
-                                new Event("Request to the watch", "Request sent ... "));
-                    } else if (event.getType() == DataEvent.TYPE_DELETED) {
-                        mDataItemListAdapter.add(
-                                new Event("DataItem Deleted", event.getDataItem().toString()));
-
-                    }
-                }
-            }
-        });
-    }
-
-    ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
-
-    @Override //MessageListener
-    public void onMessageReceived(final MessageEvent messageEvent) {
-
-    }
-
-    @Override //NodeListener
-    public void onPeerConnected(final Node peer) {
-
-    }
-
-    @Override //NodeListener
-    public void onPeerDisconnected(final Node peer) {
-
-    }
 
     public void OutputEvent(final String content){
 

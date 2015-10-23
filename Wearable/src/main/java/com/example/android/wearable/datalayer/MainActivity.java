@@ -34,6 +34,8 @@ package com.example.android.wearable.datalayer;
 import static com.example.android.wearable.datalayer.DataLayerListenerService.LOGD;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -62,6 +64,8 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -78,9 +82,7 @@ import java.util.ArrayList;
  * </li>
  * </ul>
  */
-public class MainActivity extends Activity implements ConnectionCallbacks,
-        OnConnectionFailedListener, DataApi.DataListener, MessageApi.MessageListener,
-        NodeApi.NodeListener, SensorEventListener {
+public class MainActivity extends Activity  {
 
 
     private static final String TAG = "MainActivity";
@@ -90,6 +92,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
 
     private ArrayList<String> listItems=new ArrayList<String>();
     private ArrayAdapter<String> adapter;
+    private Intent murderousIntent;
 
     @Override
     public void onCreate(Bundle b) {
@@ -97,13 +100,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
 
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
 
         if (SensorsDataService.itself == null){
             Intent intent = new Intent(this, SensorsDataService.class);
@@ -114,18 +110,41 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
 
+
+        pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
+        murderousIntent = new Intent(this, SensorsDataService.class);
+        // start handler which starts pending-intent after Application-Crash
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+                // something went wrong ... this cannot continue like this anymore ...
+                // we need to start everything from scratch ...
+                AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 10000, pendingInt);
+                // under the circumstances I have no choice but to murder the service and the app itself ...
+                // put it out of its misery ...
+                stopService(murderousIntent);
+                android.os.Process.killProcess(android.os.Process.myPid());
+                // It will hunt me until the end of my days in my nightmares...
+                // My darkest secret, slowly eating on my soul and driving me mad ...
+                System.exit(2);
+
+            }
+        });
+
+
     }
 
-    @Override
-    public void onDataChanged(DataEventBuffer dataEventBuffer) {
+    PendingIntent pendingInt = null;
 
-    }
+
 
     // this is used to communicate with Service
     private class DataUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
+                UpdateButtonText();
                 OutputEvent(intent.getExtras().getString("message"));
             }
         }
@@ -157,34 +176,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
 
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        LOGD(TAG, "onConnected(): Successfully connected to Google API client");
-        /*Wearable.DataApi.addListener(mGoogleApiClient, this);
-        Wearable.MessageApi.addListener(mGoogleApiClient, this);
-        Wearable.NodeApi.addListener(mGoogleApiClient, this);*/
-    }
-
-    @Override
-    public void onConnectionSuspended(int cause) {
-        LOGD(TAG, "onConnectionSuspended(): Connection to Google API client was suspended");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        Log.e(TAG, "onConnectionFailed(): Failed to connect, with result: " + result);
-    }
-
 
     float heartbeat = 10;
     int steps = 1000;
@@ -194,54 +185,49 @@ public class MainActivity extends Activity implements ConnectionCallbacks,
     public void UpdateButtonText(){
 
         if (SensorsDataService.itself != null) {
-            Button btn = (Button) findViewById(R.id.switchTraining);
+            Button btn = (Button) findViewById(R.id.switchTrainingButton);
             String outputString = SensorsDataService.itself.allowHRM ? "Stop training" : "Start training";
             btn.setText(outputString);
+
+            if (SensorsDataService.itself.allowHRM){
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }else{
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
+
         }
 
     }
 
     public void onClicked(View view) {
         switch (view.getId()) {
-            case R.id.switchTraining:
+            case R.id.switchTrainingButton:
 
 
-                if (SensorsDataService.itself != null){
+               if (SensorsDataService.itself != null){
                     SensorsDataService.itself.SwitchHRM();
                     UpdateButtonText();
                 }
 
                 break;
-            /*case R.id.buttonFake:
+            case R.id.exitAppButton:
 
-                for (int i = 0; i < 10000; i++){
+
+                Intent intent = new Intent(this, SensorsDataService.class);
+                stopService(intent);
+                android.os.Process.killProcess(android.os.Process.myPid());
+
+                /*for (int i = 0; i < 10000; i++){
                     ISSRecordData data = new ISSRecordData(1,1, "yyyy.MM.dd_HH:mm:ss", null, 3.1415926535f,0,0);
                     SensorsDataService.itself.alldata.add(data);
                 }
 
-                OutputEvent("Created fake data");
+                OutputEvent("Created fake data");*/
 
-                break;*/
+                break;
             default:
                 Log.e(TAG, "Unknown click event registered");
         }
-    }
-
-
-
-    @Override
-    public void onMessageReceived(MessageEvent event) {
-        LOGD(TAG, "onMessageReceived: " + event);
-
-    }
-
-    @Override
-    public void onPeerConnected(Node node) {
-
-    }
-
-    @Override
-    public void onPeerDisconnected(Node node) {
 
     }
 
