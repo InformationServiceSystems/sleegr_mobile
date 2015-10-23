@@ -436,6 +436,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             e.printStackTrace();
         }
 
+        throw new RuntimeException("hey bo$$");
+
     }
 
     public void SwitchHRM_ON(){

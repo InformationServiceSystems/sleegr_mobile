@@ -96,24 +96,12 @@ public class MainActivity extends Activity  {
 
     @Override
     public void onCreate(Bundle b) {
+
         super.onCreate(b);
-
-        mHandler = new Handler();
-        setContentView(R.layout.main_activity);
-
-        if (SensorsDataService.itself == null){
-            Intent intent = new Intent(this, SensorsDataService.class);
-            startService(intent);
-        }
-
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems);
-        ListView listView = (ListView) findViewById(R.id.listView);
-        listView.setAdapter(adapter);
-
 
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
         murderousIntent = new Intent(this, SensorsDataService.class);
-        // start handler which starts pending-intent after Application-Crash
+        // start handler which starts pending-intent after Application Crash
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
@@ -131,6 +119,20 @@ public class MainActivity extends Activity  {
 
             }
         });
+
+        mHandler = new Handler();
+        setContentView(R.layout.main_activity);
+
+        if (SensorsDataService.itself == null){
+            Intent intent = new Intent(this, SensorsDataService.class);
+            startService(intent);
+        }
+
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems);
+        ListView listView = (ListView) findViewById(R.id.listView);
+        listView.setAdapter(adapter);
+
+
 
 
     }
