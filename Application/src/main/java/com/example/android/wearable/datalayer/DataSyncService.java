@@ -102,6 +102,21 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         Log.d("ISS", "Adroid ID: " + android_id );
 
         switch (android_id){
+            case "144682d5efc12dcb":
+                UserID = 1;
+                break;
+            case "4b251c5e4f524b05":
+                UserID = 2;
+                break;
+            case "1b211b5ee8e02c15":
+                UserID = 3;
+                break;
+            case "7b1d96be4726dd22":
+                UserID = 4;
+                break;
+            case "847222e512faa744":
+                UserID = 5;
+                break;
             case "867ee27023b1f8b7":
                 UserID = 256;
                 break;

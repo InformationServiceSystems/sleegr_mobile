@@ -97,6 +97,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     File mutexFile = new File(Environment.getExternalStorageDirectory(), "/mutex.bin");
     File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon.bin");
 
+    private boolean isInitialising = true;
+
     @Override
     public void onCreate() {
 
@@ -122,8 +124,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
-
-
         // create sensor data file
 
         if (!sensorsData.exists()){
@@ -134,9 +134,15 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             }
         }
 
+        isInitialising = false;
+
     }
 
     public void ResetSensors(){
+
+        if (isInitialising){
+            return;
+        }
 
         if (!wakeLock.isHeld()){
             wakeLock.acquire();
@@ -436,8 +442,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             e.printStackTrace();
         }
 
-        throw new RuntimeException("hey bo$$");
-
     }
 
     public void SwitchHRM_ON(){
@@ -568,6 +572,26 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         Log.d("ISS", "Adroid ID: " + android_id);
 
         switch (android_id){
+            case "cf533cb594eb941f":
+                UserID = 1;
+                UserHRM = "E5:CF:3E:D5:22:1B";
+                break;
+            case "fb89ac5028563ab5":
+                UserID = 2;
+                UserHRM = "C3:65:88:2F:C0:12";
+                break;
+            case "25a7c0ea6cccfc64":
+                UserID = 3;
+                UserHRM = "F7:71:B1:1D:EE:69";
+                break;
+            case "faa47b6b99e0a2b8":
+                UserID = 4;
+                UserHRM = "F1:CC:A3:7E:66:BD";
+                break;
+            case "5d61ea025712e161":
+                UserID = 5;
+                UserHRM = "E0:28:1F:12:A1:20";
+                break;
             case "760bd2c1de704a18":
                 UserID = 256;
                 UserHRM = "DA:2B:64:87:44:35";

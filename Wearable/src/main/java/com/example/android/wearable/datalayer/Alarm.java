@@ -19,8 +19,9 @@ public class Alarm extends BroadcastReceiver
         wl.acquire();
         wl.release();*/
 
-        SensorsDataService.itself.ResetSensors();
-
+        if (SensorsDataService.itself!= null) {
+            SensorsDataService.itself.ResetSensors();
+        }
     }
 
     public void SetAlarm(Context context)
