@@ -121,7 +121,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 UserID = 256;
                 break;
             case "65e9172b7bb0638d":
-                UserID = 512;
+                UserID = 1024;
                 break;
             default:
                 OutputEvent("Unknown android ID! Please report this error to admins.");

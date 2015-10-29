@@ -230,7 +230,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             ArrayList<ISSRecordData> savedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromFile(sensorsData);
             savedData.addAll(data);
 
-            OutputEvent("Overall items so far: " + savedData.size());
+            //OutputEvent("Overall items so far: " + savedData.size());
 
             Serializer.SerializeToFile(savedData, sensorsData);
 
@@ -363,7 +363,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
 
-            OutputEvent("Characteristic read ");
+            //OutputEvent("Characteristic read ");
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
 
@@ -452,7 +452,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             @Override
             public void run() {
                 mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                OutputEvent("HRM serach stop.");
+                OutputEvent("HRM search stop.");
             }
         }, 10000);
 
@@ -538,7 +538,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
             if (data[0] == 2){
                 // send available data
-                OutputEvent("Data saved on Smarpthone");
+                OutputEvent("Data saved on Smartphone");
                 alldata.clear();
 
                 if (sensorsData.exists()){
@@ -567,9 +567,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         // get unique id of the device
         String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-        OutputEvent(android_id);
+        //OutputEvent(android_id);
 
-        Log.d("ISS", "Adroid ID: " + android_id);
+        Log.d("ISS", "Android ID: " + android_id);
 
         switch (android_id){
             case "cf533cb594eb941f":
@@ -597,7 +597,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 UserHRM = "DA:2B:64:87:44:35";
                 break;
             case "1ccb3fb5f594467b":
-                UserID = 256;
+                UserID = 1024;
                 UserHRM = "CC:1F:BD:F5:24:FA";
                 break;
             default:
@@ -632,7 +632,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             e.printStackTrace();
         }
 
-        OutputEvent("Mutex state: " + allowHRM);
+        //OutputEvent("Mutex state: " + allowHRM);
 
         if (allowHRM){
             SwitchHRM_ON();
