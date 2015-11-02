@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.wearable.datalayer;
+package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -34,29 +34,15 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.common.data.FreezableUtils;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataEvent;
-import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * Receives its own events using a listener API designed for foreground activities. Updates a data

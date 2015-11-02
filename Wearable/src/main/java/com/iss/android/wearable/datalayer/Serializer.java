@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.example.android.wearable.datalayer;
+package com.iss.android.wearable.datalayer;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -86,7 +86,7 @@ public class Serializer {
 
     }
 
-    public byte[] FileToBytes(File file) {
+    public static byte[] FileToBytes(File file) {
 
         int size = (int) file.length();
         byte[] bytes = new byte[size];

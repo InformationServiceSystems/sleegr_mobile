@@ -1,4 +1,4 @@
-package com.example.android.wearable.datalayer;
+package com.iss.android.wearable.datalayer;
 
 import java.io.Serializable;
 

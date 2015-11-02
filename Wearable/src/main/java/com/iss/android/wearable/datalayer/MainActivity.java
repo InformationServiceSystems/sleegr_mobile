@@ -29,9 +29,7 @@
  * limitations under the License.
  */
 
-package com.example.android.wearable.datalayer;
-
-import static com.example.android.wearable.datalayer.DataLayerListenerService.LOGD;
+package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -40,9 +38,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -52,20 +47,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.Wearable;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -131,9 +114,6 @@ public class MainActivity extends Activity  {
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems);
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
-
-
-
 
     }
 

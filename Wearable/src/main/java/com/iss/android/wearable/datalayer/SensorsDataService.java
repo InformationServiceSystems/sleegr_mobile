@@ -1,4 +1,4 @@
-package com.example.android.wearable.datalayer;
+package com.iss.android.wearable.datalayer;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -52,7 +52,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-import static com.example.android.wearable.datalayer.DataLayerListenerService.LOGD;
+import static com.iss.android.wearable.datalayer.DataLayerListenerService.LOGD;
 
 public class SensorsDataService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, DataApi.DataListener, MessageApi.MessageListener,
@@ -385,10 +385,41 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
             OutputEvent("HR: " + result);
 
+            //SendHRtoSmartphone(result);
+
             //mBluetoothGatt.disconnect();
 
         }
     };
+
+    public void SendHRtoSmartphone(float hr){
+
+        NodeApi.GetConnectedNodesResult result =
+                Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+        List<Node> nodes = result.getNodes();
+        String nodeId = null;
+
+        byte[] data = null;
+
+        /*long startTime = System.currentTimeMillis();
+
+        try {
+            data = Serializer.FileToBytes(sensorsData);
+            //data = Serializer.SerializeToBytes(alldata);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        long totalTime = System.currentTimeMillis() - startTime;*/
+
+        if (nodes.size() > 0) {
+            for (int i = 0; i < nodes.size(); i++){
+                nodeId = nodes.get(i).getId();
+                Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, Float.toString(hr), data);
+            }
+        }
+
+    }
 
     public int ReadHeartRateData(BluetoothGattCharacteristic characteristic){
 
@@ -588,7 +619,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 UserID = 4;
                 UserHRM = "F1:CC:A3:7E:66:BD";
                 break;
-            case "5d61ea025712e161":
+            case "f77a4bb95172c007":
                 UserID = 5;
                 UserHRM = "E0:28:1F:12:A1:20";
                 break;

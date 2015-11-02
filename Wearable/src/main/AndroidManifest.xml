@@ -14,14 +14,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
+<!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.android.wearable.datalayer" >
+    package="com.iss.android.wearable.datalayer"
+    android:versionCode="3"
+    android:versionName="Sirius">
 
     <uses-sdk
         android:minSdkVersion="21"
         android:targetSdkVersion="22" />
 
     <uses-feature android:name="android.hardware.type.watch" />
+
+    <!-- the smartphone app needs to have all of the permissions of wear app -->
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -45,15 +51,15 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <receiver android:name=".Alarm" android:exported="true">
+        <receiver android:name="com.iss.android.wearable.datalayer.Alarm" android:exported="true">
             <intent-filter>
-                <action android:name="com.example.android.wearable.datalayer.ALARM" >
+                <action android:name="com.iss.android.wearable.datalayer.ALARM" >
                 </action>
             </intent-filter>
         </receiver>
 
         <receiver
-            android:name=".StartMyActivityAtBootReceiver"
+            android:name="com.iss.android.wearable.datalayer.StartMyActivityAtBootReceiver"
             android:enabled="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
             <intent-filter>
@@ -63,14 +69,14 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".DataLayerListenerService" >
+        <service android:name="com.iss.android.wearable.datalayer.DataLayerListenerService" >
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
         </service>
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.iss.android.wearable.datalayer.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -78,14 +84,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.example.android.wearable.datalayer.EXAMPLE" />
+                <action android:name="com.iss.android.wearable.datalayer.EXAMPLE" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
         <service
-            android:name=".SensorsDataService"
+            android:name="com.iss.android.wearable.datalayer.SensorsDataService"
             android:enabled="true"
             android:exported="true" >
         </service>
