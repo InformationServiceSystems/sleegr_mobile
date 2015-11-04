@@ -194,12 +194,14 @@ public class MainActivity extends Activity  {
                 break;
             case R.id.exitAppButton:
 
+                Intent launchSleepIntent = getPackageManager().getLaunchIntentForPackage("com.urbandroid.sleep");
+                startActivity(launchSleepIntent);
 
-                Intent intent = new Intent(this, SensorsDataService.class);
+                /*Intent intent = new Intent(this, SensorsDataService.class);
                 stopService(intent);
                 android.os.Process.killProcess(android.os.Process.myPid());
 
-                /*for (int i = 0; i < 10000; i++){
+                for (int i = 0; i < 10000; i++){
                     ISSRecordData data = new ISSRecordData(1,1, "yyyy.MM.dd_HH:mm:ss", null, 3.1415926535f,0,0);
                     SensorsDataService.itself.alldata.add(data);
                 }
