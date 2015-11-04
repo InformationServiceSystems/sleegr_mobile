@@ -126,11 +126,9 @@ public class MainActivity extends Activity  {
     @Override
     public void onResume() {
         super.onResume();
-
         if (dataUpdateReceiver == null) dataUpdateReceiver = new DataUpdateReceiver();
         IntentFilter intentFilter = new IntentFilter(DataSyncService.NEW_MESSAGE_AVAILABLE);
         registerReceiver(dataUpdateReceiver, intentFilter);
-
     }
 
     @Override
