@@ -142,6 +142,9 @@ public class MainActivity extends Activity  {
         IntentFilter intentFilter = new IntentFilter(SensorsDataService.NEW_MESSAGE_AVAILABLE);
         registerReceiver(dataUpdateReceiver, intentFilter);
 
+        /*final String StopSleepString = "com.urbandroid.sleep.alarmclock.STOP_SLEEP_TRACK";
+        Intent StopSleepIntent = new Intent(StopSleepString);
+        startActivity(StopSleepIntent);*/
         UpdateButtonText();
 
     }
@@ -196,6 +199,12 @@ public class MainActivity extends Activity  {
 
                 Intent launchSleepIntent = getPackageManager().getLaunchIntentForPackage("com.urbandroid.sleep");
                 startActivity(launchSleepIntent);
+
+                murderousIntent = new Intent(this, SensorsDataService.class);
+                //We need to kill again!
+                stopService(murderousIntent);
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(2);
 
                 /*Intent intent = new Intent(this, SensorsDataService.class);
                 stopService(intent);

@@ -631,7 +631,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 UserID = 1024;
                 UserHRM = "CC:1F:BD:F5:24:FA";
                 break;
-            case "48401fdb7f993169":
+            case "1f3ae220a852939f":
                 UserID = 127;
                 UserHRM = "DA:2B:64:87:44:35";
                 break;
