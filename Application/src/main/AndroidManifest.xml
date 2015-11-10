@@ -29,8 +29,8 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <!-- This apparently is also needed for the wear watch to atcually install on smartwatch-->
-    <uses-feature android:name="android.hardware.type.watch" android:required="false"/>
+    <!-- This might also be needed for the wear watch to atcually install on smartwatch ...
+    <uses-feature android:name="android.hardware.type.watch" android:required="false"/>-->
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
