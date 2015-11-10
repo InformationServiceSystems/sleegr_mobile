@@ -169,6 +169,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             recordedSensorTypes.put(Sensor.TYPE_HEART_RATE, 1);
         }
 
+        StopSleepTracking();
+
     }
 
     SensorEventListener sensorEventListener = new SensorEventListener(){
@@ -582,6 +584,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 }
 
             }
+
+            if (data[0] == 3){
+                SleepTrackingStopped = true;
+            }
+
         }
     }
 
@@ -635,12 +642,18 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 UserID = 127;
                 UserHRM = "DA:2B:64:87:44:35";
                 break;
+            case "b0bfcacefe39d7d6":
+                UserID = 257;
+                UserHRM = "...";
+                break;
             default:
                 OutputEvent("Unknown android ID! Please report this error to admins.");
                 break;
         }
 
         InitializeMutexRecovery();
+
+        StopSleepTracking();
 
         return START_STICKY;
 
@@ -711,6 +724,55 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    public void StopSleep(){
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    NodeApi.GetConnectedNodesResult result =
+                            Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+                    List<Node> nodes = result.getNodes();
+                    String nodeId = null;
+
+                    byte[] data = null;
+
+                    /*long startTime = System.currentTimeMillis();
+                    try {
+                        data = Serializer.FileToBytes(sensorsData);
+                        //data = Serializer.SerializeToBytes(alldata);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    long totalTime = System.currentTimeMillis() - startTime;*/
+
+                    if (nodes.size() > 0) {
+                        for (int i = 0; i < nodes.size(); i++){
+                            nodeId = nodes.get(i).getId();
+                            Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "Stop sleep tracking", data);
+                        }
+                    }
+                }
+                catch(Exception ex){
+                    OutputEvent(ex.toString());
+                }
+            }
+        }).start();
+
+    }
+
+    boolean SleepTrackingStopped = false;
+
+    public void StopSleepTracking() {
+
+            if (!SleepTrackingStopped) {
+                StopSleep();
+            }
 
     }
 }

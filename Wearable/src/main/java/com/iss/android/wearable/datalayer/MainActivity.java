@@ -106,11 +106,6 @@ public class MainActivity extends Activity  {
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
 
-        if (SensorsDataService.itself == null){
-            Intent intent = new Intent(this, SensorsDataService.class);
-            startService(intent);
-        }
-
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems);
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
@@ -118,8 +113,6 @@ public class MainActivity extends Activity  {
     }
 
     PendingIntent pendingInt = null;
-
-
 
     // this is used to communicate with Service
     private class DataUpdateReceiver extends BroadcastReceiver {
@@ -137,12 +130,22 @@ public class MainActivity extends Activity  {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (SensorsDataService.itself == null){
+            Intent intent = new Intent(this, SensorsDataService.class);
+            startService(intent);
+        }
+
         //mGoogleApiClient.connect();
         if (dataUpdateReceiver == null) dataUpdateReceiver = new DataUpdateReceiver();
         IntentFilter intentFilter = new IntentFilter(SensorsDataService.NEW_MESSAGE_AVAILABLE);
         registerReceiver(dataUpdateReceiver, intentFilter);
 
         UpdateButtonText();
+
+        /*if (SensorsDataService.itself != null){
+            SensorsDataService.itself.StopSleepTracking();
+        }*/
 
     }
 
@@ -194,12 +197,18 @@ public class MainActivity extends Activity  {
                 break;
             case R.id.exitAppButton:
 
+                // first stop the service so that it does not stop the sleep tracking
+                Intent intent = new Intent(this, SensorsDataService.class);
+                stopService(intent);
+
+                // then launch sleep tracking
                 Intent launchSleepIntent = getPackageManager().getLaunchIntentForPackage("com.urbandroid.sleep");
                 startActivity(launchSleepIntent);
 
-                /*Intent intent = new Intent(this, SensorsDataService.class);
-                stopService(intent);
+                // finally, kill the app in order to save the battery
                 android.os.Process.killProcess(android.os.Process.myPid());
+
+                /*
 
                 for (int i = 0; i < 10000; i++){
                     ISSRecordData data = new ISSRecordData(1,1, "yyyy.MM.dd_HH:mm:ss", null, 3.1415926535f,0,0);
@@ -210,6 +219,7 @@ public class MainActivity extends Activity  {
 
                 break;
             default:
+
                 Log.e(TAG, "Unknown click event registered");
         }
 
