@@ -94,8 +94,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     Timer timer = null;
 
-    File mutexFile = new File(Environment.getExternalStorageDirectory(), "/mutex.bin");
-    File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon.bin");
+    File mutexFile = new File(Environment.getExternalStorageDirectory(), "/mutex_iss_package.bin");
+    File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon_iss_package.bin");
 
     private boolean isInitialising = true;
 

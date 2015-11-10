@@ -54,9 +54,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
-    File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon.bin");
+    File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon_iss_package.bin");
     File sleepData = new File(Environment.getExternalStorageDirectory().toString() + "/sleep-data/sleep-export.csv");
-    String uploadUrl = "http://46.101.214.58:5000/upload";
+    String uploadUrl = "http://46.101.214.58:5001/upload";
 
 
     @Override
