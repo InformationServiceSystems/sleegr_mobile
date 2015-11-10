@@ -18,8 +18,8 @@
 <!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iss.android.wearable.datalayer"
-    android:versionCode="3"
-    android:versionName="Sirius">
+    android:versionCode="4"
+    android:versionName="Andromeda">
 
     <uses-sdk
         android:minSdkVersion="19"
