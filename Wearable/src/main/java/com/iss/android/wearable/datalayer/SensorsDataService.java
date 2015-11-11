@@ -58,6 +58,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         GoogleApiClient.OnConnectionFailedListener, DataApi.DataListener, MessageApi.MessageListener,
         NodeApi.NodeListener {
 
+    public static final String
+            ACTION_BATTERY_STATUS = SensorsDataService.class.getName() + "BatteryStatus",
+            EXTRA_STATUS = "extra_status";
+
+
     public static SensorsDataService itself;
     public static String Message = "";
 
@@ -302,11 +307,18 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb");
     private static final UUID UUID_HRD =
             UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb");
+    private static final UUID Battery_Service_UUID =
+            UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
+    private static final UUID Battery_Level_UUID =
+            UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
+
 
     public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
 
     BluetoothGattService heartRateService = null;
     BluetoothGattCharacteristic heartRateCharacteristic = null;
+    BluetoothGattService batteryLevelService = null;
+    BluetoothGattCharacteristic batteryLevelCharacteristic = null;
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
@@ -326,7 +338,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 heartRateService = gatt.getService(UUID_HRS);
+                batteryLevelService = gatt.getService(Battery_Service_UUID);
 
+                if (batteryLevelService != null) {
+                    batteryLevelCharacteristic =
+                            batteryLevelService.getCharacteristic(Battery_Level_UUID);
+                }
 
 
                 if (heartRateService != null){
@@ -368,7 +385,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             //OutputEvent("Characteristic read ");
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
-
+                int BatteryStatus = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
+                Log.v(TAG, "characteristic.getStringValue(0) = " + BatteryStatus);
+                sendBatteryStatus(BatteryStatus);
             }
         }
 
@@ -376,23 +395,30 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
 
-            if (!recordedSensorTypes.containsKey( Sensor.TYPE_HEART_RATE )){
-                return;
-            }
-            recordedSensorTypes.remove(Sensor.TYPE_HEART_RATE);
+            if (recordedSensorTypes.containsKey(Sensor.TYPE_HEART_RATE)) {
+                recordedSensorTypes.remove(Sensor.TYPE_HEART_RATE);
 
-            int result = ReadHeartRateData(characteristic);
+                int result = ReadHeartRateData(characteristic);
 
-            AddNewData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result, 0, 0);
+                AddNewData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result, 0, 0);
 
-            OutputEvent("HR: " + result);
+                OutputEvent("HR: " + result);
 
-            //SendHRtoSmartphone(result);
+                //SendHRtoSmartphone(result);
 
-            //mBluetoothGatt.disconnect();
+                //mBluetoothGatt.disconnect();
+
+                mBluetoothGatt.readCharacteristic(batteryLevelCharacteristic);
+            } else return;
 
         }
     };
+
+    private void sendBatteryStatus(int Status) {
+        Intent intent = new Intent(ACTION_BATTERY_STATUS);
+        intent.putExtra(EXTRA_STATUS, Status);
+        sendBroadcast(intent);
+    }
 
     public void SendHRtoSmartphone(float hr){
 
@@ -424,7 +450,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     public int ReadHeartRateData(BluetoothGattCharacteristic characteristic){
-
         int flag = characteristic.getProperties();
         int format = -1;
         if ((flag & 0x01) != 0) {

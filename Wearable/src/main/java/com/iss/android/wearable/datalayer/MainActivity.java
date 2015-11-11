@@ -46,6 +46,7 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -76,6 +77,17 @@ public class MainActivity extends Activity  {
     private ArrayList<String> listItems=new ArrayList<String>();
     private ArrayAdapter<String> adapter;
     private Intent murderousIntent;
+    BroadcastReceiver br = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
+                Log.d(TAG, "Got new Battery Status");
+                final TextView BatteryStatus = (TextView) findViewById(R.id.batteryLabel);
+                int status = intent.getIntExtra(SensorsDataService.EXTRA_STATUS, 0);
+                BatteryStatus.setText("Battery: " + status + "%");
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle b) {
@@ -83,6 +95,7 @@ public class MainActivity extends Activity  {
         super.onCreate(b);
 
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
+        // Intent that kills the app after a certain amount of time after the app has crashed
         murderousIntent = new Intent(this, SensorsDataService.class);
         // start handler which starts pending-intent after Application Crash
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
@@ -110,6 +123,12 @@ public class MainActivity extends Activity  {
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
 
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(SensorsDataService.ACTION_BATTERY_STATUS);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        registerReceiver(br, filter);
+
     }
 
     PendingIntent pendingInt = null;
@@ -130,6 +149,8 @@ public class MainActivity extends Activity  {
     @Override
     protected void onResume() {
         super.onResume();
+
+        // restart of the dataservice retrieving data from the sensor
 
         if (SensorsDataService.itself == null){
             Intent intent = new Intent(this, SensorsDataService.class);
