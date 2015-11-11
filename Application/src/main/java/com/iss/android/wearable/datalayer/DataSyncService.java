@@ -54,9 +54,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
-    File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon.bin");
+    File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon_iss_package.bin");
     File sleepData = new File(Environment.getExternalStorageDirectory().toString() + "/sleep-data/sleep-export.csv");
-    String uploadUrl = "http://46.101.214.58:5000/upload";
+    String uploadUrl = "http://46.101.214.58:5001/upload";
 
 
     @Override
@@ -123,6 +123,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             case "65e9172b7bb0638d":
                 UserID = 1024;
                 break;
+            case "3032a1d80ae293bd":
+                UserID = 257;
+                break;
             default:
                 OutputEvent("Unknown android ID! Please report this error to admins.");
                 break;
@@ -153,12 +156,31 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
+    public void StopSleepTracking(){
+        try{
+            Intent intent = new Intent("com.urbandroid.sleep.alarmclock.STOP_SLEEP_TRACK");
+            sendBroadcast(intent);
+            ConfirmSleepTrackingStopped();
+        }
+        catch(Exception ex){
+            System.out.println(ex.toString());
+        }
+    }
+
     @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
 
+
+        if(messageEvent.getPath().equals("Stop sleep tracking")){
+            StopSleepTracking();
+        }
+        else{
+            SendHRtoServer(messageEvent.getPath());
+        }
+
         //OutputEvent(messageEvent.getPath());
 
-        //SendHRtoServer(messageEvent.getPath());
+        //
 
        /*if (messageEvent.getPath().equals("data")) {
             byte[] data = messageEvent.getData();
@@ -355,6 +377,29 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }).start();
     }
 
+    public void ConfirmSleepTrackingStopped() {
+
+        OutputEvent("Stopped the sleep tracking");
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //mGoogleApiClient.blockingConnect(3000, TimeUnit.MILLISECONDS);
+                NodeApi.GetConnectedNodesResult result =
+                        Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+                List<Node> nodes = result.getNodes();
+                String nodeId = null;
+                if (nodes.size() > 0) {
+                    for (int i = 0; i < nodes.size(); i++) {
+                        nodeId = nodes.get(i).getId();
+                        Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "Sleep tracking stopped", new byte[]{3});
+                    }
+                }
+
+            }
+        }).start();
+    }
+
     private void SendDataFileToEmail() {
 
         String filelocation = sensorsData.toString();
@@ -495,7 +540,11 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
+
+
     public void ShareDataWithServer() {
+
+        //StopSleep();
 
         UploadFileToServer(sleepData, uploadUrl);
         UploadFileToServer(sensorsData, uploadUrl);
