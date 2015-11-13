@@ -79,7 +79,7 @@ public class MainActivity extends Activity  {
     private ArrayList<String> listItems=new ArrayList<String>();
     private ArrayAdapter<String> adapter;
     private Intent murderousIntent;
-    private boolean warned = false;
+    private int warned = 0;
 
     @Override
     public void onCreate(Bundle b) {
@@ -130,26 +130,45 @@ public class MainActivity extends Activity  {
                 Log.d(TAG, "Got new Battery Status");
                 final TextView BatteryStatus = (TextView) findViewById(R.id.batteryLabel);
                 int status = intent.getIntExtra(SensorsDataService.EXTRA_STATUS, 0);
-                BatteryStatus.setText("Battery: " + status + "%");
+                BatteryStatus.setText("HRM Battery: " + status + "%");
                 // Checks if the Battery status is 15% or below and if the User already has been alarmed.
                 // If the battery got charged up again, reset the Warning.
-                if (status <= 15 && !warned) {
-                    displayBatteryWarning();
-                    warned = true;
-                } else if (status > 15 && warned) {
-                    warned = false;
+                if (status == 15 && warned != 1) {
+                    warned = 1;
+                    displayBatteryWarning(warned);
+                } else if (status == 10 && warned != 2) {
+                    warned = 2;
+                    displayBatteryWarning(warned);
+                } else if (status == 5 && warned != 3) {
+                    warned = 3;
+                    displayBatteryWarning(warned);
+                } else if (status > 15 && warned != 0) {
+                    warned = 0;
                 }
             }
         }
     };
 
-    private void displayBatteryWarning() {
+    private void displayBatteryWarning(int warned) {
         // 1. Instantiate an AlertDialog.Builder with its constructor
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         // 2. Chain together various setter methods to set the dialog characteristics
-        builder.setMessage(R.string.battery_warning)
+        String warning = "";
+        switch (warned) {
+            case 1:
+                warning = "HRM Battery Level at 15%";
+                break;
+            case 2:
+                warning = "HRM Battery Level at 10%";
+                break;
+            case 3:
+                warning = "HRM Battery Level at 5%";
+                break;
+        }
+        builder.setMessage(warning)
                 .setTitle(R.string.battery_warning_title)
+                .setCancelable(true)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -158,7 +177,6 @@ public class MainActivity extends Activity  {
 
         // 3. Get the AlertDialog from create()
         AlertDialog dialog = builder.create();
-        builder.show();
         dialog.show();
     }
 
