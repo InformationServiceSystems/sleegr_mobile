@@ -33,9 +33,11 @@ package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -77,17 +79,7 @@ public class MainActivity extends Activity  {
     private ArrayList<String> listItems=new ArrayList<String>();
     private ArrayAdapter<String> adapter;
     private Intent murderousIntent;
-    BroadcastReceiver br = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
-                Log.d(TAG, "Got new Battery Status");
-                final TextView BatteryStatus = (TextView) findViewById(R.id.batteryLabel);
-                int status = intent.getIntExtra(SensorsDataService.EXTRA_STATUS, 0);
-                BatteryStatus.setText("Battery: " + status + "%");
-            }
-        }
-    };
+    private boolean warned = false;
 
     @Override
     public void onCreate(Bundle b) {
@@ -129,6 +121,45 @@ public class MainActivity extends Activity  {
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(br, filter);
 
+    }
+
+    BroadcastReceiver br = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
+                Log.d(TAG, "Got new Battery Status");
+                final TextView BatteryStatus = (TextView) findViewById(R.id.batteryLabel);
+                int status = intent.getIntExtra(SensorsDataService.EXTRA_STATUS, 0);
+                BatteryStatus.setText("Battery: " + status + "%");
+                // Checks if the Battery status is 15% or below and if the User already has been alarmed.
+                // If the battery got charged up again, reset the Warning.
+                if (status <= 15 && !warned) {
+                    displayBatteryWarning();
+                    warned = true;
+                } else if (status > 15 && warned) {
+                    warned = false;
+                }
+            }
+        }
+    };
+
+    private void displayBatteryWarning() {
+        // 1. Instantiate an AlertDialog.Builder with its constructor
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // 2. Chain together various setter methods to set the dialog characteristics
+        builder.setMessage(R.string.battery_warning)
+                .setTitle(R.string.battery_warning_title)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        // 3. Get the AlertDialog from create()
+        AlertDialog dialog = builder.create();
+        builder.show();
+        dialog.show();
     }
 
     PendingIntent pendingInt = null;
