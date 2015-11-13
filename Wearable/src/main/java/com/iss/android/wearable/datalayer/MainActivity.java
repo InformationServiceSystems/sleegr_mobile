@@ -120,6 +120,7 @@ public class MainActivity extends Activity  {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(SensorsDataService.ACTION_BATTERY_STATUS);
+        filter.addAction(SensorsDataService.ACTION_HR);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(br, filter);
 
@@ -177,6 +178,13 @@ public class MainActivity extends Activity  {
                 } else if (status > 15 && warned != 0) {
                     warned = 0;
                 }
+            }
+            if (intent.getAction().equals(SensorsDataService.ACTION_HR)) {
+                Log.d("got here", "finally");
+                final TextView HeartRate = (TextView) findViewById(R.id.heartRateLabel);
+                int result = intent.getIntExtra(SensorsDataService.EXTRA_HR, 0);
+                Log.d("printHR: ", String.valueOf(result));
+                HeartRate.setText("HR: " + result);
             }
         }
     };

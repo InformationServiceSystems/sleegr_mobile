@@ -41,6 +41,14 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="HR:"
+        android:id="@+id/heartRateLabel"
+        android:layout_above="@+id/SWbatteryLabel"
+        android:editable="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="SW Battery: not set"
         android:id="@+id/SWbatteryLabel"
         android:layout_above="@+id/batteryLabel"

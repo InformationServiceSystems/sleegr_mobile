@@ -60,7 +60,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     public static final String
             ACTION_BATTERY_STATUS = SensorsDataService.class.getName() + "BatteryStatus",
-            EXTRA_STATUS = "extra_status";
+            ACTION_HR = SensorsDataService.class.getName() + "HeartRate",
+            EXTRA_STATUS = "extra_status",
+            EXTRA_HR = "extra_hr";
 
 
     public static SensorsDataService itself;
@@ -401,7 +403,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                 AddNewData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result, 0, 0);
 
-                OutputEvent("HR: " + result);
+                Log.d("gotHR: ", String.valueOf(result));
+
+                sendHR(result);
 
                 //SendHRtoSmartphone(result);
 
@@ -413,10 +417,17 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
     };
 
+    private void sendHR(int result) {
+        Log.d("sendHR: ", String.valueOf(result));
+        Intent hrintent = new Intent(ACTION_HR);
+        hrintent.putExtra(EXTRA_HR, result);
+        sendBroadcast(hrintent);
+    }
+
     private void sendBatteryStatus(int Status) {
-        Intent intent = new Intent(ACTION_BATTERY_STATUS);
-        intent.putExtra(EXTRA_STATUS, Status);
-        sendBroadcast(intent);
+        Intent batteryintent = new Intent(ACTION_BATTERY_STATUS);
+        batteryintent.putExtra(EXTRA_STATUS, Status);
+        sendBroadcast(batteryintent);
     }
 
     public void SendHRtoSmartphone(float hr){
