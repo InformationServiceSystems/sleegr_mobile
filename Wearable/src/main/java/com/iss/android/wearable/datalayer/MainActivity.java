@@ -127,16 +127,7 @@ public class MainActivity extends Activity  {
         final Handler h = new Handler();
         final int delay = 20000; //milliseconds
 
-        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = registerReceiver(null, ifilter);
-
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-
-        int batteryPct = (int) (level / (float) scale * 100);
-        SWBatteryStatus.setText("SW Battery: " + batteryPct + "%");
-
-        // would've used timer, since it runs once initially, but it crashes the app.
+        // Timer's fine for Java, but kills android apps.
 
         h.postDelayed(new Runnable() {
             public void run() {
@@ -150,7 +141,7 @@ public class MainActivity extends Activity  {
                 SWBatteryStatus.setText("SW Battery: " + batteryPct + "%");
                 h.postDelayed(this, delay);
             }
-        }, delay);
+        }, 0);
     }
 
     BroadcastReceiver br = new BroadcastReceiver() {
@@ -279,7 +270,10 @@ public class MainActivity extends Activity  {
             Button btn = (Button) findViewById(R.id.switchTrainingButton);
             String outputString = SensorsDataService.itself.allowHRM ? "Stop training" : "Start training";
             btn.setText(outputString);
-
+            TextView HRLabel = (TextView) findViewById(R.id.heartRateLabel);
+            if (outputString.equals("Start training")) {
+                HRLabel.setText("HR:");
+            }
             if (SensorsDataService.itself.allowHRM){
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             }else{
