@@ -386,7 +386,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 int BatteryStatus = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-                Log.v(TAG, "characteristic.getStringValue(0) = " + BatteryStatus);
                 sendBatteryStatus(BatteryStatus);
             }
         }

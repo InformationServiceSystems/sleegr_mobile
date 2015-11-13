@@ -40,6 +40,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -115,6 +116,7 @@ public class MainActivity extends Activity  {
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
 
+        initializeSWBatteryChecker();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(SensorsDataService.ACTION_BATTERY_STATUS);
@@ -123,23 +125,53 @@ public class MainActivity extends Activity  {
 
     }
 
+    private void initializeSWBatteryChecker() {
+        final TextView SWBatteryStatus = (TextView) findViewById(R.id.SWbatteryLabel);
+        final Handler h = new Handler();
+        final int delay = 20000; //milliseconds
+
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = registerReceiver(null, ifilter);
+
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        int batteryPct = (int) (level / (float) scale * 100);
+        SWBatteryStatus.setText("SW Battery: " + batteryPct + "%");
+
+        // would've used timer, since it runs once initially, but it crashes the app.
+
+        h.postDelayed(new Runnable() {
+            public void run() {
+                IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                Intent batteryStatus = registerReceiver(null, ifilter);
+
+                int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+                int batteryPct = (int) (level / (float) scale * 100);
+                SWBatteryStatus.setText("SW Battery: " + batteryPct + "%");
+                h.postDelayed(this, delay);
+            }
+        }, delay);
+    }
+
     BroadcastReceiver br = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
-                Log.d(TAG, "Got new Battery Status");
                 final TextView BatteryStatus = (TextView) findViewById(R.id.batteryLabel);
                 int status = intent.getIntExtra(SensorsDataService.EXTRA_STATUS, 0);
-                BatteryStatus.setText("HRM Battery: " + status + "%");
+                BatteryStatus.setText("HR Battery: " + status + "%");
                 // Checks if the Battery status is 15% or below and if the User already has been alarmed.
                 // If the battery got charged up again, reset the Warning.
-                if (status == 15 && warned != 1) {
+                if (status <= 15 && status > 10 && warned != 1) {
                     warned = 1;
                     displayBatteryWarning(warned);
-                } else if (status == 10 && warned != 2) {
+                } else if (status <= 10 && status > 5 && warned != 2) {
                     warned = 2;
                     displayBatteryWarning(warned);
-                } else if (status == 5 && warned != 3) {
+                } else if (status <= 5 && warned != 3) {
                     warned = 3;
                     displayBatteryWarning(warned);
                 } else if (status > 15 && warned != 0) {
