@@ -403,8 +403,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                 AddNewData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result, 0, 0);
 
-                Log.d("gotHR: ", String.valueOf(result));
-
                 sendHR(result);
 
                 //SendHRtoSmartphone(result);
@@ -418,7 +416,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     };
 
     private void sendHR(int result) {
-        Log.d("sendHR: ", String.valueOf(result));
         Intent hrintent = new Intent(ACTION_HR);
         hrintent.putExtra(EXTRA_HR, result);
         sendBroadcast(hrintent);

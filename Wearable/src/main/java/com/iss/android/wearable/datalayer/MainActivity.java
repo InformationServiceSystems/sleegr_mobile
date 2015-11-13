@@ -48,7 +48,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -112,15 +111,12 @@ public class MainActivity extends Activity  {
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
 
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems);
-        ListView listView = (ListView) findViewById(R.id.listView);
-        listView.setAdapter(adapter);
-
         initializeSWBatteryChecker();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(SensorsDataService.ACTION_BATTERY_STATUS);
         filter.addAction(SensorsDataService.ACTION_HR);
+        filter.addAction(SensorsDataService.NEW_MESSAGE_AVAILABLE);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(br, filter);
 
@@ -178,13 +174,14 @@ public class MainActivity extends Activity  {
                 } else if (status > 15 && warned != 0) {
                     warned = 0;
                 }
-            }
-            if (intent.getAction().equals(SensorsDataService.ACTION_HR)) {
-                Log.d("got here", "finally");
+            } else if (intent.getAction().equals(SensorsDataService.ACTION_HR)) {
                 final TextView HeartRate = (TextView) findViewById(R.id.heartRateLabel);
                 int result = intent.getIntExtra(SensorsDataService.EXTRA_HR, 0);
-                Log.d("printHR: ", String.valueOf(result));
                 HeartRate.setText("HR: " + result);
+            } else if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
+                final TextView MessageLabel = (TextView) findViewById(R.id.messageLabel);
+                String message = intent.getStringExtra("message");
+                MessageLabel.setText(message);
             }
         }
     };
@@ -228,7 +225,6 @@ public class MainActivity extends Activity  {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
                 UpdateButtonText();
-                OutputEvent(intent.getExtras().getString("message"));
             }
         }
     }
@@ -267,7 +263,7 @@ public class MainActivity extends Activity  {
         Wearable.NodeApi.removeListener(mGoogleApiClient, this);
         mGoogleApiClient.disconnect();*/
         //mSensorManager.unregisterListener(this);
-        if (dataUpdateReceiver != null) unregisterReceiver(dataUpdateReceiver);
+        if (br != null) unregisterReceiver(br);
 
     }
 
@@ -332,22 +328,6 @@ public class MainActivity extends Activity  {
 
                 Log.e(TAG, "Unknown click event registered");
         }
-
-    }
-
-    public void OutputEvent(String content){
-
-        final String cont = content;
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                listItems.add(0,cont);
-                while (listItems.size() > 64){
-                    listItems.remove(listItems.size()-1);
-                }
-                adapter.notifyDataSetChanged();
-            }
-        });
 
     }
 
