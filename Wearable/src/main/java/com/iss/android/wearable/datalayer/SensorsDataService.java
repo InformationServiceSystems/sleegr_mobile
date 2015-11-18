@@ -416,12 +416,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     };
 
     private void sendHR(int result) {
+        // Send a broadcast with the current HR
         Intent hrintent = new Intent(ACTION_HR);
         hrintent.putExtra(EXTRA_HR, result);
         sendBroadcast(hrintent);
     }
 
     private void sendBatteryStatus(int Status) {
+        // Send a broadcast with the battery status of the HRM
         Intent batteryintent = new Intent(ACTION_BATTERY_STATUS);
         batteryintent.putExtra(EXTRA_STATUS, Status);
         sendBroadcast(batteryintent);
@@ -585,6 +587,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
     public void OutputEvent(String str){
+        // Send a Broadcast with the message
         Intent intent = new Intent(this.NEW_MESSAGE_AVAILABLE);
         intent.putExtra("message", str);
         sendBroadcast(intent);

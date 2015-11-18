@@ -145,6 +145,7 @@ public class MainActivity extends Activity  {
     }
 
     BroadcastReceiver br = new BroadcastReceiver() {
+        // Receives broadcasts sent from other points of the app, like the SensorsDataService
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
@@ -166,10 +167,12 @@ public class MainActivity extends Activity  {
                     warned = 0;
                 }
             } else if (intent.getAction().equals(SensorsDataService.ACTION_HR)) {
+                // Prints out the heart rate
                 final TextView HeartRate = (TextView) findViewById(R.id.heartRateLabel);
                 int result = intent.getIntExtra(SensorsDataService.EXTRA_HR, 0);
                 HeartRate.setText("HR: " + result);
             } else if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
+                // prints out the Outputevent messages
                 final TextView MessageLabel = (TextView) findViewById(R.id.messageLabel);
                 String message = intent.getStringExtra("message");
                 MessageLabel.setText(message);
@@ -178,10 +181,9 @@ public class MainActivity extends Activity  {
     };
 
     private void displayBatteryWarning(int warned) {
-        // 1. Instantiate an AlertDialog.Builder with its constructor
+        // Display a cancelable warning that the HRM battery is running low.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        // 2. Chain together various setter methods to set the dialog characteristics
         String warning = "";
         switch (warned) {
             case 1:
@@ -203,7 +205,6 @@ public class MainActivity extends Activity  {
                     }
                 });
 
-        // 3. Get the AlertDialog from create()
         AlertDialog dialog = builder.create();
         dialog.show();
     }
