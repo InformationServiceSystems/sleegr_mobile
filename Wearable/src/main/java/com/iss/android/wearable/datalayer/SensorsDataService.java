@@ -191,7 +191,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             recordedSensorTypes.remove(event.sensor.getType());
             mSensorManager.unregisterListener(sensorEventListener, event.sensor);
 
-            AddNewData(UserID, event.sensor.getType(), GetTimeNow() , null, event.values[0],event.values[1],event.values[1] );
+            AddNewData(UserID, event.sensor.getType(), GetTimeNow() , null, event.values[0],event.values[1],event.values[2] );
 
             if (recordedSensorTypes.isEmpty()){
                 if (wakeLock.isHeld()){
