@@ -51,6 +51,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
 
@@ -110,6 +113,17 @@ public class MainActivity extends Activity  {
 
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
+
+        // This is a Placeholder Graph.
+        GraphView graph = (GraphView) findViewById(R.id.heartRateGraph);
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
+                new DataPoint(0, 1),
+                new DataPoint(1, 5),
+                new DataPoint(2, 3),
+                new DataPoint(3, 2),
+                new DataPoint(4, 6)
+        });
+        graph.addSeries(series);
 
         initializeSWBatteryChecker();
 
