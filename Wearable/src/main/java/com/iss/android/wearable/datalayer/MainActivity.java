@@ -47,7 +47,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -170,7 +170,8 @@ public class MainActivity extends Activity  {
                 // Prints out the heart rate
                 final TextView HeartRate = (TextView) findViewById(R.id.heartRateLabel);
                 int result = intent.getIntExtra(SensorsDataService.EXTRA_HR, 0);
-                HeartRate.setText("HR: " + result);
+                // Need to convert the Int to String or else the app crashes. GJ Google.
+                HeartRate.setText(Integer.toString(result));
             } else if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
                 // prints out the Outputevent messages
                 final TextView MessageLabel = (TextView) findViewById(R.id.messageLabel);
@@ -268,9 +269,10 @@ public class MainActivity extends Activity  {
     public void UpdateButtonText(){
 
         if (SensorsDataService.itself != null) {
-            Button btn = (Button) findViewById(R.id.switchTrainingButton);
+            ImageButton btn = (ImageButton) findViewById(R.id.switchTrainingButton);
             String outputString = SensorsDataService.itself.allowHRM ? "Stop training" : "Start training";
-            btn.setText(outputString);
+            //Only if the button is a TextButton
+            //btn.setText(outputString);
             TextView HRLabel = (TextView) findViewById(R.id.heartRateLabel);
             if (outputString.equals("Start training")) {
                 HRLabel.setText("HR:");

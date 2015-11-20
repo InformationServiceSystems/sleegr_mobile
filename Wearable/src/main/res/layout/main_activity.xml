@@ -17,40 +17,77 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/black">
+    android:background="@color/white">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start training"
+
+    <ImageButton
+        android:background="@drawable/roundbutton"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:onClick="onClicked"
+        android:id="@+id/exitAppButton"
+        android:contentDescription="@string/StartSleepButton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="2dp" />
+
+    <ImageButton
+        android:background="@drawable/roundbutton"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:onClick="onClicked"
         android:id="@+id/switchTrainingButton"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
+        android:contentDescription="@string/StartTrainingButton"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/exitAppButton"
+        android:layout_margin="2dp" />
+
+    <!--<ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="10dp"
+        android:src="@drawable/battery_100"
+        android:contentDescription="@string/SWBattery_Desc"
+        android:layout_height="20dp"/>-->
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/HRLayout"
+        android:background="@color/white"
+        android:layout_below="@+id/messageLabel">
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="30dp"
+            android:src="@drawable/ic_launcher"
+            android:contentDescription="@string/SWBattery_Desc"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HR"
+            android:id="@+id/heartRateLabel"
+            android:editable="true"
+            android:layout_below="@+id/imageView2"
+            android:textColor="@color/black"
+            android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
         android:id="@+id/messageLabel"
-        android:layout_below="@+id/switchTrainingButton"
-        android:editable="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="HR:"
-        android:id="@+id/heartRateLabel"
-        android:layout_below="@+id/messageLabel"
-        android:editable="true" />
+        android:editable="true"
+        android:textColor="@color/black" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="SW Battery: not set"
+        android:layout_below="@+id/HRLayout"
         android:id="@+id/SWbatteryLabel"
-        android:layout_below="@+id/heartRateLabel"
         android:editable="true" />
 
     <TextView
@@ -60,15 +97,6 @@
         android:id="@+id/batteryLabel"
         android:layout_below="@+id/SWbatteryLabel"
         android:editable="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sleep"
-        android:onClick="onClicked"
-        android:id="@+id/exitAppButton"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
 
 
 </RelativeLayout>

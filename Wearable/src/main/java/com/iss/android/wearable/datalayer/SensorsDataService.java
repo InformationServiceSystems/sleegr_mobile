@@ -322,98 +322,100 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     BluetoothGattService batteryLevelService = null;
     BluetoothGattCharacteristic batteryLevelCharacteristic = null;
 
-    private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            String intentAction;
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                mBluetoothGatt.discoverServices();
-                OutputEvent("HRM connected");
-                //mBluetoothAdapter.stopLeScan(mLeScanCallback);
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                OutputEvent("HRM disconnected");
-                //mBluetoothAdapter.startLeScan(mLeScanCallback);
-            }
-        }
+    private final BluetoothGattCallback mGattCallback;
 
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                heartRateService = gatt.getService(UUID_HRS);
-                batteryLevelService = gatt.getService(Battery_Service_UUID);
-
-                if (batteryLevelService != null) {
-                    batteryLevelCharacteristic =
-                            batteryLevelService.getCharacteristic(Battery_Level_UUID);
+    {
+        mGattCallback = new BluetoothGattCallback() {
+            @Override
+            public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+                String intentAction;
+                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    mBluetoothGatt.discoverServices();
+                    OutputEvent("HRM connected");
+                    //mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                    OutputEvent("HRM disconnected");
+                    //mBluetoothAdapter.startLeScan(mLeScanCallback);
                 }
+            }
 
+            @Override
+            public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    heartRateService = gatt.getService(UUID_HRS);
+                    batteryLevelService = gatt.getService(Battery_Service_UUID);
 
-                if (heartRateService != null){
-
-                    heartRateCharacteristic =
-                            heartRateService.getCharacteristic(UUID_HRD);
-                    boolean res = gatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER);
-                    gatt.setCharacteristicNotification(heartRateCharacteristic,true);
-
-                    try {
-                        BluetoothGattDescriptor descriptor = heartRateCharacteristic.getDescriptor(
-                                UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
-
-                        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-
-                        mBluetoothGatt.writeDescriptor(descriptor);
-                        OutputEvent("Reading HRM");
-                    }catch (Exception ex){
-                        Log.e(TAG, "wuuuuut?");
-
+                    if (batteryLevelService != null) {
+                        batteryLevelCharacteristic =
+                                batteryLevelService.getCharacteristic(Battery_Level_UUID);
                     }
 
 
+                    if (heartRateService != null) {
 
+                        heartRateCharacteristic =
+                                heartRateService.getCharacteristic(UUID_HRD);
+                        boolean res = gatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER);
+                        gatt.setCharacteristicNotification(heartRateCharacteristic, true);
+
+                        try {
+                            BluetoothGattDescriptor descriptor = heartRateCharacteristic.getDescriptor(
+                                    UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
+
+                            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+
+                            mBluetoothGatt.writeDescriptor(descriptor);
+                            OutputEvent("Reading HRM");
+                        } catch (Exception ex) {
+                            Log.e(TAG, "wuuuuut?");
+
+                        }
+
+
+                    }
+
+                } else {
+                    Log.w(TAG, "onServicesDiscovered received: " + status);
                 }
-
-            } else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
             }
-        }
 
 
+            @Override
+            public void onCharacteristicRead(BluetoothGatt gatt,
+                                             BluetoothGattCharacteristic characteristic,
+                                             int status) {
 
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic characteristic,
-                                         int status) {
+                //OutputEvent("Characteristic read ");
 
-            //OutputEvent("Characteristic read ");
-
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                int BatteryStatus = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-                sendBatteryStatus(BatteryStatus);
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    int BatteryStatus = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
+                    sendBatteryStatus(BatteryStatus);
+                }
             }
-        }
 
-        @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic characteristic) {
+            @Override
+            public void onCharacteristicChanged(BluetoothGatt gatt,
+                                                BluetoothGattCharacteristic characteristic) {
 
-            if (recordedSensorTypes.containsKey(Sensor.TYPE_HEART_RATE)) {
-                recordedSensorTypes.remove(Sensor.TYPE_HEART_RATE);
+                if (recordedSensorTypes.containsKey(Sensor.TYPE_HEART_RATE)) {
+                    recordedSensorTypes.remove(Sensor.TYPE_HEART_RATE);
 
-                int result = ReadHeartRateData(characteristic);
+                    int result = ReadHeartRateData(characteristic);
 
-                AddNewData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result, 0, 0);
+                    AddNewData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result, 0, 0);
 
-                sendHR(result);
+                    sendHR(result);
 
-                //SendHRtoSmartphone(result);
+                    //SendHRtoSmartphone(result);
 
-                //mBluetoothGatt.disconnect();
+                    //mBluetoothGatt.disconnect();
 
-                mBluetoothGatt.readCharacteristic(batteryLevelCharacteristic);
-            } else return;
+                    mBluetoothGatt.readCharacteristic(batteryLevelCharacteristic);
+                } else return;
 
-        }
-    };
+            }
+        };
+    }
 
     private void sendHR(int result) {
         // Send a broadcast with the current HR
