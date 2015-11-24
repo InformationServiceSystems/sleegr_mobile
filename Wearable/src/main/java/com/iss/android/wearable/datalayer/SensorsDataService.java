@@ -353,8 +353,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                     if (heartRateService != null) {
 
-                        heartRateCharacteristic =
-                                heartRateService.getCharacteristic(UUID_HRD);
+                        heartRateCharacteristic = heartRateService.getCharacteristic(UUID_HRD);
                         boolean res = gatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER);
                         gatt.setCharacteristicNotification(heartRateCharacteristic, true);
 
@@ -681,7 +680,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 break;
             case "b0bfcacefe39d7d6":
                 UserID = 257;
-                UserHRM = "...";
+                UserHRM = "DA:2B:64:87:44:35";
                 break;
             default:
                 OutputEvent("Unknown android ID! Please report this error to admins.");

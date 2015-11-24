@@ -40,6 +40,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -84,6 +85,10 @@ public class MainActivity extends Activity  {
     private Intent murderousIntent;
     private int warned = 0;
 
+    LineGraphSeries<DataPoint> series = null;
+
+    int current_time = 0;
+
     @Override
     public void onCreate(Bundle b) {
 
@@ -116,14 +121,18 @@ public class MainActivity extends Activity  {
 
         // This is a Placeholder Graph.
         GraphView graph = (GraphView) findViewById(R.id.heartRateGraph);
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
-                new DataPoint(0, 1),
-                new DataPoint(1, 5),
-                new DataPoint(2, 3),
-                new DataPoint(3, 2),
-                new DataPoint(4, 6)
+
+        // some styling of the graph
+
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(30);
+        graph.getViewport().setMaxY(200);
+
+        series = new LineGraphSeries<DataPoint>(new DataPoint[]{
         });
         graph.addSeries(series);
+
+        series.setColor(Color.parseColor("#00C853"));
 
         initializeSWBatteryChecker();
 
@@ -186,6 +195,16 @@ public class MainActivity extends Activity  {
                 int result = intent.getIntExtra(SensorsDataService.EXTRA_HR, 0);
                 // Need to convert the Int to String or else the app crashes. GJ Google.
                 HeartRate.setText(Integer.toString(result));
+                try {
+                    series.appendData(new DataPoint(current_time, result), true, 100);
+                    current_time += 10;
+                }catch (Exception ex){
+
+                    String str = ex.toString();
+                    str = str + "d";
+
+                }
+
             } else if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
                 // prints out the Outputevent messages
                 final TextView MessageLabel = (TextView) findViewById(R.id.messageLabel);
@@ -284,18 +303,23 @@ public class MainActivity extends Activity  {
 
         if (SensorsDataService.itself != null) {
             ImageButton btn = (ImageButton) findViewById(R.id.switchTrainingButton);
+            ImageButton colorbtn = (ImageButton) findViewById(R.id.colorButton);
             String outputString = SensorsDataService.itself.allowHRM ? "Stop training" : "Start training";
             //Only if the button is a TextButton
             //btn.setText(outputString);
             TextView HRLabel = (TextView) findViewById(R.id.heartRateLabel);
             if (outputString.equals("Start training")) {
-                HRLabel.setText("HR:");
+                HRLabel.setText("HR");
             }
             if (SensorsDataService.itself.allowHRM){
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                colorbtn.setBackgroundColor(Color.parseColor("#00C853"));
             }else{
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                series.resetData(new DataPoint[]{});
+                colorbtn.setBackgroundColor(Color.parseColor("#ffffff"));
             }
+
 
         }
 
