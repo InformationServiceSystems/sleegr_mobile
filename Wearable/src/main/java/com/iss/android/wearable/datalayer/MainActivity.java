@@ -40,7 +40,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -85,7 +87,8 @@ public class MainActivity extends Activity  {
     private Intent murderousIntent;
     private int warned = 0;
 
-    LineGraphSeries<DataPoint> series = null;
+    LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
+    });
 
     int current_time = 0;
 
@@ -119,7 +122,6 @@ public class MainActivity extends Activity  {
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
 
-        // This is a Placeholder Graph.
         GraphView graph = (GraphView) findViewById(R.id.heartRateGraph);
 
         // some styling of the graph
@@ -127,12 +129,13 @@ public class MainActivity extends Activity  {
         graph.getViewport().setYAxisBoundsManual(true);
         graph.getViewport().setMinY(30);
         graph.getViewport().setMaxY(200);
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(60);
+        graph.getGridLabelRenderer().setGridColor(Color.BLACK);
+        graph.getGridLabelRenderer().setVerticalLabelsColor(Color.BLACK);
 
-        series = new LineGraphSeries<DataPoint>(new DataPoint[]{
-        });
         graph.addSeries(series);
-
-        series.setColor(Color.parseColor("#00C853"));
 
         initializeSWBatteryChecker();
 
@@ -308,16 +311,19 @@ public class MainActivity extends Activity  {
             //Only if the button is a TextButton
             //btn.setText(outputString);
             TextView HRLabel = (TextView) findViewById(R.id.heartRateLabel);
+            Resources res = getResources();
+            Drawable Selected_Round_Button = res.getDrawable(R.drawable.selectedroundbutton);
+            Drawable Round_Button = res.getDrawable(R.drawable.roundbutton);
             if (outputString.equals("Start training")) {
                 HRLabel.setText("HR");
             }
             if (SensorsDataService.itself.allowHRM){
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                colorbtn.setBackgroundColor(Color.parseColor("#00C853"));
+                colorbtn.setBackground(Selected_Round_Button);
             }else{
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 series.resetData(new DataPoint[]{});
-                colorbtn.setBackgroundColor(Color.parseColor("#ffffff"));
+                colorbtn.setBackground(Round_Button);
             }
 
 
