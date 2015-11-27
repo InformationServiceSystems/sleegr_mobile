@@ -123,6 +123,20 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         mSensorManager = ((SensorManager) getSystemService(SENSOR_SERVICE));
 
+        Sensor accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        int fifoSize = accelerometer.getFifoReservedEventCount();
+        if (fifoSize > 0) {
+            Log.d("Accelerometer", "supports batching");
+        } else {
+            Log.d("Accelerometer", "does not support batching");
+        }
+        Sensor gyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        int gyrofifoSize = gyroscope.getFifoReservedEventCount();
+        if (gyrofifoSize > 0) {
+            Log.d("Gyroscope", "supports batching");
+        } else {
+            Log.d("Gyroscope", "does not support batching");
+        }
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "MyWakelockTag");

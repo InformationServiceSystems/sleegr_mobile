@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:id="@+id/messageLabel"
-            android:editable="true" />
+            android:textColor="@color/black" />
 
     </RelativeLayout>
 
@@ -43,21 +43,21 @@
         android:layout_height="20dp"/>-->
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:id="@+id/CenterLayout"
         android:layout_below="@+id/statusbar"
         android:layout_above="@+id/BottomLayout">
 
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="35dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:id="@+id/HRLayout"
             android:layout_margin="2dp"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="HR"
                 android:id="@+id/heartRateLabel"
@@ -73,7 +73,7 @@
 
         <com.jjoe64.graphview.GraphView
             android:layout_width="300dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:id="@+id/heartRateGraph"
             android:layout_toEndOf="@+id/HRLayout"
             android:layout_margin="5dp"
@@ -99,11 +99,22 @@
             android:layout_alignParentStart="true" />
 
         <ImageButton
+            android:background="@drawable/roundbutton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:id="@+id/colorButtonRight"
+            android:layout_margin="1dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true" />
+
+        <ImageButton
             android:background="@drawable/ic_brightness_2_black_24dp"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:onClick="onClicked"
             android:id="@+id/exitAppButton"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
             android:contentDescription="@string/StartSleepButton"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
@@ -115,7 +126,7 @@
             android:layout_height="30dp"
             android:onClick="onClicked"
             android:id="@+id/switchTrainingButton"
-            android:layout_marginLeft="4dp"
+            android:layout_marginStart="4dp"
             android:layout_marginBottom="4dp"
             android:contentDescription="@string/StartTrainingButton"
             android:layout_alignParentStart="true"
