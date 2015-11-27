@@ -694,7 +694,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 break;
             case "b0bfcacefe39d7d6":
                 UserID = 257;
-                UserHRM = "DA:2B:64:87:44:35";
+                UserHRM = "C3:4D:73:79:04:0E";
                 break;
             default:
                 OutputEvent("Unknown android ID! Please report this error to admins.");
