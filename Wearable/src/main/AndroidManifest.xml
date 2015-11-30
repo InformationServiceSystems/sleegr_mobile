@@ -110,6 +110,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".DeviceControlActivity" />
 
         <service
             android:name="com.iss.android.wearable.datalayer.SensorsDataService"
