@@ -75,26 +75,75 @@ import java.util.ArrayList;
  * </li>
  * </ul>
  */
-public class MainActivity extends Activity  {
+public class MainActivity extends Activity {
 
 
     private static final String TAG = "MainActivity";
+    LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
+    });
+    int current_time = 0;
+    PendingIntent pendingInt = null;
+    float heartbeat = 10;
+    int steps = 1000;
+    boolean allowHRM = false;
     private GoogleApiClient mGoogleApiClient;
     private Handler mHandler;
-
-
-    private ArrayList<String> listItems=new ArrayList<String>();
+    private ArrayList<String> listItems = new ArrayList<String>();
     private ArrayAdapter<String> adapter;
     private Intent murderousIntent;
     private int warned = 0;
+    BroadcastReceiver br = new BroadcastReceiver() {
+        // Receives broadcasts sent from other points of the app, like the SensorsDataService
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
+                final TextView BatteryStatus = (TextView) findViewById(R.id.batteryLabel);
+                int status = intent.getIntExtra(SensorsDataService.EXTRA_STATUS, 0);
+                BatteryStatus.setText("HR Battery: " + status + "%");
+                // Checks if the Battery status is 15% or below and if the User already has been alarmed.
+                // If the battery got charged up again, reset the Warning.
+                if (status <= 15 && status > 10 && warned != 1) {
+                    warned = 1;
+                    displayBatteryWarning(warned);
+                } else if (status <= 10 && status > 5 && warned != 2) {
+                    warned = 2;
+                    displayBatteryWarning(warned);
+                } else if (status <= 5 && warned != 3) {
+                    warned = 3;
+                    displayBatteryWarning(warned);
+                } else if (status > 15 && warned != 0) {
+                    warned = 0;
+                }
+            } else if (intent.getAction().equals(SensorsDataService.ACTION_HR)) {
+                // Prints out the heart rate
+                final TextView HeartRate = (TextView) findViewById(R.id.heartRateLabel);
+                int result = intent.getIntExtra(SensorsDataService.EXTRA_HR, 0);
+                // Need to convert the Int to String or else the app crashes. GJ Google.
+                HeartRate.setText(Integer.toString(result));
+                try {
+                    series.appendData(new DataPoint(current_time, result), true, 100);
+                    current_time += 10;
+                } catch (Exception ex) {
 
-    LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
-    });
+                    String str = ex.toString();
+                    str = str + "d";
 
-    int current_time = 0;
+                }
+
+            } else if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
+                // prints out the Outputevent messages
+                final TextView MessageLabel = (TextView) findViewById(R.id.messageLabel);
+                String message = intent.getStringExtra("message");
+                MessageLabel.setText(message);
+            }
+        }
+    };
+    private DataUpdateReceiver dataUpdateReceiver;
 
     @Override
     public void onCreate(Bundle b) {
+
+        Log.d("MainActivity", "is now being created");
 
         super.onCreate(b);
 
@@ -105,6 +154,7 @@ public class MainActivity extends Activity  {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+                Log.d("Killer", "kills");
                 // something went wrong ... this cannot continue like this anymore ...
                 // we need to start everything from scratch ...
                 AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -153,6 +203,8 @@ public class MainActivity extends Activity  {
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(br, filter);
 
+        Log.d("MainActivity", "has been created");
+
     }
 
     private void initializeSWBatteryChecker() {
@@ -176,53 +228,6 @@ public class MainActivity extends Activity  {
             }
         }, 0);
     }
-
-    BroadcastReceiver br = new BroadcastReceiver() {
-        // Receives broadcasts sent from other points of the app, like the SensorsDataService
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
-                final TextView BatteryStatus = (TextView) findViewById(R.id.batteryLabel);
-                int status = intent.getIntExtra(SensorsDataService.EXTRA_STATUS, 0);
-                BatteryStatus.setText("HR Battery: " + status + "%");
-                // Checks if the Battery status is 15% or below and if the User already has been alarmed.
-                // If the battery got charged up again, reset the Warning.
-                if (status <= 15 && status > 10 && warned != 1) {
-                    warned = 1;
-                    displayBatteryWarning(warned);
-                } else if (status <= 10 && status > 5 && warned != 2) {
-                    warned = 2;
-                    displayBatteryWarning(warned);
-                } else if (status <= 5 && warned != 3) {
-                    warned = 3;
-                    displayBatteryWarning(warned);
-                } else if (status > 15 && warned != 0) {
-                    warned = 0;
-                }
-            } else if (intent.getAction().equals(SensorsDataService.ACTION_HR)) {
-                // Prints out the heart rate
-                final TextView HeartRate = (TextView) findViewById(R.id.heartRateLabel);
-                int result = intent.getIntExtra(SensorsDataService.EXTRA_HR, 0);
-                // Need to convert the Int to String or else the app crashes. GJ Google.
-                HeartRate.setText(Integer.toString(result));
-                try {
-                    series.appendData(new DataPoint(current_time, result), true, 100);
-                    current_time += 10;
-                }catch (Exception ex){
-
-                    String str = ex.toString();
-                    str = str + "d";
-
-                }
-
-            } else if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
-                // prints out the Outputevent messages
-                final TextView MessageLabel = (TextView) findViewById(R.id.messageLabel);
-                String message = intent.getStringExtra("message");
-                MessageLabel.setText(message);
-            }
-        }
-    };
 
     private void displayBatteryWarning(int warned) {
         // Display a cancelable warning that the HRM battery is running low.
@@ -253,27 +258,13 @@ public class MainActivity extends Activity  {
         dialog.show();
     }
 
-    PendingIntent pendingInt = null;
-
-    // this is used to communicate with Service
-    private class DataUpdateReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
-                UpdateButtonText();
-            }
-        }
-    }
-
-    private DataUpdateReceiver dataUpdateReceiver;
-
     @Override
     protected void onResume() {
         super.onResume();
 
         // restart of the dataservice retrieving data from the sensor
 
-        if (SensorsDataService.itself == null){
+        if (SensorsDataService.itself == null) {
             Intent intent = new Intent(this, SensorsDataService.class);
             startService(intent);
         }
@@ -303,13 +294,7 @@ public class MainActivity extends Activity  {
 
     }
 
-
-    float heartbeat = 10;
-    int steps = 1000;
-
-    boolean allowHRM = false;
-
-    public void UpdateButtonText(){
+    public void UpdateButtonText() {
 
         if (SensorsDataService.itself != null) {
             ImageButton btn = (ImageButton) findViewById(R.id.switchTrainingButton);
@@ -324,10 +309,10 @@ public class MainActivity extends Activity  {
             if (outputString.equals("Start training")) {
                 HRLabel.setText("HR");
             }
-            if (SensorsDataService.itself.allowHRM){
+            if (SensorsDataService.itself.allowHRM) {
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 colorbtn.setBackground(Selected_Round_Button);
-            }else{
+            } else {
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 series.resetData(new DataPoint[]{});
                 colorbtn.setBackground(Round_Button);
@@ -343,7 +328,7 @@ public class MainActivity extends Activity  {
             case R.id.switchTrainingButton:
 
 
-               if (SensorsDataService.itself != null){
+                if (SensorsDataService.itself != null) {
                     SensorsDataService.itself.SwitchHRM();
                     UpdateButtonText();
                 }
@@ -377,6 +362,16 @@ public class MainActivity extends Activity  {
                 Log.e(TAG, "Unknown click event registered");
         }
 
+    }
+
+    // this is used to communicate with Service
+    private class DataUpdateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
+                UpdateButtonText();
+            }
+        }
     }
 
 }

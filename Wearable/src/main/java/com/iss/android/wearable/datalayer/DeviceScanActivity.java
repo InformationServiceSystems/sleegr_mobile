@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
@@ -8,9 +24,12 @@ import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,29 +41,43 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 /**
- * Created by Michael on 30.11.2015.
+ * Activity for scanning and displaying available Bluetooth LE devices.
  */
-public class SearchHRMActivity extends ListActivity {
-
+public class DeviceScanActivity extends ListActivity {
+    private static final int REQUEST_ENABLE_BT = 1;
+    // Stops scanning after 10 seconds.
+    private static final long SCAN_PERIOD = 10000;
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
     private Handler mHandler;
+    // Device scan callback.
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
 
-    private static final int REQUEST_ENABLE_BT = 1;
-    // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mLeDeviceListAdapter.addDevice(device);
+                            mLeDeviceListAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            };
 
     @Override
-    public void onCreate(Bundle b) {
-
-        super.onCreate(b);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         mHandler = new Handler();
+
+        setContentView(R.layout.device_scan_activity);
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, "BLE not supported", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             finish();
         }
 
@@ -56,23 +89,11 @@ public class SearchHRMActivity extends ListActivity {
 
         // Checks if Bluetooth is supported on the device.
         if (mBluetoothAdapter == null) {
-            Toast.makeText(this, "Bluetooth not supported", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-
-        PackageManager myPackageManager = getPackageManager();
-
-        // let's disable the Bluetooth Search Activity
-        myPackageManager.setComponentEnabledSetting(new ComponentName(this, SearchHRMActivity.class),
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-
-        // let's enable the MainActivity
-        myPackageManager.setComponentEnabledSetting(new ComponentName(this, MainActivity.class),
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-
     }
-
 
     @Override
     protected void onResume() {
@@ -81,10 +102,8 @@ public class SearchHRMActivity extends ListActivity {
         // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
         // fire an intent to display a dialog asking the user to grant permission to enable it.
         if (!mBluetoothAdapter.isEnabled()) {
-            if (!mBluetoothAdapter.isEnabled()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            }
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
         // Initializes list view adapter.
@@ -114,14 +133,25 @@ public class SearchHRMActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
         if (device == null) return;
-        final Intent intent = new Intent(this, DeviceControlActivity.class);
-        intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_NAME, device.getName());
-        intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_ADDRESS, device.getAddress());
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(getString(R.string.device_address), device.getAddress());
+        Log.d("Device Address", device.getAddress());
+        editor.putString(getString(R.string.device_name), device.getName());
+        editor.apply();
+        Log.d("Device Address", "has been stored");
+        final Intent intent = new Intent(this, MainActivity.class);
         if (mScanning) {
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
             mScanning = false;
         }
+
+        getPackageManager().setComponentEnabledSetting(new ComponentName(this, DeviceScanActivity.class),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        getPackageManager().setComponentEnabledSetting(new ComponentName(this, MainActivity.class),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
         startActivity(intent);
+        Log.d("MainActivity", "has been called");
     }
 
     private void scanLeDevice(final boolean enable) {
@@ -143,6 +173,11 @@ public class SearchHRMActivity extends ListActivity {
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
         }
         invalidateOptionsMenu();
+    }
+
+    static class ViewHolder {
+        TextView deviceName;
+        TextView deviceAddress;
     }
 
     // Adapter for holding devices found through scanning.
@@ -209,26 +244,5 @@ public class SearchHRMActivity extends ListActivity {
 
             return view;
         }
-    }
-
-    // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
-
-                @Override
-                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mLeDeviceListAdapter.addDevice(device);
-                            mLeDeviceListAdapter.notifyDataSetChanged();
-                        }
-                    });
-                }
-            };
-
-    static class ViewHolder {
-        TextView deviceName;
-        TextView deviceAddress;
     }
 }

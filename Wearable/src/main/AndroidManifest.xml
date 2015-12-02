@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
  Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +42,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <!-- the smartphone app needs to have all of the permissions of wear app -->
 
@@ -51,22 +50,23 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.DeviceDefault" >
+        android:theme="@android:style/Theme.DeviceDefault">
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <receiver android:name="com.iss.android.wearable.datalayer.Alarm" android:exported="true">
+        <receiver
+            android:name="com.iss.android.wearable.datalayer.Alarm"
+            android:exported="true">
             <intent-filter>
-                <action android:name="com.iss.android.wearable.datalayer.ALARM" >
-                </action>
+                <action android:name="com.iss.android.wearable.datalayer.ALARM" />
             </intent-filter>
         </receiver>
 
         <receiver
             android:name="com.iss.android.wearable.datalayer.StartMyActivityAtBootReceiver"
             android:enabled="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
@@ -74,16 +74,16 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.iss.android.wearable.datalayer.DataLayerListenerService" >
+        <service android:name="com.iss.android.wearable.datalayer.DataLayerListenerService">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
         </service>
 
         <activity
-            android:name="com.iss.android.wearable.datalayer.SearchHRMActivity"
-            android:label="@string/app_name"
-            android:enabled="true">
+            android:name="com.iss.android.wearable.datalayer.DeviceScanActivity"
+            android:enabled="true"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -97,8 +97,8 @@
 
         <activity
             android:name="com.iss.android.wearable.datalayer.MainActivity"
-            android:label="@string/app_name"
-            android:enabled="false">
+            android:enabled="false"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -110,13 +110,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".DeviceControlActivity" />
 
         <service
             android:name="com.iss.android.wearable.datalayer.SensorsDataService"
             android:enabled="true"
-            android:exported="true" >
-        </service>
+            android:exported="true" />
+        <service
+            android:name=".BluetoothLeService"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>
