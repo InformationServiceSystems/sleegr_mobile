@@ -14,12 +14,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
 <!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iss.android.wearable.datalayer"
     android:versionCode="8"
-    android:versionName="Andromeda">
+    android:versionName="Andromeda" >
 
     <uses-sdk
         android:minSdkVersion="19"
@@ -35,19 +34,16 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <!-- the smartphone app needs to have all of the permissions of wear app -->
-
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -56,15 +52,16 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <receiver android:name="com.iss.android.wearable.datalayer.SyncAlarm" android:exported="true">
+        <receiver
+            android:name=".SyncAlarm"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="com.iss.android.wearable.datalayer.ALARM" >
                 </action>
             </intent-filter>
         </receiver>
-
         <receiver
-            android:name="com.iss.android.wearable.datalayer.StartMyActivityAtBootReceiver"
+            android:name=".StartMyActivityAtBootReceiver"
             android:enabled="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
             <intent-filter>
@@ -75,7 +72,7 @@
         </receiver>
 
         <activity
-            android:name="com.iss.android.wearable.datalayer.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask" >
             <intent-filter>
@@ -86,10 +83,15 @@
         </activity>
 
         <service
-            android:name="com.iss.android.wearable.datalayer.DataSyncService"
+            android:name=".DataSyncService"
             android:enabled="true"
             android:exported="true" >
         </service>
+
+        <activity
+            android:name=".RegisterUserActivity"
+            android:label="@string/title_activity_register_user" >
+        </activity>
     </application>
 
 </manifest>

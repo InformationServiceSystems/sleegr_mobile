@@ -42,8 +42,10 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -94,9 +96,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     BluetoothGattCharacteristic heartRateCharacteristic = null;
     BluetoothGattService batteryLevelService = null;
     BluetoothGattCharacteristic batteryLevelCharacteristic = null;
+
     boolean SleepTrackingStopped = false;
     private int SamplingRateMS = 10000;
-    private int UserID = -1;
+    private long TrainingStart;
+    private int UserID = 0;
     private SensorManager mSensorManager;
     private Sensor androidSensor;
     private GoogleApiClient mGoogleApiClient;
@@ -376,7 +380,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
             long totalTime = System.currentTimeMillis() - startTime;
 
-            OutputEvent("Total saving time: " + totalTime + " ms");
 
 
         } catch (Exception e) {
@@ -497,6 +500,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     public void SwitchHRM_ON() {
+
+        GetHRMid();
+
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
         mBluetoothAdapter.startLeScan(mLeScanCallback);
 
@@ -511,11 +517,34 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         OutputEvent("Searching HRM ... ");
         timerTask = new TimerTask() {
             public void run() {
+                OutputTrainingTimer();
                 ResetSensors();
             }
         };
+
         timer = new Timer();
+        TrainingStart = System.currentTimeMillis() / 1000; // in seconds
         timer.schedule(timerTask, 0, SamplingRateMS);
+    }
+
+    private void OutputTrainingTimer() {
+        // I am a little OCD about precision, thus I get training length as follows ...
+        long TrainingLength =  (System.currentTimeMillis() / 1000) - TrainingStart;
+        long seconds = TrainingLength % 60;
+        long minutes = TrainingLength / 60;
+        long hours = (TrainingLength % 60) / 60;
+
+        Calendar cl = Calendar.getInstance();
+        cl.set(Calendar.HOUR_OF_DAY, (int) hours);
+        cl.set(Calendar.MINUTE, (int) minutes);
+        cl.set(Calendar.SECOND, (int) seconds);
+
+        DateFormat df = new SimpleDateFormat("HH:mm:ss");
+        String output = df.format(cl.getTime());
+
+        // this outputs somewhat ugly
+        OutputEvent("Time: " + output);
+
     }
 
     public void SendCollectedData() {
@@ -615,6 +644,47 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // this method defined user heart rate monitor prior to the enabling of the training mode
+    public void GetHRMid(){
+
+        String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        switch (android_id) {
+            case "cf533cb594eb941f":
+                UserHRM = "E5:CF:3E:D5:22:1B";
+                break;
+            case "fb89ac5028563ab5":
+                UserHRM = "C3:65:88:2F:C0:12";
+                break;
+            case "25a7c0ea6cccfc64":
+                UserHRM = "F7:71:B1:1D:EE:69";
+                break;
+            case "faa47b6b99e0a2b8":
+                UserHRM = "F1:CC:A3:7E:66:BD";
+                break;
+            case "f77a4bb95172c007":
+                UserHRM = "E0:28:1F:12:A1:20";
+                break;
+            case "760bd2c1de704a18":
+                UserHRM = "DA:2B:64:87:44:35";
+                break;
+            case "1af13a491433cd6d":
+                UserHRM = "CC:1F:BD:F5:24:FA";
+                break;
+            case "1f3ae220a852939f":
+                UserHRM = "DA:2B:64:87:44:35";
+                break;
+            case "b0bfcacefe39d7d6":
+                UserHRM = "C3:4D:73:79:04:0E";
+                break;
+            default:
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+                UserHRM = pref.getString(getString(R.string.device_address), "");
+                break;
+
+        }
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -626,36 +696,49 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         Log.d("ISS", "Android ID: " + android_id);
 
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        UserHRM = pref.getString(getString(R.string.device_address), "");
-
-        switch (UserHRM) {
-            case "E5:CF:3E:D5:22:1B":
+        // for known IMEI's (those of athletes phones) lets let for now the hrm to be hardcoded.
+        // for other (potential) users, it would be read from the preferences
+        // p.s. user id is not important on wearable app and is deprectaded, will be removed in future
+        switch (android_id) {
+            case "cf533cb594eb941f":
                 UserID = 1;
+                UserHRM = "E5:CF:3E:D5:22:1B";
                 break;
-            case "C3:65:88:2F:C0:12":
+            case "fb89ac5028563ab5":
                 UserID = 2;
+                UserHRM = "C3:65:88:2F:C0:12";
                 break;
-            case "F7:71:B1:1D:EE:69":
+            case "25a7c0ea6cccfc64":
                 UserID = 3;
+                UserHRM = "F7:71:B1:1D:EE:69";
                 break;
-            case "F1:CC:A3:7E:66:BD":
+            case "faa47b6b99e0a2b8":
                 UserID = 4;
+                UserHRM = "F1:CC:A3:7E:66:BD";
                 break;
-            case "E0:28:1F:12:A1:20":
+            case "f77a4bb95172c007":
                 UserID = 5;
+                UserHRM = "E0:28:1F:12:A1:20";
                 break;
-            case "DA:2B:64:87:44:35":
+            case "760bd2c1de704a18":
                 UserID = 256;
+                UserHRM = "DA:2B:64:87:44:35";
                 break;
-            case "CC:1F:BD:F5:24:FA":
+            case "1af13a491433cd6d":
                 UserID = 1024;
+                UserHRM = "CC:1F:BD:F5:24:FA";
                 break;
-            case "C3:4D:73:79:04:0E":
+            case "1f3ae220a852939f":
+                UserID = 127;
+                UserHRM = "DA:2B:64:87:44:35";
+                break;
+            case "b0bfcacefe39d7d6":
                 UserID = 257;
+                UserHRM = "C3:4D:73:79:04:0E";
                 break;
             default:
-                OutputEvent("Unknown android ID! Please report this error to admins.");
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+                UserHRM = pref.getString(getString(R.string.device_address), "");
                 break;
         }
 

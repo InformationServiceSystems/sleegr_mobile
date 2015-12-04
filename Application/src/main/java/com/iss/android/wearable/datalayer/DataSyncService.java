@@ -2,11 +2,13 @@ package com.iss.android.wearable.datalayer;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -34,7 +36,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -54,10 +60,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
-    File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon_iss_package.bin");
+
     File sleepData = new File(Environment.getExternalStorageDirectory().toString() + "/sleep-data/sleep-export.csv");
     String uploadUrl = "http://46.101.214.58:5001/upload";
-
 
     @Override
     public void onCreate() {
@@ -89,7 +94,25 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     SyncAlarm alarm = new SyncAlarm();
 
-    public int UserID = -2;
+    public String UserID = "userID";
+
+    public File getSensorsFile(){
+        return getSensorsFile(0);
+    }
+
+    public File getSensorsFile(int dayoffset){
+
+        DateFormat df = new SimpleDateFormat("dd_MMM_yyyy");
+        Calendar cl = Calendar.getInstance();
+        cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
+        String currentDateandTime = df.format(cl.getTime());
+
+        String uids = UserID.replace("@", "_at_");
+
+        File sensorsData = new File(Environment.getExternalStorageDirectory(),  "User_" + uids +  "_" + currentDateandTime + "_triathlon_iss_package.bin");
+        return sensorsData;
+
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -103,34 +126,36 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         switch (android_id){
             case "144682d5efc12dcb":
-                UserID = 1;
+                UserID = "1";
                 break;
             case "4b251c5e4f524b05":
-                UserID = 2;
+                UserID = "2";
                 break;
             case "1b211b5ee8e02c15":
-                UserID = 3;
+                UserID = "3";
                 break;
             case "7b1d96be4726dd22":
-                UserID = 4;
+                UserID = "4";
                 break;
             case "847222e512faa744":
-                UserID = 5;
+                UserID = "5";
                 break;
             case "867ee27023b1f8b7":
-                UserID = 256;
+                UserID = "256";
                 break;
             case "65e9172b7bb0638d":
-                UserID = 1024;
+                UserID = "1024";
                 break;
-            case "3032a1d80ae293bd":
-                UserID = 257;
+            case "3032a1d80ae293bd ":
+                UserID = "257";
                 break;
             default:
-                OutputEvent("Unknown android ID! Please report this error to admins.");
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+                UserID = pref.getString("user_email", "unknown");
                 break;
         }
 
+        OutputEvent("Welcome user " + UserID + "!");
 
         return START_STICKY;
 
@@ -301,6 +326,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         try {
 
+            File sensorsData = getSensorsFile();
+
             if (!sensorsData.exists()) {
                 Serializer.SerializeToFile(new ArrayList<ISSRecordData>(), sensorsData);
             }
@@ -400,23 +427,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }).start();
     }
 
-    private void SendDataFileToEmail() {
-
-        String filelocation = sensorsData.toString();
-
-        Intent emailIntent = new Intent(Intent.ACTION_SEND);
-// set the type to 'email'
-        emailIntent.setType("vnd.android.cursor.dir/email");
-        String to[] = {"iaroslogos@gmail.com"};
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, to);
-// the attachment
-        emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + filelocation));
-// the mail subject
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
-        startActivity(Intent.createChooser(emailIntent, "Send email..."));
-
-    }
-
     public byte[] FileToBytes(File file) {
 
         int size = (int) file.length();
@@ -439,6 +449,10 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // Returns String which is a server response
     public void UploadFileToServer(File fileToUpload, String uploadUrl) {
+
+        if (!fileToUpload.exists()){
+            return;
+        }
 
         final File file = fileToUpload;
         final String serverurl = uploadUrl;
@@ -546,8 +560,12 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         //StopSleep();
 
+
         UploadFileToServer(sleepData, uploadUrl);
-        UploadFileToServer(sensorsData, uploadUrl);
+
+        for (int i = 0; i < 7; i++){
+            UploadFileToServer(getSensorsFile(i), uploadUrl);
+        }
 
 
         // <<<<<<<<<<<<< some deprecated code >>>>>>>>>>>>>>>>>>>

@@ -92,6 +92,7 @@ public class MainActivity extends Activity {
     private ArrayAdapter<String> adapter;
     private Intent murderousIntent;
     private int warned = 0;
+
     BroadcastReceiver br = new BroadcastReceiver() {
         // Receives broadcasts sent from other points of the app, like the SensorsDataService
         @Override
@@ -178,7 +179,7 @@ public class MainActivity extends Activity {
         // some styling of the graph
 
         graph.getViewport().setYAxisBoundsManual(true);
-        graph.getViewport().setMinY(30);
+        graph.getViewport().setMinY(0);
         graph.getViewport().setMaxY(200);
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setMinX(0);
@@ -196,14 +197,21 @@ public class MainActivity extends Activity {
 
         initializeSWBatteryChecker();
 
+        RegisterBroadcastsReceiver();
+
+        Log.d("MainActivity", "has been created");
+
+    }
+
+    private void RegisterBroadcastsReceiver(){
+
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(SensorsDataService.ACTION_BATTERY_STATUS);
         filter.addAction(SensorsDataService.ACTION_HR);
         filter.addAction(SensorsDataService.NEW_MESSAGE_AVAILABLE);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(br, filter);
-
-        Log.d("MainActivity", "has been created");
 
     }
 
@@ -279,6 +287,8 @@ public class MainActivity extends Activity {
         /*if (SensorsDataService.itself != null){
             SensorsDataService.itself.StopSleepTracking();
         }*/
+
+        RegisterBroadcastsReceiver();
 
     }
 
@@ -356,6 +366,14 @@ public class MainActivity extends Activity {
 
                 OutputEvent("Created fake data");*/
 
+                break;
+            case R.id.searchForHRM:
+                try {
+                    final Intent bluetoothSelector = new Intent(this, DeviceScanActivity.class);
+                    startActivity(bluetoothSelector);
+                }catch (Exception ex){
+                    Log.e(TAG, ex.toString());
+                }
                 break;
             default:
 
