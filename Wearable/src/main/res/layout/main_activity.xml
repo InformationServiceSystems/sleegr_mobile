@@ -22,34 +22,31 @@
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
-        android:layout_height="20dp"
+        android:layout_height="36dp"
         android:id="@+id/statusbar"
         android:background="@color/white">
 
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:id="@+id/messageLabel"
-            android:textColor="@color/black" />
+        <ImageButton
+            android:background="@drawable/roundbutton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:id="@+id/imageButton"
+            android:layout_marginLeft="1dp"
+            android:layout_marginRight="1dp"
+            android:layout_marginStart="14dp"
+            android:layout_alignParentTop="true" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SW:"
-            android:id="@+id/SWbatteryLabel"
-            android:editable="true"
-            android:layout_toEndOf="@+id/messageLabel"
-            android:textColor="@color/black" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="HRM:"
-            android:id="@+id/batteryLabel"
-            android:editable="true"
-            android:layout_toEndOf="@+id/SWbatteryLabel"
-            android:textColor="@color/black" />
+        <ImageButton
+            android:background="@drawable/ic_settings_bluetooth_black_24dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:onClick="onClicked"
+            android:id="@+id/searchForHRM"
+            android:layout_marginStart="3dp"
+            android:layout_marginTop="2dp"
+            android:contentDescription="@string/StartTrainingButton"
+            android:layout_alignTop="@+id/imageButton"
+            android:layout_alignStart="@+id/imageButton" />
 
     </RelativeLayout>
 
@@ -85,7 +82,8 @@
                 android:layout_alignParentStart="true"
                 android:textSize="@dimen/diag_button_side_padding_right_round"
                 android:gravity="center"
-                android:layout_alignParentTop="true" />
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true" />
 
         </RelativeLayout>
 
@@ -131,12 +129,11 @@
             android:layout_height="30dp"
             android:onClick="onClicked"
             android:id="@+id/exitAppButton"
-            android:layout_marginEnd="4dp"
-            android:layout_marginBottom="4dp"
             android:contentDescription="@string/StartSleepButton"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_margin="2dp" />
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_centerVertical="true"
+            android:layout_alignEnd="@+id/colorButtonRight" />
 
         <ImageButton
             android:background="@drawable/ic_directions_run_black_24dp"
@@ -153,17 +150,36 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/timer"
-            android:text="asd"
-            android:layout_margin="3dp"
-            android:layout_toEndOf="@+id/colorButton"
-            android:layout_alignParentBottom="true"
-            android:textColor="@color/black" />
+            android:text="SW Battery:"
+            android:id="@+id/SWbatteryLabel"
+            android:editable="true"
+            android:textColor="@color/black"
+            android:layout_alignTop="@+id/colorButton"
+            android:layout_toEndOf="@+id/colorButton" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HRM Battery:"
+            android:id="@+id/batteryLabel"
+            android:editable="true"
+            android:textColor="@color/black"
+            android:layout_alignBottom="@+id/colorButton"
+            android:layout_toEndOf="@+id/colorButton" />
 
     </RelativeLayout>
 
-
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:id="@+id/messageLabel"
+        android:textColor="@color/black"
+        android:layout_alignBottom="@+id/statusbar"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/statusbar"
+        android:gravity="center" />
 
 
 </RelativeLayout>

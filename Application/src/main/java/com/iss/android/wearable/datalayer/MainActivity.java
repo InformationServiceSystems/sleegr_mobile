@@ -75,8 +75,6 @@ public class MainActivity extends Activity  {
         mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
         mDataItemList.setAdapter(mDataItemListAdapter);
 
-
-
         if (DataSyncService.itself == null){
             Intent intent = new Intent(this, DataSyncService.class);
             startService(intent);
@@ -238,15 +236,13 @@ public class MainActivity extends Activity  {
 
     }
 
-    public void onSendToServerClick(View view) {
 
-        //SendToServer(watchData);
-        //ShareDataWithServer();
-        //SendDataFileToEmail();
 
-        if (DataSyncService.itself != null){
-            DataSyncService.itself.ShareDataWithServer();
-        }
+
+    public void onRegisterUser(View view) {
+
+        final Intent bluetoothSelector = new Intent(this, RegisterUserActivity.class);
+        startActivity(bluetoothSelector);
 
     }
 

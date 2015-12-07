@@ -70,28 +70,33 @@ public class DeviceScanActivity extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mHandler = new Handler();
 
-        setContentView(R.layout.device_scan_activity);
+        try {
+            mHandler = new Handler();
 
-        // Use this check to determine whether BLE is supported on the device.  Then you can
-        // selectively disable BLE-related features.
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-            finish();
-        }
+            setContentView(R.layout.device_scan_activity);
 
-        // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
-        // BluetoothAdapter through BluetoothManager.
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
+            // Use this check to determine whether BLE is supported on the device.  Then you can
+            // selectively disable BLE-related features.
+            if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+                Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
+                finish();
+            }
 
-        // Checks if Bluetooth is supported on the device.
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
-            finish();
-            return;
+            // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
+            // BluetoothAdapter through BluetoothManager.
+            final BluetoothManager bluetoothManager =
+                    (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+            mBluetoothAdapter = bluetoothManager.getAdapter();
+
+            // Checks if Bluetooth is supported on the device.
+            if (mBluetoothAdapter == null) {
+                Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        }catch (Exception ex){
+            ex.toString();
         }
     }
 
@@ -140,17 +145,19 @@ public class DeviceScanActivity extends ListActivity {
         editor.putString(getString(R.string.device_name), device.getName());
         editor.apply();
         Log.d("Device Address", "has been stored");
-        final Intent intent = new Intent(this, MainActivity.class);
+
         if (mScanning) {
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
             mScanning = false;
         }
 
-        getPackageManager().setComponentEnabledSetting(new ComponentName(this, DeviceScanActivity.class),
+        /*getPackageManager().setComponentEnabledSetting(new ComponentName(this, DeviceScanActivity.class),
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
         getPackageManager().setComponentEnabledSetting(new ComponentName(this, MainActivity.class),
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-        startActivity(intent);
+        final Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);*/
+        finish();
         Log.d("MainActivity", "has been called");
     }
 

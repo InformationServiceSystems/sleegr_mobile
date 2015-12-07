@@ -18,50 +18,41 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:id="@+id/top"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="10dp">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sync with watch"
-            android:id="@+id/syncWithWatchButton"
-            android:onClick="onSyncClick"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sync with server"
-            android:id="@+id/sendToServerButton"
-            android:onClick="onSendToServerClick"
-            android:layout_below="@+id/syncWithWatchButton"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentStart="true" />
-
-
-
-    </RelativeLayout>
-
-    <View
-        style="@style/Divider"
-        android:id="@+id/divider"
-        android:layout_below="@+id/top"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp" />
-
     <ListView
         android:id="@+id/data_item_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:transcriptMode="alwaysScroll"
-        android:layout_below="@+id/divider" />
+        android:layout_below="@+id/button" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sync with server"
+        android:id="@+id/sendToServerButton"
+        android:onClick="onSendToServerClick"
+        android:layout_weight="0.45"
+        android:layout_below="@+id/syncWithWatchButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sync with watch"
+        android:id="@+id/syncWithWatchButton"
+        android:onClick="onSyncClick"
+        android:layout_weight="0.39"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        android:id="@+id/button"
+        android:layout_below="@+id/sendToServerButton"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>
