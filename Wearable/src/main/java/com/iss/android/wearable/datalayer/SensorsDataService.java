@@ -42,10 +42,8 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -522,7 +520,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         OutputEvent("Searching HRM ... ");
         timerTask = new TimerTask() {
             public void run() {
-                OutputTrainingTimer();
                 ResetSensors();
             }
         };
@@ -530,26 +527,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         timer = new Timer();
         TrainingStart = System.currentTimeMillis() / 1000; // in seconds
         timer.schedule(timerTask, 0, SamplingRateMS);
-    }
-
-    private void OutputTrainingTimer() {
-        // I am a little OCD about precision, thus I get training length as follows ...
-        long TrainingLength =  (System.currentTimeMillis() / 1000) - TrainingStart;
-        long seconds = TrainingLength % 60;
-        long minutes = TrainingLength / 60;
-        long hours = (TrainingLength % 60) / 60;
-
-        Calendar cl = Calendar.getInstance();
-        cl.set(Calendar.HOUR_OF_DAY, (int) hours);
-        cl.set(Calendar.MINUTE, (int) minutes);
-        cl.set(Calendar.SECOND, (int) seconds);
-
-        DateFormat df = new SimpleDateFormat("HH:mm:ss");
-        String output = df.format(cl.getTime());
-
-        // this outputs somewhat ugly
-        OutputEvent("Time: " + output);
-
     }
 
     public void SendCollectedData() {
