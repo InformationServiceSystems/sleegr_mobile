@@ -487,6 +487,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
 
         allowHRM = !allowHRM;
+        if (allowHRM) {
+            MainActivity.itself.startTimer();
+        } else {
+            MainActivity.itself.stopTimer();
+        }
 
         try {
             Serializer.SerializeToFile(allowHRM, mutexFile);

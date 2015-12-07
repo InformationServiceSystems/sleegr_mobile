@@ -59,6 +59,8 @@ import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 
 /**
@@ -99,7 +101,7 @@ public class MainActivity extends Activity {
             if (intent.getAction().equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
                 final TextView BatteryStatus = (TextView) findViewById(R.id.batteryLabel);
                 int status = intent.getIntExtra(SensorsDataService.EXTRA_STATUS, 0);
-                BatteryStatus.setText("HR Battery: " + status + "%");
+                BatteryStatus.setText("HR: " + status + "%");
                 // Checks if the Battery status is 15% or below and if the User already has been alarmed.
                 // If the battery got charged up again, reset the Warning.
                 if (status <= 15 && status > 10 && warned != 1) {
@@ -139,6 +141,7 @@ public class MainActivity extends Activity {
         }
     };
     private DataUpdateReceiver dataUpdateReceiver;
+    public static MainActivity itself;
 
     @Override
     public void onCreate(Bundle b) {
@@ -146,6 +149,7 @@ public class MainActivity extends Activity {
         Log.d("MainActivity", "is now being created");
 
         super.onCreate(b);
+        itself = this;
 
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
         // Intent that kills the app after a certain amount of time after the app has crashed
@@ -223,7 +227,7 @@ public class MainActivity extends Activity {
                 int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
                 int batteryPct = (int) (level / (float) scale * 100);
-                SWBatteryStatus.setText("SW Battery: " + batteryPct + "%");
+                SWBatteryStatus.setText("SW: " + batteryPct + "%");
                 h.postDelayed(this, delay);
             }
         }, 0);
@@ -326,8 +330,6 @@ public class MainActivity extends Activity {
     public void onClicked(View view) {
         switch (view.getId()) {
             case R.id.switchTrainingButton:
-
-
                 if (SensorsDataService.itself != null) {
                     SensorsDataService.itself.SwitchHRM();
                     UpdateButtonText();
@@ -372,6 +374,40 @@ public class MainActivity extends Activity {
                 UpdateButtonText();
             }
         }
+    }
+
+    // Need to declare the handler here so it can be called off later
+    Handler handler = new Handler();
+    long[] time = {0, 0};
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            time[0] += 1;
+            if (time[0] > 59) {
+                time[1] += 1;
+                time[0] = 0;
+            }
+            updatetimetext();
+            handler.postDelayed(this, 1000);
+        }
+    };
+
+    private void updatetimetext() {
+        long minutes = time[1];
+        long seconds = time[0];
+        String newtime = String.valueOf(minutes) + ":" + StringUtils.leftPad(Long.toString(seconds), 2, "0");
+        TextView timetext = (TextView) findViewById(R.id.timer);
+        timetext.setText(newtime);
+    }
+
+    public void startTimer() {
+        time[0] = 0;
+        time[1] = 0;
+        handler.postDelayed(runnable, 1000);
+    }
+
+    void stopTimer() {
+        handler.removeCallbacks(runnable);
     }
 
 }
