@@ -237,7 +237,16 @@ public class MainActivity extends Activity  {
     }
 
 
+    public void onSendToServerClick(View view) {
 
+        //SendToServer(watchData);
+        //RequestDataFromWatch();
+
+        if (DataSyncService.itself != null){
+            DataSyncService.itself.ShareDataWithServer();
+        }
+
+    }
 
     public void onRegisterUser(View view) {
 

@@ -638,7 +638,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             case "fb89ac5028563ab5":
                 UserHRM = "C3:65:88:2F:C0:12";
                 break;
-            case "25a7c0ea6cccfc64":
+            case "bd9050e5d954b9a3":
                 UserHRM = "F7:71:B1:1D:EE:69";
                 break;
             case "faa47b6b99e0a2b8":
@@ -690,7 +690,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 UserID = 2;
                 UserHRM = "C3:65:88:2F:C0:12";
                 break;
-            case "25a7c0ea6cccfc64":
+            case "bd9050e5d954b9a3":
                 UserID = 3;
                 UserHRM = "F7:71:B1:1D:EE:69";
                 break;

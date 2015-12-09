@@ -102,7 +102,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     public File getSensorsFile(int dayoffset){
 
-        DateFormat df = new SimpleDateFormat("dd_MMM_yyyy");
+        DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         Calendar cl = Calendar.getInstance();
         cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
         String currentDateandTime = df.format(cl.getTime());
@@ -131,7 +131,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             case "4b251c5e4f524b05":
                 UserID = "2";
                 break;
-            case "1b211b5ee8e02c15":
+            case "3622852bee38de73":
                 UserID = "3";
                 break;
             case "7b1d96be4726dd22":
