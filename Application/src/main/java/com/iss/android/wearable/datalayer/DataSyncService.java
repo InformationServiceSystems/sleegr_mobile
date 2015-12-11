@@ -1,13 +1,17 @@
 package com.iss.android.wearable.datalayer;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
+import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -40,7 +44,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -62,13 +65,16 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
 
     File sleepData = new File(Environment.getExternalStorageDirectory().toString() + "/sleep-data/sleep-export.csv");
-    String uploadUrl = "http://46.101.214.58:5001/upload";
+    File userDataFolder = new File(Environment.getExternalStorageDirectory().toString() , "triathlon" );
+    String uploadUrl = "http://46.101.214.58:5001/upload2/";
 
     @Override
     public void onCreate() {
 
         super.onCreate();
         mHandler = new Handler();
+
+        // create artificial data
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -107,9 +113,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
         String currentDateandTime = df.format(cl.getTime());
 
-        String uids = UserID.replace("@", "_at_");
+        String userIDstring = UserID.replace("@", "_at_");
 
-        File sensorsData = new File(Environment.getExternalStorageDirectory(),  "User_" + uids +  "_" + currentDateandTime + "_triathlon_iss_package.bin");
+        File sensorsData = new File(userDataFolder,  userIDstring +  "-" + currentDateandTime + ".bin");
         return sensorsData;
 
     }
@@ -122,7 +128,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         String android_id = Settings.Secure.getString(this.getContentResolver(),Settings.Secure.ANDROID_ID);
         OutputEvent(android_id);
 
-        Log.d("ISS", "Adroid ID: " + android_id );
+        Log.d("ISS", "Adroid ID: " + android_id);
 
         switch (android_id){
             case "144682d5efc12dcb":
@@ -152,10 +158,25 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             default:
                 SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
                 UserID = pref.getString("user_email", "unknown");
+                OutputEvent("Welcome user " + UserID + "!");
                 break;
         }
 
-        OutputEvent("Welcome user " + UserID + "!");
+        boolean result = false;
+        if(!userDataFolder.exists()){
+            result = userDataFolder.mkdir();
+        }
+
+        for (int i = 0; i < 7; i++){
+            File file = getSensorsFile(i);
+
+            try {
+                Serializer.SerializeToFile("Hello string ... ",  file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
 
         return START_STICKY;
 
@@ -471,7 +492,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                     // Static stuff:
 
                     String attachmentName = "file";
-                    String attachmentFileName = "User_" + UserID + "_" + file.getName();
+                    String attachmentFileName = file.getName();
                     String crlf = "\r\n";
                     String twoHyphens = "--";
                     String boundary = "*****";
@@ -554,119 +575,40 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
+    // Magic that is supposed to keep the process running on the Android v 4.4 even
+    // after the app is swiped away; seems to be a bug of this android version. GJ Google
+    // http://stackoverflow.com/questions/20677781/in-android-4-4-swiping-app-out-of-recent-tasks-permanently-kills-application-wi
+    public void onTaskRemoved(Intent rootIntent) {
+        Log.e("FLAGX : ", ServiceInfo.FLAG_STOP_WITH_TASK + "");
+        Intent restartServiceIntent = new Intent(getApplicationContext(),
+                this.getClass());
+        restartServiceIntent.setPackage(getPackageName());
 
+        PendingIntent restartServicePendingIntent = PendingIntent.getService(
+                getApplicationContext(), 1, restartServiceIntent,
+                PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmService = (AlarmManager) getApplicationContext()
+                .getSystemService(Context.ALARM_SERVICE);
+        alarmService.set(AlarmManager.ELAPSED_REALTIME,
+                SystemClock.elapsedRealtime() + 1000,
+                restartServicePendingIntent);
+
+        super.onTaskRemoved(rootIntent);
+    }
+
+    // a simple wrapper around UploadFileToServer
+    public void UploadUserFileToServer(File file, String uploadUrl){
+        String completeUrl = uploadUrl + UserID;
+        UploadFileToServer(file, completeUrl);
+    }
 
     public void ShareDataWithServer() {
 
-        //StopSleep();
-
-
-        UploadFileToServer(sleepData, uploadUrl);
+        UploadUserFileToServer(sleepData, uploadUrl);
 
         for (int i = 0; i < 7; i++){
-            UploadFileToServer(getSensorsFile(i), uploadUrl);
+            UploadUserFileToServer(getSensorsFile(i), uploadUrl);
         }
-
-
-        // <<<<<<<<<<<<< some deprecated code >>>>>>>>>>>>>>>>>>>
-
-        /*StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-        StrictMode.setThreadPolicy(policy);
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                String data = null;
-                String serveroutput = "";
-
-                // load the sleep file contents
-
-
-
-
-                final long startTime = System.currentTimeMillis();
-
-                try {
-
-
-                    if (alldata == null){
-                        return;
-                    }
-
-
-                    for (int i = 0; i < alldata.size(); i ++){
-                        ISSRecordData recordData = alldata.get(i);
-                        String urlstr  = "http://46.101.214.58:8082/sendData/?type=7" +
-                                "&userid=" + recordData.UserID +
-                                "&sensortype=" + recordData.MeasurementType +
-                                "&time=" + recordData.Timestamp +
-                                "&value=" + round(recordData.Value, 2) +
-                                "&metadata=null";
-
-                        URL url = new URL(urlstr);
-                        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                        conn.setRequestMethod("GET");
-                        conn.setRequestProperty("User-Agent",  "Mozilla/5.0");
-                        int responseCode = conn.getResponseCode();
-                    }
-
-                    alldata.clear();*/
-
-/*
-                    String url="http://46.101.214.58:5000/sendPost";
-                    URL object=new URL(url);
-
-                    HttpURLConnection con = (HttpURLConnection) object.openConnection();
-                    con.setDoOutput(true);
-                    con.setDoInput(true);
-                    con.setRequestProperty("Content-Type", "application/json");
-                    con.setRequestProperty("Accept", "application/json");
-                    con.setRequestMethod("POST");
-
-                    OutputStream wr = con.getOutputStream();
-                    String jsondata = "{ \"user\":\"data\" }";
-                    wr.write(jsondata.getBytes("UTF-8"));
-                    wr.flush();
-
-//display what returns the POST request
-
-                    StringBuilder sb = new StringBuilder();
-                    int HttpResult = con.getResponseCode();
-                    if(HttpResult == HttpURLConnection.HTTP_OK) {
-                        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-                        String line = null;
-                        while ((line = br.readLine()) != null) {
-                            sb.append(line + "\n");
-                        }
-                    }
-
-                    String strdata = sb.toString();*/
-
-
-                /*OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-                wr.write(data);
-                wr.flush();
-                wr.close();
-
-                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    serveroutput += line;
-                }
-                rd.close();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    serveroutput = e.toString();
-                }
-
-
-
-
-            }
-        }).start();*/
 
     }
 

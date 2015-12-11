@@ -45,7 +45,7 @@ public class RegisterUserActivity extends Activity {
     public void onUserConfirm(View view){
 
         EditText editText = (EditText) findViewById(R.id.editText);
-        String emailid = editText.getText().toString();
+        String emailid = editText.getText().toString().replace(" ","");
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = pref.edit();
