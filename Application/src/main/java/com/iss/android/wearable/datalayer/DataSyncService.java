@@ -167,17 +167,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             result = userDataFolder.mkdir();
         }
 
-        for (int i = 0; i < 7; i++){
-            File file = getSensorsFile(i);
-
-            try {
-                Serializer.SerializeToFile("Hello string ... ",  file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-
         return START_STICKY;
 
     }
