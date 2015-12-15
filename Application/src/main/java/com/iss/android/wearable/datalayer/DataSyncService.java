@@ -108,7 +108,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     public File getSensorsFile(int dayoffset){
 
-        DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cl = Calendar.getInstance();
         cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
         String currentDateandTime = df.format(cl.getTime());
@@ -119,6 +119,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         return sensorsData;
 
     }
+
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
