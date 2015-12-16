@@ -46,6 +46,7 @@ import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -257,6 +258,8 @@ public class MainActivity extends Activity {
                 warning = "HRM Battery Level at 5%";
                 break;
         }
+        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(100);
         builder.setMessage(warning)
                 .setTitle(R.string.battery_warning_title)
                 .setCancelable(true)
@@ -344,6 +347,8 @@ public class MainActivity extends Activity {
                     SensorsDataService.itself.SwitchHRM();
                     UpdateButtonText();
                 }
+                Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(100);
 
                 break;
             case R.id.exitAppButton:

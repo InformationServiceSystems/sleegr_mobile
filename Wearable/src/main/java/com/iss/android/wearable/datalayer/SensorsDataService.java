@@ -320,7 +320,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         for (int sensorID : sensorIDs) {
             androidSensor = mSensorManager.getDefaultSensor(sensorID);
             mSensorManager.unregisterListener(sensorEventListener, androidSensor);
-            mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+            if (androidSensor.getFifoReservedEventCount() > 0) {
+                mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL, 120);
+            } else {
+                mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            }
         }
 
             /*if (mBluetoothGatt != null ){

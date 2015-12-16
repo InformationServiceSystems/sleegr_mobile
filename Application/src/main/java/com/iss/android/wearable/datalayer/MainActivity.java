@@ -83,6 +83,7 @@ public class MainActivity extends Activity  {
 
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
         // start handler which starts pending-intent after Application-Crash
+        // That stuff may be cool for end users, but for developers it's nasty
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
@@ -225,29 +226,6 @@ public class MainActivity extends Activity  {
         return results;
     }
 
-    public void onSyncClick(View view) {
-
-        //SendToServer(watchData);
-        //RequestDataFromWatch();
-
-        if (DataSyncService.itself != null){
-            DataSyncService.itself.RequestDataFromWatch();
-        }
-
-    }
-
-
-    public void onSendToServerClick(View view) {
-
-        //SendToServer(watchData);
-        //RequestDataFromWatch();
-
-        if (DataSyncService.itself != null){
-            DataSyncService.itself.ShareDataWithServer();
-        }
-
-    }
-
     public void onRegisterUser(View view) {
 
         final Intent bluetoothSelector = new Intent(this, RegisterUserActivity.class);
@@ -259,8 +237,6 @@ public class MainActivity extends Activity  {
      * Sets up UI components and their callback handlers.
      */
     private void setupViews() {
-        watchSyncButton = (Button) findViewById(R.id.syncWithWatchButton);
-        //mThumbView = (ImageView) findViewById(R.id.imageView);
         mDataItemList = (ListView) findViewById(R.id.data_item_list);
         //mStartActivityBtn = findViewById(R.id.start_wearable_activity);
     }

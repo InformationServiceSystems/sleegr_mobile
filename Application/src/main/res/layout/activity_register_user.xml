@@ -7,13 +7,19 @@
     tools:context="com.iss.android.wearable.datalayer.RegisterUserActivity"
     android:id="@+id/globalLayout">
 
-    <EditText
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
+
+        <EditText
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
         android:id="@+id/editText"
         android:layout_below="@+id/textView"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -21,7 +27,7 @@
         android:text="Please enter your email below (it is used as your ID):"
         android:id="@+id/textView"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -39,5 +45,7 @@
         android:text="You will be registered automatically on our website where you can see and analyze your data."
         android:id="@+id/textView2"
         android:layout_below="@+id/confirmUserEmail"
-        android:layout_alignParentStart="true" />
+        android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
 </RelativeLayout>
