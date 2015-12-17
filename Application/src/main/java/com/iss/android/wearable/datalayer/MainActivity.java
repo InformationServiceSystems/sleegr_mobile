@@ -70,6 +70,8 @@ public class MainActivity extends Activity  {
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
         setupViews();
+        //Necessary, terminating the choose register service activity
+        ChooseRegisterServiceActivity.instance.finish();
 
         // Stores DataItems received by the local broadcaster or from the paired watch.
         mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
