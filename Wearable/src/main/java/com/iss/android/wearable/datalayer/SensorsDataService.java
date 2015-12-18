@@ -370,7 +370,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 Serializer.SerializeToFile(new ArrayList<ISSRecordData>(), sensorsData);
             }
 
-            OutputEvent("Started saving the data ... ");
+            //OutputEvent("Started saving the data ... ");
 
             long startTime = System.currentTimeMillis();
 
@@ -518,7 +518,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             @Override
             public void run() {
                 mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                OutputEvent("HRM search stop.");
+                //OutputEvent("HRM search stop.");
             }
         }, 10000);
 
@@ -605,7 +605,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
             if (data[0] == 2) {
                 // send available data
-                OutputEvent("Data saved on Smartphone");
+                OutputEvent("Data saved");
                 alldata.clear();
 
                 if (sensorsData.exists()) {

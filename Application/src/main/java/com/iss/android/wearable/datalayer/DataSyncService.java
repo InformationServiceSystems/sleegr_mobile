@@ -31,13 +31,16 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
@@ -115,7 +118,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         String userIDstring = UserID.replace("@", "_at_");
 
-        File sensorsData = new File(userDataFolder,  userIDstring +  "-" + currentDateandTime + ".bin");
+        File sensorsData = new File(userDataFolder,  userIDstring +  "-" + currentDateandTime + ".csv");
         return sensorsData;
 
     }
@@ -333,27 +336,22 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-
     private void SaveNewDataToFile(ArrayList<ISSRecordData> data) {
 
         try {
 
             File sensorsData = getSensorsFile();
 
-            if (!sensorsData.exists()) {
-                Serializer.SerializeToFile(new ArrayList<ISSRecordData>(), sensorsData);
-            }
-
             OutputEvent("Started saving the data ... ");
 
             long startTime = System.currentTimeMillis();
 
-            ArrayList<ISSRecordData> savedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromFile(sensorsData);
-            savedData.addAll(data);
+            //ArrayList<ISSRecordData> savedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromFile(sensorsData);
+            //savedData.addAll(data);
+            //OutputEvent("Overall items so far: " + savedData.size());
+            //Serializer.SerializeToFile(savedData, sensorsData);
 
-            OutputEvent("Overall items so far: " + savedData.size());
-
-            Serializer.SerializeToFile(savedData, sensorsData);
+            CSVManager.WriteNewCSVdata(sensorsData, CSVManager.RecordsToCSV(data).toString());
 
             long totalTime = System.currentTimeMillis() - startTime;
 

@@ -71,7 +71,7 @@ public class MainActivity extends Activity  {
         setContentView(R.layout.main_activity);
         setupViews();
         //Necessary, terminating the choose register service activity
-        ChooseRegisterServiceActivity.instance.finish();
+        //ChooseRegisterServiceActivity.instance.finish();
 
         // Stores DataItems received by the local broadcaster or from the paired watch.
         mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
@@ -130,6 +130,8 @@ public class MainActivity extends Activity  {
         if (dataUpdateReceiver == null) dataUpdateReceiver = new DataUpdateReceiver();
         IntentFilter intentFilter = new IntentFilter(DataSyncService.NEW_MESSAGE_AVAILABLE);
         registerReceiver(dataUpdateReceiver, intentFilter);
+
+
     }
 
     @Override
