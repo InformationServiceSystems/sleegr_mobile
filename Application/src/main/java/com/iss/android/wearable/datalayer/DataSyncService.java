@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -67,8 +68,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
 
-    File sleepData = new File(Environment.getExternalStorageDirectory().toString() + "/sleep-data/sleep-export.csv");
-    File userDataFolder = new File(Environment.getExternalStorageDirectory().toString() , "triathlon" );
+
     String uploadUrl = "http://46.101.214.58:5001/upload2/";
 
     @Override
@@ -104,26 +104,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     SyncAlarm alarm = new SyncAlarm();
 
     public String UserID = "userID";
-
-    public File getSensorsFile(){
-        return getSensorsFile(0);
-    }
-
-    public File getSensorsFile(int dayoffset){
-
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar cl = Calendar.getInstance();
-        cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
-        String currentDateandTime = df.format(cl.getTime());
-
-        String userIDstring = UserID.replace("@", "_at_");
-
-        File sensorsData = new File(userDataFolder,  userIDstring +  "-" + currentDateandTime + ".csv");
-        return sensorsData;
-
-    }
-
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -167,10 +147,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 break;
         }
 
-        boolean result = false;
-        if(!userDataFolder.exists()){
-            result = userDataFolder.mkdir();
-        }
+        DataStorageManager.InitializeTriathlonFolder();
 
         return START_STICKY;
 
@@ -318,7 +295,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             ArrayList<ISSRecordData> receivedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data);
             OutputEvent("Read data from the watch of size " + receivedData.size());
-            SaveNewDataToFile(receivedData);
+            DataStorageManager.SaveNewDataToFile(receivedData, UserID);
             ClearWatchData();
 
         } catch (Exception e) {
@@ -336,35 +313,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    private void SaveNewDataToFile(ArrayList<ISSRecordData> data) {
 
-        try {
-
-            File sensorsData = getSensorsFile();
-
-            OutputEvent("Started saving the data ... ");
-
-            long startTime = System.currentTimeMillis();
-
-            //ArrayList<ISSRecordData> savedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromFile(sensorsData);
-            //savedData.addAll(data);
-            //OutputEvent("Overall items so far: " + savedData.size());
-            //Serializer.SerializeToFile(savedData, sensorsData);
-
-            CSVManager.WriteNewCSVdata(sensorsData, CSVManager.RecordsToCSV(data).toString());
-
-            long totalTime = System.currentTimeMillis() - startTime;
-
-            OutputEvent("Total saving time: " + totalTime + " ms");
-
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-
-    }
 
     // interation with the watch procecdures
 
@@ -437,132 +386,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }).start();
     }
 
-    public byte[] FileToBytes(File file) {
 
-        int size = (int) file.length();
-        byte[] bytes = new byte[size];
-
-        try {
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-            buf.read(bytes, 0, bytes.length);
-            buf.close();
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return bytes;
-    }
-
-    // Returns String which is a server response
-    public void UploadFileToServer(File fileToUpload, String uploadUrl) {
-
-        if (!fileToUpload.exists()){
-            return;
-        }
-
-        final File file = fileToUpload;
-        final String serverurl = uploadUrl;
-
-        /*StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);*/
-
-        OutputEvent("Starting to sync with server ... ");
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-
-                    // Static stuff:
-
-                    String attachmentName = "file";
-                    String attachmentFileName = file.getName();
-                    String crlf = "\r\n";
-                    String twoHyphens = "--";
-                    String boundary = "*****";
-
-                    //Setup the request:
-
-                    HttpURLConnection httpUrlConnection = null;
-                    URL url = new URL(serverurl);
-                    httpUrlConnection = (HttpURLConnection) url.openConnection();
-                    httpUrlConnection.setUseCaches(false);
-                    httpUrlConnection.setDoOutput(true);
-
-                    httpUrlConnection.setRequestMethod("POST");
-                    httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
-                    httpUrlConnection.setRequestProperty("Cache-Control", "no-cache");
-                    httpUrlConnection.setRequestProperty(
-                            "Content-Type", "multipart/form-data;boundary=" + boundary);
-
-                    // Start content wrapper:
-
-                    DataOutputStream request = new DataOutputStream(
-                            httpUrlConnection.getOutputStream());
-
-                    request.writeBytes(twoHyphens + boundary + crlf);
-                    request.writeBytes("Content-Disposition: form-data; name=\"" +
-                            attachmentName + "\";filename=\"" +
-                            attachmentFileName + "\"" + crlf);
-                    request.writeBytes(crlf);
-
-                    // read all file bytes
-
-                    byte[] filecontents = FileToBytes(file);
-
-                    // end content wrapper
-
-                    request.write(filecontents);
-
-                    request.writeBytes(crlf);
-                    request.writeBytes(twoHyphens + boundary +
-                            twoHyphens + crlf);
-
-                    // flush the output buffer
-
-                    request.flush();
-                    request.close();
-
-                    // Get server response:
-
-                    InputStream responseStream = new
-                            BufferedInputStream(httpUrlConnection.getInputStream());
-
-                    BufferedReader responseStreamReader =
-                            new BufferedReader(new InputStreamReader(responseStream));
-
-                    String line = "";
-                    StringBuilder stringBuilder = new StringBuilder();
-
-                    while ((line = responseStreamReader.readLine()) != null) {
-                        stringBuilder.append(line).append("\n");
-                    }
-                    responseStreamReader.close();
-
-                    String response = stringBuilder.toString();
-
-                    OutputEvent("Sent " + filecontents.length + " bytes. Server responded: " + response);
-
-                    // release resources:
-
-                    responseStream.close();
-                    httpUrlConnection.disconnect();
-
-                } catch (Exception ex) {
-                    OutputEvent("Exception during sync: " + ex.toString());
-                }
-
-
-            }
-        }).start();
-
-
-    }
 
     // Magic that is supposed to keep the process running on the Android v 4.4 even
     // after the app is swiped away; seems to be a bug of this android version. GJ Google
@@ -585,19 +409,16 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         super.onTaskRemoved(rootIntent);
     }
 
-    // a simple wrapper around UploadFileToServer
-    public void UploadUserFileToServer(File file, String uploadUrl){
-        String completeUrl = uploadUrl + UserID;
-        UploadFileToServer(file, completeUrl);
-    }
+
 
     public void ShareDataWithServer() {
 
-        UploadUserFileToServer(sleepData, uploadUrl);
-
-        for (int i = 0; i < 7; i++){
-            UploadUserFileToServer(getSensorsFile(i), uploadUrl);
+        ArrayList<File> files = DataStorageManager.GetAllFilesToUpload(UserID, 7);
+        for (File file : files) {
+            UploadingManager.UploadUserFileToServer(file, uploadUrl, UserID);
         }
+
+        OutputEvent("Sent data files to server");
 
     }
 
@@ -633,5 +454,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             Log.d(tag, message);
         }
     }
+
+
 
 }

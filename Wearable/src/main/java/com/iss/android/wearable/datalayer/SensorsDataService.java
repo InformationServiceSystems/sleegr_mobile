@@ -65,6 +65,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             EXTRA_HR = "extra_hr",
             TAG = "MainActivity",
             CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb",
+            UPDATE_TIMER_VALUE="update the timer value",
             NEW_MESSAGE_AVAILABLE = "log the output";
     private static final UUID UUID_HRS =
             UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb"),
@@ -78,7 +79,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     public static SensorsDataService itself;
     private final BluetoothGattCallback mGattCallback;
     public ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
-    public boolean allowHRM = false;
+
     int[] sensorIDs = new int[]{Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE};//,
     PowerManager.WakeLock wakeLock = null;
     // this wakes CPU for sensor measuring
@@ -86,7 +87,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     //int [] sensorIDs = new int[]{ Sensor.TYPE_SIGNIFICANT_MOTION};
     TimerTask timerTask = null;
     Timer timer = null;
-    File mutexFile = new File(Environment.getExternalStorageDirectory(), "/mutex_iss_package.bin");
+    File mutexFile = new File(Environment.getExternalStorageDirectory(), "/triathlon_state.backup");
     File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon_iss_package.bin");
     BluetoothDevice hrmDevice = null;
     BluetoothGatt mBluetoothGatt = null;
@@ -96,7 +97,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     BluetoothGattCharacteristic batteryLevelCharacteristic = null;
 
     boolean SleepTrackingStopped = false;
-    private int SamplingRateMS = 10000;
+    private int SamplingRate = 3; // in secs
     private long TrainingStart;
     private int UserID = 0;
     private SensorManager mSensorManager;
@@ -116,7 +117,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             recordedSensorTypes.remove(event.sensor.getType());
             mSensorManager.unregisterListener(sensorEventListener, event.sensor);
 
-            AddNewData(UserID, event.sensor.getType(), GetTimeNow(), null, event.values[0], event.values[1], event.values[2]);
+            AddNewData(UserID, event.sensor.getType(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2]);
 
             if (recordedSensorTypes.isEmpty()) {
                 if (wakeLock.isHeld()) {
@@ -237,7 +238,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                     int result = ReadHeartRateData(characteristic);
 
-                    AddNewData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), null, result, 0, 0);
+                    AddNewData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), currentState, result, 0, 0);
 
                     sendHR(result);
 
@@ -307,7 +308,38 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    int timerTime = 0;
+
+    public void TimerEvent(){
+
+        timerTime = timerTime + 1;
+
+        // fire this event only with some interval in seconds
+        if (timerTime % SamplingRate == 0){
+            ResetSensors();
+        }
+
+        SendTimerTime(timerTime / 60, timerTime % 60);
+
+        if (timerTime > timerTimeout){
+            SwitchSportsAction(currentState);
+        }
+
+
+    }
+
+    public void SendTimerTime(int minutes, int seconds){
+
+        Intent intent = new Intent(this.UPDATE_TIMER_VALUE);
+        intent.putExtra("minutes", minutes);
+        intent.putExtra("seconds", seconds);
+        sendBroadcast(intent);
+
+    }
+
     public void ResetSensors() {
+
+
 
         if (isInitialising) {
             return;
@@ -338,9 +370,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             recordedSensorTypes.put(sensor, 1);
         }
 
-        if (allowHRM) {
-            recordedSensorTypes.put(Sensor.TYPE_HEART_RATE, 1);
-        }
+
+        recordedSensorTypes.put(Sensor.TYPE_HEART_RATE, 1);
+
 
         StopSleepTracking();
 
@@ -469,45 +501,75 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    public void SwitchHRM() {
+    public static  String [] GetAllStates(){
 
-        if (mBluetoothAdapter == null) {
-            OutputEvent("Where is BT adapter?");
-            return;
+        return new String[] {
+                "Resting",
+                "Swimming",
+                "Cycling",
+                "Running",
+                "Athletics"
+        };
+
+    }
+
+    String currentState = "Idle";
+
+    int timerTimeout = 60*60*24;
+
+    int COOLING_MEASUREMENT_TIME = 60 * 60; // cooling is measured for 60 minutes
+    int RESTING_MEASUREMENT_TIME = 60 * 5; // measure heart rate for 5 min
+    int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
+
+    public void SwitchSportsAction( String action ) {
+
+        if (action.equals("Idle")){
+            return; // this is needed to correctly recover from the app crash
         }
 
-        if (!allowHRM) {
-            SwitchHRM_ON();
-        } else {
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        if (!currentState.equals("Idle")){
 
-            if (mBluetoothGatt != null) {
-                mBluetoothGatt.close();
-                mBluetoothGatt = null;
-                hrmDevice = null;
+            if (currentState.equals("Resting") || currentState.contains("Cooling")){
+                // stop recording cooling / resting prematurely
+                StopMeasuring();
+                currentState = "Idle";
+            } else {
+                // start measuring cooling down
+                currentState = currentState + ":Cooling";
+                timerTime = 0;
+                timerTimeout = COOLING_MEASUREMENT_TIME; // measure cooling for 1 hour
+                OutputEvent("Cooling down ...");
+            }
+        }
+        else { // switch from idle state to measurement
+
+            StartMeasuring();
+
+            if (action.equals("Resting")){
+                // stop recording cooling / resting prematurely
+                timerTimeout = RESTING_MEASUREMENT_TIME; // measure cooling for 1 hour
+            } else if (action.contains("Cooling"))
+            {
+                timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
+                OutputEvent("Cooling down ...");
+            }
+            else{
+                // start training
+                timerTimeout = TRAINING_TIMEOUT;
             }
 
-            OutputEvent("HRM off");
-
-            timer.cancel();
-        }
-
-        allowHRM = !allowHRM;
-        if (allowHRM) {
-            MainActivity.itself.startTimer();
-        } else {
-            MainActivity.itself.stopTimer();
+            currentState = action;
         }
 
         try {
-            Serializer.SerializeToFile(allowHRM, mutexFile);
+            Serializer.SerializeToFile(currentState, mutexFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
 
-    public void SwitchHRM_ON() {
+    void StartMeasuring(){
 
         GetHRMid();
 
@@ -525,13 +587,48 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         OutputEvent("Searching HRM ... ");
         timerTask = new TimerTask() {
             public void run() {
-                ResetSensors();
+                TimerEvent();
             }
         };
 
         timer = new Timer();
-        TrainingStart = System.currentTimeMillis() / 1000; // in seconds
-        timer.schedule(timerTask, 0, SamplingRateMS);
+        //TrainingStart = System.currentTimeMillis() / 1000; // in seconds
+        timerTime = 0;
+
+        if (!wakeLock.isHeld()) {
+            wakeLock.acquire();
+        }
+
+        timer.schedule(timerTask, 0, 1000);
+
+    }
+
+    void StopMeasuring(){
+
+        wakeLock.release();
+
+        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        if (mBluetoothGatt != null) {
+            mBluetoothGatt.close();
+            mBluetoothGatt = null;
+            hrmDevice = null;
+        }
+
+        OutputEvent("HRM off");
+
+        if (timer != null) {
+            timer.cancel();
+        }
+    }
+
+    public void  genData(){
+
+        for (int i = 0; i < 1000; i  ++){
+
+            AddNewData(1,21, GetTimeNow(), currentState, 1, 3.123f, 3 );
+
+        }
+
     }
 
     public void SendCollectedData() {
@@ -544,6 +641,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                         Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
                 List<Node> nodes = result.getNodes();
                 String nodeId = null;
+
+                //genData();
 
                 byte[] data = null;
 
@@ -744,25 +843,23 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         if (!mutexFile.exists()) {
             try {
-                Serializer.SerializeToFile(allowHRM, mutexFile);
+                Serializer.SerializeToFile(currentState, mutexFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
         try {
-            allowHRM = (boolean) Serializer.DeserializeFromFile(mutexFile);
-        } catch (IOException e) {
+            //currentState = (String) Serializer.DeserializeFromFile(mutexFile);
+            //SwitchSportsAction(currentState);
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            OutputEvent(e.toString());
         }
 
         //OutputEvent("Mutex state: " + allowHRM);
 
-        if (allowHRM) {
-            SwitchHRM_ON();
-        }
+
 
     }
 

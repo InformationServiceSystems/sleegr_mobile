@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -82,7 +83,7 @@ public class MainActivity extends Activity  {
             startService(intent);
         }
 
-
+/*
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
         // start handler which starts pending-intent after Application-Crash
         // That stuff may be cool for end users, but for developers it's nasty
@@ -95,10 +96,11 @@ public class MainActivity extends Activity  {
                 System.exit(2);
 
             }
-        });
-
+        });*/
 
     }
+
+    
 
     PendingIntent pendingInt = null;
 
@@ -130,7 +132,6 @@ public class MainActivity extends Activity  {
         if (dataUpdateReceiver == null) dataUpdateReceiver = new DataUpdateReceiver();
         IntentFilter intentFilter = new IntentFilter(DataSyncService.NEW_MESSAGE_AVAILABLE);
         registerReceiver(dataUpdateReceiver, intentFilter);
-
 
     }
 
@@ -252,6 +253,22 @@ public class MainActivity extends Activity  {
         if (Log.isLoggable(tag, Log.DEBUG)) {
             Log.d(tag, message);
         }
+    }
+
+    public void onServerSync(View view){
+
+        if (DataSyncService.itself != null){
+            DataSyncService.itself.ShareDataWithServer();
+        }
+
+    }
+
+    public void onWatchSync(View view){
+
+        if (DataSyncService.itself != null){
+            DataSyncService.itself.RequestDataFromWatch();
+        }
+
     }
 
 }

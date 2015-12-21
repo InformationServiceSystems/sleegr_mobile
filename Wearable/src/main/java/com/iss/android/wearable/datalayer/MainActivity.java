@@ -50,8 +50,10 @@ import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -125,8 +127,8 @@ public class MainActivity extends Activity {
                 // Need to convert the Int to String or else the app crashes. GJ Google.
                 HeartRate.setText(Integer.toString(result));
                 try {
-                    series.appendData(new DataPoint(current_time, result), true, 100);
-                    current_time += 10;
+                    series.appendData(new DataPoint(current_time, result), true, 240);
+                    current_time += 1;
                 } catch (Exception ex) {
 
                     String str = ex.toString();
@@ -139,6 +141,11 @@ public class MainActivity extends Activity {
                 final TextView MessageLabel = (TextView) findViewById(R.id.messageLabel);
                 String message = intent.getStringExtra("message");
                 MessageLabel.setText(message);
+            }else if (intent.getAction().equals(SensorsDataService.UPDATE_TIMER_VALUE)) {
+                String newtime = String.valueOf( intent.getIntExtra("minutes",0) )
+                        + ":" + StringUtils.leftPad(Long.toString(intent.getIntExtra("seconds",0)), 2, "0");
+                TextView timetext = (TextView) findViewById(R.id.timer);
+                timetext.setText(newtime);
             }
         }
     };
@@ -151,7 +158,36 @@ public class MainActivity extends Activity {
         Log.d("MainActivity", "is now being created");
 
         super.onCreate(b);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         itself = this;
+
+        // needs to be the first thing to happen
+        initializeSelfRestarting();
+
+        mHandler = new Handler();
+        setContentView(R.layout.main_activity);
+
+        initializeGraph();
+
+        initializeSWBatteryChecker();
+
+        initializeSportsActions();
+
+        initializeScreenOn();
+
+        RegisterBroadcastsReceiver();
+
+        Log.d("MainActivity", "has been created");
+
+    }
+
+    private void initializeScreenOn(){
+
+
+
+    }
+
+    private void initializeSelfRestarting(){
 
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
         // Intent that kills the app after a certain amount of time after the app has crashed
@@ -176,8 +212,22 @@ public class MainActivity extends Activity {
             }
         });
 
-        mHandler = new Handler();
-        setContentView(R.layout.main_activity);
+    }
+
+    private AdapterView.OnItemSelectedListener OnCatSpinnerCL = new AdapterView.OnItemSelectedListener() {
+        public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+
+            ((TextView) parent.getChildAt(0)).setTextColor(Color.BLUE);
+            ((TextView) parent.getChildAt(0)).setTextSize(5);
+
+        }
+
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    };
+
+    private void initializeGraph(){
 
         GraphView graph = (GraphView) findViewById(R.id.heartRateGraph);
 
@@ -188,9 +238,9 @@ public class MainActivity extends Activity {
         graph.getViewport().setMaxY(200);
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(120);
+        graph.getViewport().setMaxX(240);
         StaticLabelsFormatter staticLabelsFormatter = new StaticLabelsFormatter(graph);
-        staticLabelsFormatter.setHorizontalLabels(new String[]{"120", "60", "0"});
+        staticLabelsFormatter.setHorizontalLabels(new String[]{"240", "120", "0"});
         graph.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
         graph.getGridLabelRenderer().setGridColor(Color.BLACK);
         graph.getGridLabelRenderer().setHighlightZeroLines(true);
@@ -200,11 +250,29 @@ public class MainActivity extends Activity {
         graph.addSeries(series);
         graph.setTitleColor(Color.BLACK);
 
-        initializeSWBatteryChecker();
+    }
 
-        RegisterBroadcastsReceiver();
 
-        Log.d("MainActivity", "has been created");
+    private void initializeSportsActions(){
+
+
+
+
+        String [] arraySpinner = SensorsDataService.GetAllStates();
+        Spinner s = (Spinner) findViewById(R.id.sportsAction);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, arraySpinner);
+        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item,arraySpinner);
+        s.setAdapter(adapter);
+
+
+        // monstrosity below is needed to set the color of selected sports action
+        AdapterView.OnItemSelectedListener colorSpinnerListener = new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                ((TextView) parent.getChildAt(0)).setTextColor(Color.BLACK);
+            }
+            public void onNothingSelected(AdapterView<?> parent) { }
+        };
+        s.setOnItemSelectedListener(colorSpinnerListener);
 
     }
 
@@ -215,6 +283,7 @@ public class MainActivity extends Activity {
         filter.addAction(SensorsDataService.ACTION_BATTERY_STATUS);
         filter.addAction(SensorsDataService.ACTION_HR);
         filter.addAction(SensorsDataService.NEW_MESSAGE_AVAILABLE);
+        filter.addAction(SensorsDataService.UPDATE_TIMER_VALUE);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(br, filter);
 
@@ -316,14 +385,14 @@ public class MainActivity extends Activity {
         if (SensorsDataService.itself != null) {
             ImageButton btn = (ImageButton) findViewById(R.id.switchTrainingButton);
             ImageButton colorbtn = (ImageButton) findViewById(R.id.colorButton);
-            String outputString = SensorsDataService.itself.allowHRM ? "Stop training" : "Start training";
+            //String outputString = SensorsDataService.itself.allowHRM ? "Stop training" : "Start training";
             //Only if the button is a TextButton
             //btn.setText(outputString);
             TextView HRLabel = (TextView) findViewById(R.id.heartRateLabel);
             Resources res = getResources();
             Drawable Selected_Round_Button = res.getDrawable(R.drawable.selectedroundbutton);
             Drawable Round_Button = res.getDrawable(R.drawable.roundbutton);
-            if (outputString.equals("Start training")) {
+            /*if (outputString.equals("Start training")) {
                 HRLabel.setText("HR");
             }
             if (SensorsDataService.itself.allowHRM) {
@@ -333,7 +402,7 @@ public class MainActivity extends Activity {
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 series.resetData(new DataPoint[]{});
                 colorbtn.setBackground(Round_Button);
-            }
+            }*/
 
 
         }
@@ -343,8 +412,13 @@ public class MainActivity extends Activity {
     public void onClicked(View view) {
         switch (view.getId()) {
             case R.id.switchTrainingButton:
+
+                // get selected item
+                Spinner mySpinner=(Spinner) findViewById(R.id.sportsAction);
+                String spinnerText = mySpinner.getSelectedItem().toString();
+
                 if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchHRM();
+                    SensorsDataService.itself.SwitchSportsAction( spinnerText );
                     UpdateButtonText();
                 }
                 Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
@@ -396,11 +470,13 @@ public class MainActivity extends Activity {
             if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
                 UpdateButtonText();
             }
+
+
         }
     }
 
     // Need to declare the handler here so it can be called off later
-    Handler handler = new Handler();
+   /* Handler handler = new Handler();
     long[] time = {0, 0};
     Runnable runnable = new Runnable() {
         @Override
@@ -431,7 +507,7 @@ public class MainActivity extends Activity {
 
     void stopTimer() {
         handler.removeCallbacks(runnable);
-    }
+    }*/
 
 }
 

@@ -14,6 +14,15 @@
 -->
 
 <resources>
+
+    <string-array name="sports_actions_list">
+        <item>Morning / Evening HR</item>
+        <item>Running</item>
+        <item>Cycling</item>
+        <item>Swimming</item>
+        <item>Athletics</item>
+    </string-array>
+
     <string name="start_wearable_activity">Start Wearable Activity</string>
     <string name="start">Start</string>
     <string name="take_photo">Take a Photo</string>
@@ -26,4 +35,5 @@
     <string name="FacebookButtonText">Login via Facebook</string>
     <string name="GoogleButtonText">Login via Google</string>
     <string name="EMailButtonText">Login via E-Mail</string>
+
 </resources>
