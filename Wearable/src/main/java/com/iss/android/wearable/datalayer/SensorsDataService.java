@@ -64,6 +64,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             EXTRA_STATUS = "extra_status",
             EXTRA_HR = "extra_hr",
             TAG = "MainActivity",
+            ASK_USER_FOR_RPE = "show rpe dialog",
             CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb",
             UPDATE_TIMER_VALUE="update the timer value",
             NEW_MESSAGE_AVAILABLE = "log the output";
@@ -75,6 +76,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                     UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb"),
             Battery_Level_UUID =
                     UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
+
     String UserHRM = "";
     public static SensorsDataService itself;
     private final BluetoothGattCallback mGattCallback;
@@ -309,6 +311,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     int timerTime = 0;
+    String currentState = "Idle";
+    int timerTimeout = 60*60*24;
+    int COOLING_MEASUREMENT_TIME = 60 * 60; // cooling is measured for 60 minutes
+    int RESTING_MEASUREMENT_TIME = 60 * 5; // measure heart rate for 5 min
+    int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
+    int COOLING_RPE_TIME = 10;
 
     public void TimerEvent(){
 
@@ -325,8 +333,17 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             BringIntoState("Idle");
         }
 
+        if ((timerTime == COOLING_RPE_TIME) && currentState.contains("Cooling")){
+            AskUserForRPE();
+        }
+
         OutputCurrentState();
 
+    }
+
+    private void AskUserForRPE() {
+        Intent intent = new Intent(this.ASK_USER_FOR_RPE);
+        sendBroadcast(intent);
     }
 
     public void OutputCurrentState(){
@@ -532,13 +549,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    String currentState = "Idle";
 
-    int timerTimeout = 60*60*24;
-
-    int COOLING_MEASUREMENT_TIME = 60 * 60; // cooling is measured for 60 minutes
-    int RESTING_MEASUREMENT_TIME = 60 * 5; // measure heart rate for 5 min
-    int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
 
     public void SwitchSportsAction( String action ) {
 
@@ -976,5 +987,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             StopSleep();
         }
 
+    }
+
+    public void AddTrainingScore(int position) {
+        AddNewData(0,1024,GetTimeNow(),currentState,position,0,0);
     }
 }

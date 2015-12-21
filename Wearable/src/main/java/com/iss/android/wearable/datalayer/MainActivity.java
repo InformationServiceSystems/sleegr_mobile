@@ -139,6 +139,13 @@ public class MainActivity extends Activity {
 
                 }
 
+            } else if (intent.getAction().equals(SensorsDataService.ASK_USER_FOR_RPE)) {
+
+                Intent myIntent = new Intent(MainActivity.this, SelectRPE.class);
+                startActivity(myIntent);
+                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(1000);
+
             } else if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
                 // prints out the Outputevent messages
                 final TextView MessageLabel = (TextView) findViewById(R.id.messageLabel);
@@ -315,6 +322,7 @@ public class MainActivity extends Activity {
         filter.addAction(SensorsDataService.ACTION_BATTERY_STATUS);
         filter.addAction(SensorsDataService.ACTION_HR);
         filter.addAction(SensorsDataService.NEW_MESSAGE_AVAILABLE);
+        filter.addAction(SensorsDataService.ASK_USER_FOR_RPE);
         filter.addAction(SensorsDataService.UPDATE_TIMER_VALUE);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(br, filter);
@@ -359,7 +367,7 @@ public class MainActivity extends Activity {
                 warning = "HRM Battery Level at 5%";
                 break;
         }
-        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(100);
         builder.setMessage(warning)
                 .setTitle(R.string.battery_warning_title)
