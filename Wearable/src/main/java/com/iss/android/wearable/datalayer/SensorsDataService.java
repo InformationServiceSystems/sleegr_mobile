@@ -322,9 +322,26 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         SendTimerTime(timerTime / 60, timerTime % 60);
 
         if (timerTime > timerTimeout){
-            SwitchSportsAction(currentState);
+            BringIntoState("Idle");
         }
 
+        OutputCurrentState();
+
+    }
+
+    public void OutputCurrentState(){
+
+        if (currentState.equals("Resting")){
+            OutputEvent(currentState);
+            return;
+        }
+
+        if (currentState.contains("Cooling")){
+            OutputEvent("Cooling down");
+            return;
+        }
+
+        OutputEvent("Training");
 
     }
 
@@ -354,7 +371,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             mSensorManager.unregisterListener(sensorEventListener, androidSensor);
 
             if (androidSensor.getFifoReservedEventCount() > 0) {
-                mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL, 120);
+                //mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL, 120);
+                // there was some crashing going on, just in case I try the app without batching to see if bug persists
+                mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL);
             } else {
                 mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL);
             }
@@ -523,49 +542,58 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     public void SwitchSportsAction( String action ) {
 
-        if (action.equals("Idle")){
-            return; // this is needed to correctly recover from the app crash
-        }
+        String newState = "";
 
         if (!currentState.equals("Idle")){
 
             if (currentState.equals("Resting") || currentState.contains("Cooling")){
                 // stop recording cooling / resting prematurely
-                StopMeasuring();
-                currentState = "Idle";
+                newState = "Idle";
             } else {
                 // start measuring cooling down
-                currentState = currentState + ":Cooling";
-                timerTime = 0;
-                timerTimeout = COOLING_MEASUREMENT_TIME; // measure cooling for 1 hour
+                newState = currentState + ":Cooling";
                 OutputEvent("Cooling down ...");
             }
         }
         else { // switch from idle state to measurement
 
-            StartMeasuring();
-
-            if (action.equals("Resting")){
-                // stop recording cooling / resting prematurely
-                timerTimeout = RESTING_MEASUREMENT_TIME; // measure cooling for 1 hour
-            } else if (action.contains("Cooling"))
-            {
-                timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
-                OutputEvent("Cooling down ...");
-            }
-            else{
-                // start training
-                timerTimeout = TRAINING_TIMEOUT;
-            }
-
-            currentState = action;
+            newState = action;
         }
 
+        BringIntoState(newState);
+
         try {
-            Serializer.SerializeToFile(currentState, mutexFile);
+            Serializer.SerializeToFile(newState, mutexFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    private void BringIntoState(String state) {
+
+        currentState = state;
+
+        StopMeasuring();
+
+        if (state.equals("Idle")){
+            return;
+        }
+
+        if (state.equals("Resting")){
+            // stop recording cooling / resting prematurely
+            timerTimeout = RESTING_MEASUREMENT_TIME; // measure cooling for 1 hour
+        } else if (state.contains("Cooling"))
+        {
+            timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
+            OutputEvent("Cooling down ...");
+        }
+        else{
+            // start training
+            timerTimeout = TRAINING_TIMEOUT;
+        }
+
+        StartMeasuring();
 
     }
 
@@ -605,9 +633,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     void StopMeasuring(){
 
-        wakeLock.release();
+        if (wakeLock.isHeld()) {
+            wakeLock.release();
+        }
 
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
+
         if (mBluetoothGatt != null) {
             mBluetoothGatt.close();
             mBluetoothGatt = null;
@@ -850,8 +881,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
 
         try {
-            //currentState = (String) Serializer.DeserializeFromFile(mutexFile);
-            //SwitchSportsAction(currentState);
+            currentState = (String) Serializer.DeserializeFromFile(mutexFile);
+            BringIntoState(currentState);
         } catch (Exception e) {
             e.printStackTrace();
             OutputEvent(e.toString());

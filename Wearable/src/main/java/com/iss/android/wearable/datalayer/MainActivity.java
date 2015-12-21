@@ -43,6 +43,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.hardware.Sensor;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,6 +54,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -65,6 +67,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * The main activity with a view pager, containing three pages:<p/>
@@ -127,7 +130,7 @@ public class MainActivity extends Activity {
                 // Need to convert the Int to String or else the app crashes. GJ Google.
                 HeartRate.setText(Integer.toString(result));
                 try {
-                    series.appendData(new DataPoint(current_time, result), true, 240);
+                    series.appendData(new DataPoint(current_time, result), true, 120);
                     current_time += 1;
                 } catch (Exception ex) {
 
@@ -158,7 +161,6 @@ public class MainActivity extends Activity {
         Log.d("MainActivity", "is now being created");
 
         super.onCreate(b);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         itself = this;
 
         // needs to be the first thing to happen
@@ -181,9 +183,42 @@ public class MainActivity extends Activity {
 
     }
 
+    private void showCurrentAppState(){
+
+        if (SensorsDataService.itself == null){
+            return;
+        }
+
+        String mark = SensorsDataService.itself.currentState;
+
+        int idx = mark.indexOf(":");
+
+        if (idx >= 0) {
+            mark = mark.substring(0, idx);
+        }
+
+        int selectedIndex = Arrays.asList(SensorsDataService.GetAllStates()).indexOf(mark);
+        Spinner s = (Spinner) findViewById(R.id.sportsAction);
+        s.setSelection(selectedIndex);
+
+    }
+
+    public static void selectSpinnerItemByValue(Spinner spnr, String value)
+    {
+        SimpleCursorAdapter adapter = (SimpleCursorAdapter) spnr.getAdapter();
+        for (int position = 0; position < adapter.getCount(); position++)
+        {
+            if(value.equals(adapter.getItemId(position)) )
+            {
+                spnr.setSelection(position);
+                return;
+            }
+        }
+    }
+
     private void initializeScreenOn(){
 
-
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     }
 
@@ -238,9 +273,9 @@ public class MainActivity extends Activity {
         graph.getViewport().setMaxY(200);
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(240);
+        graph.getViewport().setMaxX(120);
         StaticLabelsFormatter staticLabelsFormatter = new StaticLabelsFormatter(graph);
-        staticLabelsFormatter.setHorizontalLabels(new String[]{"240", "120", "0"});
+        staticLabelsFormatter.setHorizontalLabels(new String[]{"120", "60", "0"});
         graph.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
         graph.getGridLabelRenderer().setGridColor(Color.BLACK);
         graph.getGridLabelRenderer().setHighlightZeroLines(true);
@@ -254,9 +289,6 @@ public class MainActivity extends Activity {
 
 
     private void initializeSportsActions(){
-
-
-
 
         String [] arraySpinner = SensorsDataService.GetAllStates();
         Spinner s = (Spinner) findViewById(R.id.sportsAction);
@@ -365,6 +397,8 @@ public class MainActivity extends Activity {
         }*/
 
         RegisterBroadcastsReceiver();
+
+        showCurrentAppState();
 
     }
 

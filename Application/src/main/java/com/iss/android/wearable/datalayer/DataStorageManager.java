@@ -68,13 +68,7 @@ public class DataStorageManager {
 
     }
 
-    public static String getKey(ISSRecordData record){
-
-        String mark = record.ExtraData;
-
-        if (mark == null){
-            return null;
-        }
+    public static String getStateKey(String mark){
 
         int idx = mark.indexOf(":");
 
@@ -83,6 +77,18 @@ public class DataStorageManager {
         }
 
         return mark.substring(0, idx);
+
+    }
+
+    public static String getKey(ISSRecordData record){
+
+        String mark = record.ExtraData;
+
+        if (mark == null){
+            return null;
+        }
+
+        return  getStateKey(mark);
 
     }
 
