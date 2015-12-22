@@ -44,7 +44,7 @@ public class SyncAlarm extends BroadcastReceiver
         // With setInexactRepeating(), you have to use one of the AlarmManager interval
         // constants--in this case, AlarmManager.INTERVAL_DAY.
         am.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                1, broadcast); // AlarmManager.INTERVAL_HOUR
+                AlarmManager.INTERVAL_HOUR, broadcast); // AlarmManager.INTERVAL_HOUR
 
 
     }

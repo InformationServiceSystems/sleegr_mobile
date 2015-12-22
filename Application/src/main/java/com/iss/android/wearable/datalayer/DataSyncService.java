@@ -391,7 +391,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     // Magic that is supposed to keep the process running on the Android v 4.4 even
     // after the app is swiped away; seems to be a bug of this android version. GJ Google
     // http://stackoverflow.com/questions/20677781/in-android-4-4-swiping-app-out-of-recent-tasks-permanently-kills-application-wi
-    public void onTaskRemoved(Intent rootIntent) {
+    /*public void onTaskRemoved(Intent rootIntent) {
         Log.e("FLAGX : ", ServiceInfo.FLAG_STOP_WITH_TASK + "");
         Intent restartServiceIntent = new Intent(getApplicationContext(),
                 this.getClass());
@@ -407,7 +407,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 restartServicePendingIntent);
 
         super.onTaskRemoved(rootIntent);
-    }
+    }*/
 
 
 

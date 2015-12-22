@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -136,6 +137,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     };
     private BluetoothAdapter mBluetoothAdapter;
     private boolean isInitialising = true;
+    private boolean hrmDisconnected = true;
     // Device scan callback.
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
@@ -162,6 +164,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                     }).run();
                 }
             };
+    public boolean needToShowRPE = false;
 
     {
         mGattCallback = new BluetoothGattCallback() {
@@ -171,9 +174,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     mBluetoothGatt.discoverServices();
                     OutputEvent("HRM connected");
-                    //mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    hrmDisconnected = false;
+                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     OutputEvent("HRM disconnected");
+                    hrmDisconnected = true;
                     //mBluetoothAdapter.startLeScan(mLeScanCallback);
                 }
             }
@@ -316,11 +321,16 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     int COOLING_MEASUREMENT_TIME = 60 * 60; // cooling is measured for 60 minutes
     int RESTING_MEASUREMENT_TIME = 60 * 5; // measure heart rate for 5 min
     int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
-    int COOLING_RPE_TIME = 10;
+    int COOLING_RPE_TIME = 60 * 15;
 
     public void TimerEvent(){
 
         timerTime = timerTime + 1;
+
+        // this checks for missing hrm
+        if ((timerTime % 60 == 0) && (hrmDisconnected)){
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+        }
 
         // fire this event only with some interval in seconds
         if (timerTime % SamplingRate == 0){
@@ -342,8 +352,21 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     private void AskUserForRPE() {
+
+        Intent myIntent = new Intent(this, SelectRPE.class);
+        myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(myIntent);
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(1000);
+
+        /*SensorsDataService.itself.needToShowRPE = true;
+
+        Intent dialogIntent = new Intent(this, MainActivity.class);
+        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(dialogIntent);
+
         Intent intent = new Intent(this.ASK_USER_FOR_RPE);
-        sendBroadcast(intent);
+        sendBroadcast(intent);*/
     }
 
     public void OutputCurrentState(){
@@ -615,13 +638,13 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
         mBluetoothAdapter.startLeScan(mLeScanCallback);
 
-        mHandler.postDelayed(new Runnable() {
+        /*mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 mBluetoothAdapter.stopLeScan(mLeScanCallback);
                 //OutputEvent("HRM search stop.");
             }
-        }, 10000);
+        }, 10000);*/
 
         OutputEvent("Searching HRM ... ");
         timerTask = new TimerTask() {
@@ -991,5 +1014,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     public void AddTrainingScore(int position) {
         AddNewData(0,1024,GetTimeNow(),currentState,position,0,0);
+        needToShowRPE = false;
     }
 }

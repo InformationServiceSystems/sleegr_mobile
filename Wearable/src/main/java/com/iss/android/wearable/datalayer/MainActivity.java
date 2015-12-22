@@ -138,13 +138,9 @@ public class MainActivity extends Activity {
                     str = str + "d";
 
                 }
-
             } else if (intent.getAction().equals(SensorsDataService.ASK_USER_FOR_RPE)) {
 
-                Intent myIntent = new Intent(MainActivity.this, SelectRPE.class);
-                startActivity(myIntent);
-                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(1000);
+                CheckToShowRPE();
 
             } else if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
                 // prints out the Outputevent messages
@@ -186,7 +182,25 @@ public class MainActivity extends Activity {
 
         RegisterBroadcastsReceiver();
 
+        CheckToShowRPE();
+
         Log.d("MainActivity", "has been created");
+
+    }
+
+    void CheckToShowRPE(){
+
+        if (SensorsDataService.itself == null){
+            return;
+        }
+
+        if (! SensorsDataService.itself.needToShowRPE ){
+            return;
+        }
+
+
+
+        SensorsDataService.itself.needToShowRPE = false;
 
     }
 
@@ -351,6 +365,7 @@ public class MainActivity extends Activity {
         }, 0);
     }
 
+
     private void displayBatteryWarning(int warned) {
         // Display a cancelable warning that the HRM battery is running low.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -359,6 +374,7 @@ public class MainActivity extends Activity {
         switch (warned) {
             case 1:
                 warning = "HRM Battery Level at 15%";
+
                 break;
             case 2:
                 warning = "HRM Battery Level at 10%";
