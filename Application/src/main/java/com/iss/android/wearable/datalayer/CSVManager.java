@@ -56,6 +56,7 @@ public class CSVManager {
             out.close();
         } catch (IOException e) {
             //exception handling left as an exercise for the reader
+            DataSyncService.itself.OutputEvent("error occured: "  + e.toString());
         }
 
     }

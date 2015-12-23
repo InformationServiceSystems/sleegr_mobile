@@ -105,7 +105,8 @@ public class DataStorageManager {
             File dayFolder = new File( userDataFolder, getDayFromToday(0));
 
             if(!dayFolder.exists()){
-                dayFolder.mkdir();
+                boolean result = dayFolder.mkdir();
+                //DataSyncService.itself.OutputEvent("create folder: " + result);
             }
 
             ArrayList<ISSRecordData> accumulator = new ArrayList<ISSRecordData>();
@@ -120,6 +121,7 @@ public class DataStorageManager {
                             new File(dayFolder, sensorsTemplate + "_" + previousKey + ".csv"),
                             CSVManager.RecordsToCSV(accumulator).toString()
                     );
+                    previousKey = key;
                     accumulator.clear();
                 }
 
