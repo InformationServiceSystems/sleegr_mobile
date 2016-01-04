@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -61,10 +62,16 @@ public class DataStorageManager {
 
     }
 
+    public static String getProperUserID(String UserID){
+
+        return UserID.replace("@", "_at_");
+
+    }
+
     public static String getFileTemplate(int dayoffset, String UserID){
 
-        String userIDstring = UserID.replace("@", "_at_");
-        return userIDstring +  "-" + getDayFromToday(dayoffset);
+
+        return getProperUserID(UserID) +  "-" + getDayFromToday(dayoffset);
 
     }
 
@@ -92,21 +99,45 @@ public class DataStorageManager {
 
     }
 
+    public static void SaveBinnedData(ArrayList<ISSRecordData> accumulator, String UserID, String activityType){
+
+        // get date of first record
+        Calendar cal = Calendar.getInstance();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
+
+        try {
+            cal.setTime(sdf.parse(accumulator.get(0).Timestamp));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        cal.add(Calendar.HOUR, -4); // this is in case someone goes to sleep at like around 3 am, we assume that it still corresponds to previous day
+
+        SimpleDateFormat folderFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String folderName = folderFormat.format(cal.getTime());
+
+        // create folder for the time, if not created already
+        File dayFolder = new File( userDataFolder, folderName);
+
+        if(!dayFolder.exists()){
+            boolean result = dayFolder.mkdir();
+            //DataSyncService.itself.OutputEvent("create folder: " + result);
+        }
+
+        CSVManager.WriteNewCSVdata(
+                new File(dayFolder, getProperUserID(UserID) + "_" + folderName + "_" + activityType + ".csv"),
+                CSVManager.RecordsToCSV(accumulator).toString()
+        );
+
+    }
+
     public static void SaveNewDataToFile(ArrayList<ISSRecordData> data, String UserID) {
 
         try {
 
             if (data.size() < 1){
                 return;
-            }
-
-            String sensorsTemplate = getFileTemplate(0, UserID);
-
-            File dayFolder = new File( userDataFolder, getDayFromToday(0));
-
-            if(!dayFolder.exists()){
-                boolean result = dayFolder.mkdir();
-                //DataSyncService.itself.OutputEvent("create folder: " + result);
             }
 
             ArrayList<ISSRecordData> accumulator = new ArrayList<ISSRecordData>();
@@ -117,10 +148,7 @@ public class DataStorageManager {
                 String key = getKey(record);
 
                 if (!previousKey.equals(key)){
-                    CSVManager.WriteNewCSVdata(
-                            new File(dayFolder, sensorsTemplate + "_" + previousKey + ".csv"),
-                            CSVManager.RecordsToCSV(accumulator).toString()
-                    );
+                    SaveBinnedData(accumulator, UserID, previousKey);
                     previousKey = key;
                     accumulator.clear();
                 }
@@ -129,12 +157,7 @@ public class DataStorageManager {
             }
 
             if (accumulator.size() > 0){
-
-                CSVManager.WriteNewCSVdata(
-                        new File(dayFolder, sensorsTemplate + "_" + previousKey + ".csv"),
-                        CSVManager.RecordsToCSV(accumulator).toString()
-                );
-
+                SaveBinnedData(accumulator, UserID, previousKey);
             }
 
 
