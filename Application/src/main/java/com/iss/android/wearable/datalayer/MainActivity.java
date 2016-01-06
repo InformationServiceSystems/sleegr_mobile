@@ -39,8 +39,10 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 
 /**
@@ -75,6 +77,9 @@ public class MainActivity extends Activity  {
         // Stores DataItems received by the local broadcaster or from the paired watch.
         mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
         mDataItemList.setAdapter(mDataItemListAdapter);
+
+        Calendar date = new GregorianCalendar();
+        SportsSession.retrieveCsvs(date);
 
         if (DataSyncService.itself == null){
             Intent intent = new Intent(this, DataSyncService.class);

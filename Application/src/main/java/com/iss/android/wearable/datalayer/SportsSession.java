@@ -49,6 +49,7 @@ public class SportsSession {
             TableOfActivities = readCsv(f);
             for (SportsSession session : transformToSessions(TableOfActivities)) {
                 sessions.add(session);
+                printSession(session);
             }
         }
         return sessions;
@@ -62,12 +63,13 @@ public class SportsSession {
         Log.d("date: ", filename);
         File folder = new File("filename");
         File[] listOfFiles = folder.listFiles();
-
-        for (int i = 0; i < listOfFiles.length; i++) {
-            if (listOfFiles[i].isFile()) {
-                System.out.println("File " + listOfFiles[i].getName());
-            } else if (listOfFiles[i].isDirectory()) {
-                System.out.println("Directory " + listOfFiles[i].getName());
+        if (listOfFiles != null) {
+            for (int i = 0; i < listOfFiles.length; i++) {
+                if (listOfFiles[i].isFile()) {
+                    System.out.println("File " + listOfFiles[i].getName());
+                } else if (listOfFiles[i].isDirectory()) {
+                    System.out.println("Directory " + listOfFiles[i].getName());
+                }
             }
         }
 
@@ -149,7 +151,6 @@ public class SportsSession {
                                 //Ugly, but Java doesn't support nested functions. JavaScript does.
                                 Integer[] hr = heartrate.toArray(new Integer[heartrate.size()]);
                                 SportsSession session = new SportsSession(type, start, cooldown, end, hr);
-                                sessions.add(session);
                                 end = new GregorianCalendar(1, 1, 1);
                                 start = new GregorianCalendar(1, 1, 1);
                                 cooldown = new GregorianCalendar(1, 1, 1);
@@ -178,7 +179,6 @@ public class SportsSession {
                         //Still ugly af
                         Integer[] hr = heartrate.toArray(new Integer[heartrate.size()]);
                         SportsSession session = new SportsSession(type, start, cooldown, end, hr);
-                        sessions.add(session);
                         end = new GregorianCalendar(1, 1, 1);
                         start = new GregorianCalendar(1, 1, 1);
                         cooldown = new GregorianCalendar(1, 1, 1);
