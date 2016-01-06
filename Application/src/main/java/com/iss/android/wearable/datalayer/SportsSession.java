@@ -7,9 +7,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 /**
  * Created by Michael on 04.01.2016.
@@ -19,9 +22,9 @@ public class SportsSession {
     Calendar start;
     Calendar cooldown;
     Calendar end;
-    int[] heartrate;
+    Integer[] heartrate;
 
-    public SportsSession(String type, Calendar start, Calendar cooldown, Calendar end, int[] heartrate) {
+    public SportsSession(String type, Calendar start, Calendar cooldown, Calendar end, Integer[] heartrate) {
         this.type = type;
         this.start = start;
         this.cooldown = cooldown;
@@ -40,8 +43,8 @@ public class SportsSession {
         File[] ListOfCsvs = retrieveCsvs(date);
         for (File f : ListOfCsvs) {
             //read and interpret every csv file, returns a table with the following columns:
-            //1: UserID, 2: Measurement type, 3:Exact time, 4: Type of activity,
-            //5, 6, 7: Measurements
+            //0: UserID, 1: Measurement type, 2:Exact time, 3: Type of activity,
+            //4, 5, 6: Measurements
             ArrayList<String[]> TableOfActivities = new ArrayList<String[]>();
             TableOfActivities = readCsv(f);
             for (SportsSession session : transformToSessions(TableOfActivities)) {
@@ -124,7 +127,7 @@ public class SportsSession {
 
     public static ArrayList<SportsSession> transformToSessions(ArrayList<String[]> TableOfActivities) {
         ArrayList<SportsSession> sessions = new ArrayList<SportsSession>();
-        String type = TableOfActivities.get(1)[4];
+        String type = TableOfActivities.get(1)[3];
         Calendar start = new GregorianCalendar(1, 1, 1);
         Calendar cooldown = new GregorianCalendar(1, 1, 1);
         Calendar end = new GregorianCalendar(1, 1, 1);
@@ -133,36 +136,54 @@ public class SportsSession {
         for (int i = 0; i < TableOfActivities.size(); i++) {
             String[] s = TableOfActivities.get(i);
             //We're only interested in heart rate measurements atm
-            switch (s[2]) {
+            switch (s[1]) {
                 case "21":
                     //Add the heartrate value to the list of heartrate values
-                    heartrate.add(Integer.valueOf(s[5]));
+                    heartrate.add(Integer.valueOf(s[4]));
                     //I check if this is the last line that contains cooling.
                     //If yes, that means the current session is over and a new one begins.
-                    if (s[4].contains("Cooling")) {
+                    if (s[3].contains("Cooling")) {
                         if (i < TableOfActivities.size() + 1) {
-                            if (!TableOfActivities.get(i + 1)[4].contains("Cooling")) {
-                                end = convertToDate(s[3]);
-                                start = convertToDate(TableOfActivities.get(i + 1)[3]);
+                            if (!TableOfActivities.get(i + 1)[3].contains("Cooling")) {
+                                end = convertToDate(s[2]);
+                                //Ugly, but Java doesn't support nested functions. JavaScript does.
+                                Integer[] hr = heartrate.toArray(new Integer[heartrate.size()]);
+                                SportsSession session = new SportsSession(type, start, cooldown, end, hr);
+                                sessions.add(session);
+                                end = new GregorianCalendar(1, 1, 1);
+                                start = new GregorianCalendar(1, 1, 1);
+                                cooldown = new GregorianCalendar(1, 1, 1);
+                                heartrate = new ArrayList<Integer>();
+                                sessions.add(session);
+                                start = convertToDate(TableOfActivities.get(i + 1)[2]);
                             }
                         }
                     }
                     //If this line doesn't contain "Cooling" but the next one does,
                     //that means a cooldown phase just started.
-                    if (!s[4].contains("Cooling")) {
+                    if (!s[3].contains("Cooling")) {
                         if (i < TableOfActivities.size() + 1) {
-                            if (TableOfActivities.get(i + 1)[4].contains("Cooling")) {
-                                cooldown = convertToDate(TableOfActivities.get(i + 1)[3]);
+                            if (TableOfActivities.get(i + 1)[3].contains("Cooling")) {
+                                cooldown = convertToDate(TableOfActivities.get(i + 1)[2]);
                             }
                         }
                     }
                     //Initial starting time
                     if (start.equals(new GregorianCalendar(1, 1, 1))) {
-                        start = convertToDate(s[3]);
+                        start = convertToDate(s[2]);
                     }
                     //Last end time
                     if (i == TableOfActivities.size() - 1) {
-                        end = convertToDate(s[3]);
+                        end = convertToDate(s[2]);
+                        //Still ugly af
+                        Integer[] hr = heartrate.toArray(new Integer[heartrate.size()]);
+                        SportsSession session = new SportsSession(type, start, cooldown, end, hr);
+                        sessions.add(session);
+                        end = new GregorianCalendar(1, 1, 1);
+                        start = new GregorianCalendar(1, 1, 1);
+                        cooldown = new GregorianCalendar(1, 1, 1);
+                        heartrate = new ArrayList<Integer>();
+                        sessions.add(session);
                     }
                     break;
             }
@@ -172,7 +193,14 @@ public class SportsSession {
         return sessions;
     }
 
-    private static GregorianCalendar convertToDate(String s) {
-        return new GregorianCalendar();
+    private static Calendar convertToDate(String s) {
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss", Locale.getDefault());
+        try {
+            cal.setTime(sdf.parse(s));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return cal;
     }
 }
