@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
  Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,11 +13,12 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
---><!-- version code and name should be the same for smartphone and watch apps -->
+-->
+<!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iss.android.wearable.datalayer"
     android:versionCode="13"
-    android:versionName="Sirius">
+    android:versionName="Sirius" >
 
     <uses-sdk
         android:minSdkVersion="19"
@@ -28,15 +30,14 @@
 
     <!-- the smartphone app needs to have all of the permissions of wear app -->
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -48,22 +49,22 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name">
+        android:label="@string/app_name" >
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <receiver
             android:name=".SyncAlarm"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
-                <action android:name="com.iss.android.wearable.datalayer.ALARM"></action>
+                <action android:name="com.iss.android.wearable.datalayer.ALARM" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".StartMyActivityAtBootReceiver"
             android:enabled="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
@@ -73,27 +74,35 @@
 
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:label="@string/app_name"
-            android:launchMode="singleTask"
-            android:exported="true"></activity>
+            android:launchMode="singleTask" />
 
         <service
             android:name=".DataSyncService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity
             android:name=".RegisterUserActivity"
-            android:label="@string/title_activity_register_user">
+            android:label="@string/title_activity_register_user" >
         </activity>
         <activity
             android:name=".ChooseRegisterServiceActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".DeleteMeActivity"
+            android:label="@string/title_activity_delete_me" >
+        </activity>
+        <activity
+            android:name=".IntensityStatisticsActivity"
+            android:label="@string/title_activity_intensity_statistics" >
         </activity>
     </application>
 

@@ -71,6 +71,14 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     String uploadUrl = "http://46.101.214.58:5001/upload2/";
 
+    public static void OutputEventSq(String str){
+
+        if (DataSyncService.itself != null){
+            DataSyncService.itself.OutputEvent(str);
+        }
+
+    }
+
     @Override
     public void onCreate() {
 

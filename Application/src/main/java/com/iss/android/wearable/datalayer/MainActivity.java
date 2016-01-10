@@ -50,7 +50,7 @@ import java.util.HashSet;
  * item every second while it is open. Also allows user to take a photo and send that as an asset
  * to the paired wearable.
  */
-public class MainActivity extends Activity  {
+public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
 
@@ -81,7 +81,7 @@ public class MainActivity extends Activity  {
         Calendar date = new GregorianCalendar();
         SportsSession.retrieveCsvs(date);
 
-        if (DataSyncService.itself == null){
+        if (DataSyncService.itself == null) {
             Intent intent = new Intent(this, DataSyncService.class);
             startService(intent);
         }
@@ -103,7 +103,6 @@ public class MainActivity extends Activity  {
 
     }
 
-    
 
     PendingIntent pendingInt = null;
 
@@ -119,6 +118,7 @@ public class MainActivity extends Activity  {
     }
 
     private DataUpdateReceiver dataUpdateReceiver;
+
     // this is used to communicate with Service
     private class DataUpdateReceiver extends BroadcastReceiver {
         @Override
@@ -151,14 +151,13 @@ public class MainActivity extends Activity  {
     }
 
 
-
-    public void OutputEvent(final String content){
+    public void OutputEvent(final String content) {
 
         final String cont = content;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mDataItemListAdapter.add( new Event( "Event", content ));
+                mDataItemListAdapter.add(new Event("Event", content));
             }
         });
 
@@ -213,7 +212,7 @@ public class MainActivity extends Activity  {
             this.text = text;
         }
 
-        public String GetTimeNow(){
+        public String GetTimeNow() {
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HH:mm:ss");
             String currentDateandTime = sdf.format(new Date());
@@ -258,19 +257,51 @@ public class MainActivity extends Activity  {
         }
     }
 
-    public void onServerSync(View view){
+    public void onServerSync(View view) {
 
-        if (DataSyncService.itself != null){
+        if (DataSyncService.itself != null) {
             DataSyncService.itself.ShareDataWithServer();
         }
 
     }
 
-    public void onWatchSync(View view){
+    public void onWatchSync(View view) {
 
-        if (DataSyncService.itself != null){
+        if (DataSyncService.itself != null) {
             DataSyncService.itself.RequestDataFromWatch();
         }
+
+    }
+
+
+    public void onGraphPlot(View view){
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+
+                    int days = 14;
+                    //String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
+                    String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
+                    double[][] parameters = DataProcessingManager.GetDailyRecoveryParameters(days, UserID);
+                    double[] hrRecoveries = parameters[0];
+                    double[] rpeValues = parameters[1];
+
+                    Intent i = new Intent(MainActivity.this, IntensityStatisticsActivity.class);
+                    i.putExtra("intensity_from_data", hrRecoveries);
+                    i.putExtra("intensity_required", new double []{2000, 3000, 3500, 2800,   2000, 3000, 3500, 2800, 2000, 3000, 3500, 2800,   2000, 3000});
+                    i.putExtra("rpe_from_data", rpeValues);
+                    i.putExtra("rpe_required", new double []{4,6,8,4,4,6,8,4,4,6,8,4,4,6});
+                    startActivity(i);
+
+                }catch (Exception ex){
+                    OutputEvent(ex.toString());
+                }
+            }
+        }).start();
+
+
 
     }
 

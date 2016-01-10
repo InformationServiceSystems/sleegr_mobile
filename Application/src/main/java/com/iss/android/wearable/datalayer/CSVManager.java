@@ -1,10 +1,13 @@
 package com.iss.android.wearable.datalayer;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,25 +25,7 @@ public class CSVManager {
         for (int i = 0; i < exampleData.size(); i++) {
             ISSRecordData record = exampleData.get(i);
 
-            bld.append(record.UserID);
-            bld.append(separator);
-
-            bld.append(record.MeasurementType);
-            bld.append(separator);
-
-            bld.append(record.Timestamp);
-            bld.append(separator);
-
-            bld.append(record.ExtraData);
-            bld.append(separator);
-
-            bld.append(record.Value1);
-            bld.append(separator);
-
-            bld.append(record.Value2);
-            bld.append(separator);
-
-            bld.append(record.Value3);
+            bld.append(record.toString());
             bld.append("\r\n");
         }
 
@@ -58,6 +43,53 @@ public class CSVManager {
             //exception handling left as an exercise for the reader
             DataSyncService.itself.OutputEvent("error occured: "  + e.toString());
         }
+
+    }
+
+    public static List<ISSRecordData> ReadCSVdata(String date, String userID,  String activity){
+
+
+        //iaroslogos_at_gmail.com-2016-01-06_Running.csv
+
+        List<ISSRecordData>  result = new ArrayList<ISSRecordData>();
+
+        File file = new File(DataStorageManager.userDataFolder, date  + File.separator + userID + "-" + date + "_" + activity + ".csv");
+
+        if (!file.exists()){
+            file = new File(DataStorageManager.userDataFolder, date  + File.separator + userID + "_" + date + "_" + activity + ".csv");
+        }
+
+        if (!file.exists()){
+            return null;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+
+            String line;
+
+            while ((line = br.readLine()) != null) {
+
+                ISSRecordData recordData = ISSRecordData.fromString(line);
+
+                if (recordData == null){
+                    continue;
+                }
+
+                result.add(recordData);
+
+            }
+
+        } catch (IOException e) {
+
+            System.out.print(e);
+
+        }
+
+        if (result.size() == 0){
+            return  null;
+        }
+
+        return result;
 
     }
 

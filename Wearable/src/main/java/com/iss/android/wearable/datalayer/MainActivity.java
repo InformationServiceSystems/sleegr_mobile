@@ -66,6 +66,8 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -138,6 +140,21 @@ public class MainActivity extends Activity {
                     str = str + "d";
 
                 }
+            }else if (intent.getAction().equals(SensorsDataService.UPDATE_GPS_PARAMS)) {
+                // Prints out the heart rate
+                final TextView speedLabel = (TextView) findViewById(R.id.speedLable);
+                final TextView distanceLabel = (TextView) findViewById(R.id.distanceLabel);
+
+                double speed = intent.getDoubleExtra("speed", 0);
+                double totalDistance = intent.getDoubleExtra("totalDistance", 0);
+
+                NumberFormat formatter = new DecimalFormat("#0.0");
+
+                // Need to convert the Int to String or else the app crashes. GJ Google.
+                speedLabel.setText(formatter.format(speed));
+                distanceLabel.setText(formatter.format(totalDistance));
+
+
             } else if (intent.getAction().equals(SensorsDataService.ASK_USER_FOR_RPE)) {
 
                 CheckToShowRPE();
@@ -338,6 +355,7 @@ public class MainActivity extends Activity {
         filter.addAction(SensorsDataService.NEW_MESSAGE_AVAILABLE);
         filter.addAction(SensorsDataService.ASK_USER_FOR_RPE);
         filter.addAction(SensorsDataService.UPDATE_TIMER_VALUE);
+        filter.addAction(SensorsDataService.UPDATE_GPS_PARAMS);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(br, filter);
 

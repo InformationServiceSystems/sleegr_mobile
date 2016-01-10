@@ -17,6 +17,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.GpsStatus;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -68,6 +72,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             ASK_USER_FOR_RPE = "show rpe dialog",
             CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb",
             UPDATE_TIMER_VALUE="update the timer value",
+            UPDATE_GPS_PARAMS="update gps data",
             NEW_MESSAGE_AVAILABLE = "log the output";
     private static final UUID UUID_HRS =
             UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb"),
@@ -313,6 +318,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         isInitialising = false;
 
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
     }
 
     int timerTime = 0;
@@ -348,6 +355,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
 
         OutputCurrentState();
+
+
+        /*locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, gpsListener, null);
+        Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        gpsListener.onLocationChanged(lastKnownLocation);*/
 
     }
 
@@ -572,7 +584,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    public void RecordActivitySwitch(){
 
+        AddNewData(UserID, 0, GetTimeNow(), currentState, 0, 0, 0);
+
+    }
 
     public void SwitchSportsAction( String action ) {
 
@@ -583,6 +599,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             if (currentState.equals("Resting") || currentState.contains("Cooling")){
                 // stop recording cooling / resting prematurely
                 newState = "Idle";
+                RecordActivitySwitch();
             } else {
                 // start measuring cooling down
                 newState = currentState + ":Cooling";
@@ -592,6 +609,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         else { // switch from idle state to measurement
 
             newState = action;
+            RecordActivitySwitch();
         }
 
         BringIntoState(newState);
@@ -621,10 +639,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         {
             timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
             OutputEvent("Cooling down ...");
+            StopGPS();
         }
         else{
             // start training
             timerTimeout = TRAINING_TIMEOUT;
+            StartGPS();
         }
 
         StartMeasuring();
@@ -1016,4 +1036,85 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         AddNewData(0,1024,GetTimeNow(),currentState,position,0,0);
         needToShowRPE = false;
     }
+
+    // GPS processing
+
+    LocationManager locationManager = null;
+    LocationListener gpsListener = null;
+
+    Location locPrev = null;
+    double totalDistance = 0;
+
+    public void StartGPS(){
+
+        gpsListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+                double altitude = location.getAltitude();
+
+                AddNewData(UserID, 512, GetTimeNow(), currentState, (float)latitude, (float)longitude, (float)altitude);
+
+                float speed  = location.getSpeed() * 3.6f;
+                AddNewData(UserID, 513, GetTimeNow(), currentState, speed , 0, 0);
+
+                if (locPrev != null){
+                    float dis = locPrev.distanceTo(location);
+                    totalDistance += dis;
+                }
+                AddNewData(UserID, 514, GetTimeNow(), currentState, (float) totalDistance, 0, 0);
+
+                SendGPSdata(speed, totalDistance / 1000);
+
+                locPrev = location;
+
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        try {
+            if (locationManager != null) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, gpsListener);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, gpsListener);
+            }
+        }catch (Exception ex){
+            OutputEvent(ex.toString());
+        }
+
+    }
+
+    // GPS processing
+
+    public void StopGPS(){
+
+        locationManager.removeUpdates( gpsListener);
+        totalDistance = 0;
+
+    }
+
+    public void SendGPSdata(double speed, double totalDistance){
+
+        Intent intent = new Intent(this.UPDATE_GPS_PARAMS);
+        intent.putExtra("speed", speed);
+        intent.putExtra("totalDistance", totalDistance);
+        sendBroadcast(intent);
+
+    }
+
 }

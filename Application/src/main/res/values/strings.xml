@@ -35,5 +35,7 @@
     <string name="FacebookButtonText">Login via Facebook</string>
     <string name="GoogleButtonText">Login via Google</string>
     <string name="EMailButtonText">Login via E-Mail</string>
+    <string name="title_activity_delete_me">DeleteMeActivity</string>
+    <string name="title_activity_intensity_statistics">IntensityStatisticsActivity</string>
 
 </resources>
