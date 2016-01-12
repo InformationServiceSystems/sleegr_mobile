@@ -6,17 +6,90 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.iss.android.wearable.datalayer.IntensityStatisticsActivity">
 
-    <com.jjoe64.graphview.GraphView
-        android:layout_width="match_parent"
-        android:layout_height="200dip"
-        android:id="@+id/crv_graph" />
 
-    <com.jjoe64.graphview.GraphView
-        android:layout_width="match_parent"
-        android:layout_height="200dip"
-        android:id="@+id/rpe_graph"
-        android:layout_below="@+id/crv_graph"
-        android:layout_alignParentEnd="true" />
 
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Displaying week: 0"
+                android:id="@+id/weekTextView" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="RPE graph"
+                android:id="@+id/textV1"
+                android:gravity="center" />
+
+            <com.jjoe64.graphview.GraphView
+                android:layout_width="fill_parent"
+                android:layout_height="200dip"
+                android:id="@+id/graph1" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Average heart rate during training"
+                android:id="@+id/textV2"
+                android:gravity="center" />
+
+            <com.jjoe64.graphview.GraphView
+                android:layout_width="fill_parent"
+                android:layout_height="200dip"
+                android:id="@+id/graph2"/>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Heart rate recovery after training"
+                android:id="@+id/textV3"
+                android:gravity="center" />
+
+            <com.jjoe64.graphview.GraphView
+                android:layout_width="fill_parent"
+                android:layout_height="200dip"
+                android:id="@+id/graph3"/>
+
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Resting heart rate"
+                android:id="@+id/textV4"
+                android:gravity="center" />
+
+
+            <com.jjoe64.graphview.GraphView
+                android:layout_width="fill_parent"
+                android:layout_height="200dip"
+                android:id="@+id/graph4"/>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Resting heart rate"
+                android:id="@+id/textV5"
+                android:gravity="center" />
+
+
+            <com.jjoe64.graphview.GraphView
+                android:layout_width="fill_parent"
+                android:layout_height="200dip"
+                android:id="@+id/graph5"/>
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </RelativeLayout>

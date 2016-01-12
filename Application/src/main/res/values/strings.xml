@@ -37,5 +37,7 @@
     <string name="EMailButtonText">Login via E-Mail</string>
     <string name="title_activity_delete_me">DeleteMeActivity</string>
     <string name="title_activity_intensity_statistics">IntensityStatisticsActivity</string>
+    <string name="title_activity_select_available_data">SelectAvailableData</string>
+    <string name="title_activity_display_activity_file">DisplayActivityFile</string>
 
 </resources>

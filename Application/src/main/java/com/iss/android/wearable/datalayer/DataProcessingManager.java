@@ -2,12 +2,15 @@ package com.iss.android.wearable.datalayer;
 
 import android.provider.ContactsContract;
 
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -186,7 +189,6 @@ public class DataProcessingManager {
 
     }
 
-
     public static  boolean TestZerosDiag(double[][] A) {
         return A[0][0] == 0 || A[1][1] == 0;
     }
@@ -240,6 +242,14 @@ public class DataProcessingManager {
 
     }
 
+    public static Date getDateFromToday(int dayoffset){
+
+        Calendar cl = Calendar.getInstance();
+        cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
+
+        return cl.getTime();
+
+    }
 
     static ArrayList<ISSRecordData> extractLastCooldown(ArrayList<ISSRecordData> lastActivity){
 
@@ -247,6 +257,9 @@ public class DataProcessingManager {
 
         while(!lastActivity.get(i).ExtraData.contains("Cooling")){
             i--;
+            if (i < 0){
+                return null;
+            }
         }
 
         if (i < 0){
@@ -258,6 +271,56 @@ public class DataProcessingManager {
         ArrayList<ISSRecordData> accumulator = new ArrayList<>();
 
         while(lastActivity.get(i).ExtraData.contains("Cooling")){
+            accumulator.add(0, lastActivity.get(i));
+            i--;
+        }
+
+        return accumulator;
+
+    }
+
+    static ArrayList<ISSRecordData> extractFirstTraining(ArrayList<ISSRecordData> lastActivity){
+
+        int i = 0;
+
+        while(lastActivity.get(i).ExtraData.contains("Cooling")){
+            i++;
+            if (i == lastActivity.size()){
+                return null;
+            }
+
+        }
+
+        // get training measures
+
+        ArrayList<ISSRecordData> accumulator = new ArrayList<>();
+
+        while(i < lastActivity.size() && !lastActivity.get(i).ExtraData.contains("Cooling")){
+            accumulator.add( lastActivity.get(i));
+            i++;
+        }
+
+        return accumulator;
+
+    }
+
+    static ArrayList<ISSRecordData> extractLastTraining(ArrayList<ISSRecordData> lastActivity){
+
+        int i = lastActivity.size() - 1;
+
+        while(lastActivity.get(i).ExtraData.contains("Cooling")){
+            i--;
+        }
+
+        if (i < 0){
+            return null ;
+        }
+
+        // get training measures
+
+        ArrayList<ISSRecordData> accumulator = new ArrayList<>();
+
+        while(i >= 0 && !lastActivity.get(i).ExtraData.contains("Cooling")){
             accumulator.add(0, lastActivity.get(i));
             i--;
         }
@@ -326,6 +389,56 @@ public class DataProcessingManager {
 
     }
 
+    static double[] getMorningEveningHRs(String day, String UserID){
+
+        List<ISSRecordData> eveningHR = CSVManager.ReadCSVdata(day, UserID, "Resting");
+        List<ISSRecordData> restValues = new ArrayList<ISSRecordData>();
+
+        double avg_m = 0;
+        double cntm = 0;
+
+        double avg_e = 0;
+        double cnte = 0;
+
+
+        if (eveningHR != null){
+
+
+            for (ISSRecordData recordData: eveningHR){
+
+                if (recordData.MeasurementType != 21){
+                    continue;
+                }
+
+                Calendar calendar = GregorianCalendar.getInstance();
+                calendar.setTime(recordData.getTimestamp());
+
+                if (calendar.get(Calendar.HOUR_OF_DAY) < 14){
+                    avg_m += recordData.Value1;
+                    cntm ++;
+                }
+                else{
+                    avg_e += recordData.Value1;
+                    cnte ++;
+                }
+            }
+
+            // add the evening values
+
+        }
+
+        if (cntm == 0){
+            avg_m = -1;
+        }
+
+        if (cnte == 0){
+            avg_e = -1;
+        }
+
+        return  new double[]{avg_m / cntm, avg_e / cnte};
+
+    }
+
     public static double getRPErating(ArrayList<ISSRecordData> data){
 
         for (ISSRecordData recordData: data){
@@ -340,7 +453,7 @@ public class DataProcessingManager {
 
     public static double [] GetRecoveryParameters(String day, String UserID){
 
-        double [] result = new double[]{-1, -1};
+        double [] result = new double[]{-1, -1, -1, -1, -1};
 
         ArrayList<ISSRecordData> lastActivity = readLastSportsActivity(day, UserID);
 
@@ -351,12 +464,20 @@ public class DataProcessingManager {
 
         // get the last cooldown
         ArrayList<ISSRecordData> lastCooldown = extractLastCooldown(lastActivity);
+        ArrayList<ISSRecordData> lastTraining = extractLastTraining(lastActivity);
 
-        result[1] = getRPErating(lastCooldown);
+
+        if (lastTraining != null){
+
+            double [] res = getAVGHR(lastTraining);
+            result[0] = res[0];
+        }
 
         if (lastCooldown == null){
             return result;
         }
+
+        result[3] = getRPErating(lastCooldown);
 
         if (lastCooldown.size() < 100){
             return result;
@@ -375,16 +496,60 @@ public class DataProcessingManager {
         // exponential model with bias is fit to the data:
         // f(x) = exp(a*x + b) + c
         // parameter a corresponds to how fast the curve decays
-        result[0] = cooldownParameters[0];
+        result[2] = cooldownParameters[0];
+
+        double[] morningEveningHRs = getMorningEveningHRs(day, UserID);
+
+        result[1] = morningEveningHRs[0];
+        result[4] = morningEveningHRs[1];
 
         return result;
 
     }
 
-    public static double [][] GetDailyRecoveryParameters(int days, String UserID){
+    public static double [] getAVGHR(ArrayList<ISSRecordData> lastTraining) {
 
-        double [] crvs = new double[days];
-        double [] rpes = new double[days];
+        double sum = 0;
+        double count = 0;
+
+        for (ISSRecordData record: lastTraining){
+
+            if (record.MeasurementType != 21)
+                continue;
+
+            sum += record.Value1;
+            count ++;
+
+        }
+
+        double avg = sum / count;
+
+        double dev = 0;
+        count = 0;
+
+        for (ISSRecordData record: lastTraining){
+
+            if (record.MeasurementType != 21)
+                continue;
+
+            dev += (record.Value1 - avg);
+            count ++;
+
+        }
+
+        dev = dev / count;
+
+        return new double [] {avg, dev};
+
+    }
+
+    public static ArrayList<TimeSeries> GetDailyRecoveryParameters(int days, String UserID){
+
+        TimeSeries recoverySpeed = new TimeSeries("Training intensity");
+        TimeSeries valueOfRPE = new TimeSeries("RPE");
+        TimeSeries avgHRtraining = new TimeSeries("Avg. training HR");
+        TimeSeries morningHR = new TimeSeries("Morning HR");
+        TimeSeries eveningHR = new TimeSeries("Evening HR");
 
         for (int offset = 0; offset < days; offset++){
 
@@ -392,15 +557,39 @@ public class DataProcessingManager {
 
             try {
                 double[] parameters = GetRecoveryParameters(getDayFromToday(offset), UserID);
-                crvs[offset] = parameters[0];
-                rpes[offset] = parameters[1];
+
+                Date date = getDateFromToday(offset);
+
+                avgHRtraining.AddFirstValue(date, parameters[0]);
+                morningHR.AddFirstValue(date, parameters[1]);
+
+                recoverySpeed.AddFirstValue(date, parameters[2] / 1000.0);
+                valueOfRPE.AddFirstValue(date, parameters[3]);
+                eveningHR.AddFirstValue(date, parameters[4]);
             }
             catch (Exception ex){
                 DataSyncService.OutputEventSq(ex.toString());
             }
         }
 
-        return new double[][] {crvs, rpes} ;
+        return new ArrayList<>( Arrays.asList(valueOfRPE, avgHRtraining, recoverySpeed,  eveningHR, morningHR) ) ;
+    }
+
+    public static TimeSeries ComputeExponent(double [] p, TimeSeries series){
+
+        long start = series.Values.get(0).x.getTime();
+        TimeSeries result = new TimeSeries(series.name + ", exp. fit");
+
+        for (int i =0; i < series.Values.size(); i++){
+
+            double x = (series.Values.get(i).x.getTime()  - start) / 1000.0;
+            double y = Math.exp(-x / p[0]) *p[1] + p[2];
+
+            result.AddValue(series.Values.get(i).x, y);
+
+        }
+
+        return result;
     }
 
 }

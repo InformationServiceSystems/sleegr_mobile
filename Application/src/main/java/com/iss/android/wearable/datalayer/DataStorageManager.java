@@ -169,7 +169,6 @@ public class DataStorageManager {
 
     }
 
-
     public static ArrayList<File> GetAllFilesToUpload(String UserID, int timeSpan){
 
         ArrayList<File> result = new  ArrayList<File>();

@@ -104,6 +104,14 @@
             android:name=".IntensityStatisticsActivity"
             android:label="@string/title_activity_intensity_statistics" >
         </activity>
+        <activity
+            android:name=".SelectAvailableData"
+            android:label="@string/title_activity_select_available_data" >
+        </activity>
+        <activity
+            android:name=".DisplayActivityFile"
+            android:label="@string/title_activity_display_activity_file" >
+        </activity>
     </application>
 
 </manifest>

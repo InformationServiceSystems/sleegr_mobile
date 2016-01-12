@@ -1,5 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
+import android.support.annotation.RequiresPermission;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -51,6 +53,8 @@ public class CSVManager {
 
         //iaroslogos_at_gmail.com-2016-01-06_Running.csv
 
+        userID = DataStorageManager.getProperUserID(userID);
+
         List<ISSRecordData>  result = new ArrayList<ISSRecordData>();
 
         File file = new File(DataStorageManager.userDataFolder, date  + File.separator + userID + "-" + date + "_" + activity + ".csv");
@@ -92,5 +96,43 @@ public class CSVManager {
         return result;
 
     }
+
+    public static ArrayList<List<ISSRecordData>> ReadSplitCSVdata(String date, String userID,  String activity){
+
+
+        ArrayList<List<ISSRecordData>> result = new ArrayList<List<ISSRecordData>>();
+
+        ArrayList<ISSRecordData> allRecords = (ArrayList<ISSRecordData>) ReadCSVdata(date, userID, activity);
+
+        // now split records into different ones by time
+
+        if (allRecords.size() == 0){
+            return result;
+        }
+
+        ArrayList<ISSRecordData> accumulator = new ArrayList<>();
+        long previousTime = allRecords.get(0).getTimestamp().getTime();
+
+        for (ISSRecordData record: allRecords){
+            long currentTime = record.getTimestamp().getTime();
+
+            // more than 1 hour difference in time stamps means that these are different measures
+            if (currentTime - previousTime > 60*60*1000){
+                result.add(accumulator);
+                accumulator = new ArrayList<>();
+            }
+
+            accumulator.add(record);
+            previousTime = currentTime;
+
+        }
+
+        result.add(accumulator);
+
+        return result;
+
+    }
+
+
 
 }

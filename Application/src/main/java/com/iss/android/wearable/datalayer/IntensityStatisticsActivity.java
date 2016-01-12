@@ -1,68 +1,68 @@
 package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.LegendRenderer;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
 
 public class IntensityStatisticsActivity extends Activity {
+
+    Visualizations visualizations = null;
+
+    int week = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intensity_statistics);
 
+        try {
 
-        GraphView graph = (GraphView) findViewById(R.id.crv_graph);
-        double[] intensity_from_data = getIntent().getExtras().getDoubleArray("intensity_from_data");
-        double[] intensity_required = getIntent().getExtras().getDoubleArray("intensity_required");
-        PutDataToGraph(graph, intensity_from_data, intensity_required, "intensity", "int. req.", 0, 5000);
+            int indent = 100;
 
-        graph = (GraphView) findViewById(R.id.rpe_graph);
-        double[] rpe_from_data = getIntent().getExtras().getDoubleArray("rpe_from_data");
-        double[] rpe_required = getIntent().getExtras().getDoubleArray("rpe_required");
-        PutDataToGraph(graph, rpe_from_data, rpe_required, "RPE", "RPE req.",0,10);
+            visualizations = (Visualizations) Serializer.DeserializeFromBytes(getIntent().getExtras().getByteArray("visualizations"));
+
+            VisualizeWeek(week);
+
+
+        }catch (Exception ex){
+
+        }
 
     }
 
-    public void PutDataToGraph(GraphView graph, double[] data, double [] req, String label_data, String label_req, double min, double max ){
+    public void visualizeData(Visualizations vis){
 
-        LineGraphSeries<DataPoint> data_values = new LineGraphSeries<DataPoint>(new DataPoint[] {});
-        data_values.setDrawDataPoints(true);
-        data_values.setColor(Color.RED);
-        LineGraphSeries<DataPoint> requirements = new LineGraphSeries<DataPoint>(new DataPoint[] {});
-        requirements.setColor(Color.GREEN);
-        requirements.setDrawDataPoints(true);
+        GraphView [] graphs = new GraphView[]{
+                (GraphView) findViewById(R.id.graph1),
+                (GraphView) findViewById(R.id.graph2),
+                (GraphView) findViewById(R.id.graph3),
+                (GraphView) findViewById(R.id.graph4),
+                (GraphView) findViewById(R.id.graph5)};
 
-        //double [] data = new double[] {1,2,3,4};
+        TextView [] labels = new TextView[]{
+                (TextView) findViewById(R.id.textV1),
+                (TextView) findViewById(R.id.textV2),
+                (TextView) findViewById(R.id.textV3),
+                (TextView) findViewById(R.id.textV4),
+                (TextView) findViewById(R.id.textV5)};
 
-        graph.addSeries(data_values);
-        graph.addSeries(requirements);
+        VisualizationsPlotter.Plot(vis, graphs, labels, this);
 
-        data_values.setTitle(label_data);
-        requirements.setTitle(label_req);
-        graph.getLegendRenderer().setVisible(true);
-        graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
+    }
 
-        graph.getViewport().setYAxisBoundsManual(true);
-        graph.getViewport().setMinY(min);
-        graph.getViewport().setMaxY(max);
 
-        for (int i = 0; i < data.length; i++){
-            int lastidx = data.length - i - 1;
-            if (data[lastidx] > 0){
-                data_values.appendData(new DataPoint(i, data[lastidx]), true, 100);
-            }
-            if (req[lastidx] > 0) {
-                requirements.appendData(new DataPoint(i, req[lastidx]), true, 100);
-            }
-        }
+
+
+    public void VisualizeWeek(int week){
+
+        Visualizations vis = visualizations.subsetForWeek(week);
+        visualizeData(vis);
+        TextView weekView = (TextView)findViewById(R.id.weekTextView);
+        weekView.setText("Displaying week: " + week);
 
     }
 
@@ -84,7 +84,19 @@ public class IntensityStatisticsActivity extends Activity {
         if (id == R.id.action_settings) {
             return true;
         }
+        else if (id == R.id.next_session){
+            week ++;
+            VisualizeWeek(week);
+        }
+        else if (id == R.id.previous_session){
+            week --;
+            VisualizeWeek(week);
+        }
+        else if (id == R.id.home_week){
+            week = 0;
+            VisualizeWeek(week);
+        }
 
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 }

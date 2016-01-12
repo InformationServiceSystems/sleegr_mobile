@@ -22,7 +22,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,11 +40,15 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.File;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -274,6 +280,141 @@ public class MainActivity extends Activity {
     }
 
 
+    public TimeSeries randomRPEReq(int past, int future){
+
+        TimeSeries requirements = new TimeSeries("RPE schedule");
+
+        for (int i=0; i < past; i++){
+            long round = Math.round(Math.random() * 10);
+            Date date = DataProcessingManager.getDateFromToday(i);
+            requirements.AddFirstValue(date, round);
+        }
+
+        for (int i=0; i < future; i++){
+            long round = Math.round(Math.random() * 10);
+            Date date = DataProcessingManager.getDateFromToday(-i-1);
+            requirements.AddValue(date, round);
+        }
+
+        return requirements;
+
+    }
+
+    public double predictRecovery(ArrayList<Double> pastX, ArrayList<Double> pastY, Double futureX){
+
+
+        double result = -1;
+
+        // collect values of past records into bins
+
+        double [] bins = new double[11];
+        double [] counts = new double[11];
+
+        for (int i = 0; i < 11; i++){
+            bins[i] = 0;
+            counts[i] = 0;
+        }
+
+        for (int i = 0; i < pastY.size(); i++){
+
+            if (pastX.get(i) <0){
+                continue;
+            }
+
+            bins[((int) Math.round(pastX.get(i)))] += pastY.get(i);
+            counts[((int) Math.round(pastX.get(i)))] += 1;
+        }
+
+        for (int i = 0; i < 11; i++){
+            if(counts[i] == 0){
+                continue;
+            }
+            bins[i] = bins[i] / counts[i];
+        }
+
+        smoothenBins(bins, counts);
+
+        result = bins[((int) Math.round(futureX))];
+
+        return result;
+
+    }
+
+    public void smoothenBins(double [] bins, double [] counts){
+
+        double cv = 0;
+
+        for (int i= 0;i < bins.length; i++){
+            if (counts[i] > 0){
+                cv = bins[i];
+            }
+            bins[i] = cv;
+        }
+
+        for (int i=  bins.length-1;i >= 0; i--){
+            if (counts[i] > 0){
+                cv = bins[i];
+            }
+            bins[i] = cv;
+        }
+
+    }
+
+    public Date offsetDate(Date input, int offset){
+
+        Calendar clnd = Calendar.getInstance();
+        clnd.setTime(input);
+        clnd.add(Calendar.DAY_OF_MONTH, -offset);
+        return clnd.getTime();
+
+    }
+
+    public TimeSeries predictTimeSeries(TimeSeries xReq, TimeSeries xActual, TimeSeries yActual, int offset){
+
+        TimeSeries result = new TimeSeries(yActual.name+", pred.");
+
+        for (int i = 0; i < xReq.Values.size()-offset; i++){
+
+            Date date  = xReq.Values.get(i).x;
+            Double val  = xReq.Values.get(i).y;
+
+            TimeSeries xActBefore = xActual.beforeDate(date);
+            TimeSeries yActBefore = yActual.beforeDate(date);
+
+            if (xActBefore.Values.size() == 0){
+                continue;
+            }
+
+            HashMap<String, Double> predValues = yActBefore.toDictionary();
+
+            ArrayList<Double> xvalues = new ArrayList<>();
+            ArrayList<Double> yvalues = new ArrayList<>();
+
+            // generate training set
+            for (int j = 0; j < xActBefore.Values.size(); j++){
+
+                Date locdate = offsetDate( xActBefore.Values.get(j).x, offset);
+                double x = xActBefore.Values.get(j).y;
+
+                if (!predValues.containsKey( TimeSeries.formatData(locdate) )){
+                    continue;
+                }
+
+                double y = predValues.get(TimeSeries.formatData(locdate));
+
+                xvalues.add(x);
+                yvalues.add(y);
+
+            }
+
+            double prediction = predictRecovery(xvalues, yvalues, val);
+            result.AddValue(offsetDate(date, offset), prediction);
+        }
+
+        return result;
+
+    }
+
     public void onGraphPlot(View view){
 
         new Thread(new Runnable() {
@@ -281,18 +422,49 @@ public class MainActivity extends Activity {
             public void run() {
                 try{
 
-                    int days = 14;
+                    int days = 21;
                     //String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
                     String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
-                    double[][] parameters = DataProcessingManager.GetDailyRecoveryParameters(days, UserID);
-                    double[] hrRecoveries = parameters[0];
-                    double[] rpeValues = parameters[1];
+
+                    ArrayList<TimeSeries> allData = null;
+
+                    File tempdata = new File(Environment.getExternalStorageDirectory().toString() , "data.tmp2" );
+                    if (!tempdata.exists()) {
+                        allData = DataProcessingManager.GetDailyRecoveryParameters(days, UserID);
+                        Serializer.SerializeToFile(allData, tempdata);
+                    }else {
+                        allData = (ArrayList<TimeSeries>) Serializer.DeserializeFromFile(tempdata);
+                    }
+
+                    int pred_days = 7;
+                    TimeSeries rpeReq = randomRPEReq(days, pred_days);
+
+                    // this class will be used for plotting the data
+                    Visualizations visualizations = new Visualizations();
+
+                    // add requirement graph
+                    Visualizations.Subplot subplot = visualizations.AddGraph("RPE requirements");
+                    subplot.Add(allData.get(0), Color.RED);
+                    subplot.Add(rpeReq, Color.GREEN);
+
+                    TimeSeries avgDeviationsRPE = ComputeCompliences(rpeReq, allData.get(0), 3);
+                    subplot.Add(avgDeviationsRPE, Color.GRAY);
+
+                    // add prediction graphs
+                    for (int i = 1; i < allData.size(); i++){
+
+                        int offset = 0;
+
+                        TimeSeries prediction = predictTimeSeries(rpeReq, allData.get(0), allData.get(i), offset);
+
+                        subplot = visualizations.AddGraph(prediction.name);
+                        subplot.Add(allData.get(i), Color.RED);
+                        subplot.Add(prediction, Color.BLUE);
+
+                    }
 
                     Intent i = new Intent(MainActivity.this, IntensityStatisticsActivity.class);
-                    i.putExtra("intensity_from_data", hrRecoveries);
-                    i.putExtra("intensity_required", new double []{2000, 3000, 3500, 2800,   2000, 3000, 3500, 2800, 2000, 3000, 3500, 2800,   2000, 3000});
-                    i.putExtra("rpe_from_data", rpeValues);
-                    i.putExtra("rpe_required", new double []{4,6,8,4,4,6,8,4,4,6,8,4,4,6});
+                    i.putExtra("visualizations", Serializer.SerializeToBytes(visualizations));
                     startActivity(i);
 
                 }catch (Exception ex){
@@ -302,6 +474,77 @@ public class MainActivity extends Activity {
         }).start();
 
 
+
+    }
+
+    private TimeSeries ComputeCompliences(TimeSeries requirements, TimeSeries values, int timewindow) {
+
+        TimeSeries result = new TimeSeries(values.name + ", avg. divergence");
+
+        for (int i = 0; i < values.Values.size(); i++){
+
+            Date x = requirements.Values.get(i).x;
+
+            TimeSeries req = requirements.beforeDate(x);
+            TimeSeries vals = values.beforeDate(x);
+
+            ArrayList<Double> seq1 = new ArrayList<>();
+            ArrayList<Double> seq2 = new ArrayList<>();
+
+            // construct data
+            HashMap<String, Double> reqVals = req.toDictionary();
+
+            for (int j = 0; j < vals.Values.size(); j++){
+
+                int last = vals.Values.size() - j - 1;
+
+                Date d = vals.Values.get(last).x;
+
+                if (!reqVals.containsKey( TimeSeries.formatData(d) ))
+                    continue;
+
+                Double yp = reqVals.get(TimeSeries.formatData(d));
+                Double y = vals.Values.get(last).y;
+
+                seq1.add(0,yp);
+                seq2.add(0, y);
+
+                if (seq1.size() >= timewindow){
+                    break;
+                }
+
+            }
+
+            if (seq1.size() == 0){
+                result.AddValue(x, -1);
+                continue;
+            }
+
+            result.AddValue(x, ComplienceMeasure(seq1, seq2));
+
+        }
+
+
+        return result;
+
+    }
+
+    private double ComplienceMeasure(ArrayList<Double> seq1, ArrayList<Double> seq2) {
+
+        double result = 0;
+
+        for (int i = 0; i < seq1.size(); i++){
+            result += Math.abs( seq1.get(i) - seq2.get(i) ) / seq1.size();
+        }
+
+        return result;
+
+    }
+
+    public void onExploreData(View view){
+
+        Intent i = new Intent(MainActivity.this, SelectAvailableData.class);
+        startActivity(i);
 
     }
 

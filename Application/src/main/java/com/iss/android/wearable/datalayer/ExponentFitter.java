@@ -110,8 +110,8 @@ public class ExponentFitter {
 
             pval = norm;
 
-            System.out.println(norm);
-            System.out.println(result[0] + "," + result[1] + "," + result[2]);
+            //System.out.println(norm);
+            //System.out.println(result[0] + "," + result[1] + "," + result[2]);
         }
 
         return result;
