@@ -20,11 +20,11 @@ public class ISSRecordData implements Serializable {
     public float Value2;
     public float Value3;
 
-    public static ISSRecordData fromString(String str){
+    public static ISSRecordData fromString(String str) {
 
         String[] split = str.split(",");
 
-        if (split == null){
+        if (split == null) {
             return null;
         }
 
@@ -40,14 +40,14 @@ public class ISSRecordData implements Serializable {
 
     }
 
-    public String toString(){
+    public String toString() {
 
         String sep = ",";
         return UserID + sep + MeasurementType + sep + Timestamp + sep + ExtraData + sep + Value1 + sep + Value2 + sep + Value3;
 
     }
 
-    public ISSRecordData(int UID, int MType, String timestamp, String extraData, float v1, float v2, float v3){
+    public ISSRecordData(int UID, int MType, String timestamp, String extraData, float v1, float v2, float v3) {
 
         UserID = UID;
         MeasurementType = MType;
@@ -61,22 +61,19 @@ public class ISSRecordData implements Serializable {
 
     public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
 
-    public Date getTimestamp(){
+    public Date getTimestamp() {
 
         Calendar time = Calendar.getInstance();
 
         try {
             time.setTime(sdf.parse(this.Timestamp));
-        }
-        catch (ParseException e)
-        {
+        } catch (ParseException e) {
 
         }
 
         return time.getTime();
 
     }
-
 
 
 }

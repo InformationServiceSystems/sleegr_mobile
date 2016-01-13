@@ -21,7 +21,6 @@ import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -95,7 +94,7 @@ public class DeviceScanActivity extends ListActivity {
                 finish();
                 return;
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.toString();
         }
     }

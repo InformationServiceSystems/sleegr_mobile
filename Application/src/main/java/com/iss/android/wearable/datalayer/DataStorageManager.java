@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,8 +27,8 @@ public class DataStorageManager {
 
     }
 
-    static File sleepData = new File(Environment.getExternalStorageDirectory().toString() + "/sleep-data/sleep-export.csv");
-    static File userDataFolder = new File(Environment.getExternalStorageDirectory().toString() , "triathlon" );
+    static File sleepData = new File(Environment.getDataDirectory().toString() + "/sleep-data/sleep-export.csv");
+    static File userDataFolder = new File(Environment.getDataDirectory().toString(), "triathlon");
 
     public static byte[] FileToBytes(File file) {
 

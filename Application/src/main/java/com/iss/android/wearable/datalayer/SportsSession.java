@@ -1,5 +1,6 @@
 package com.iss.android.wearable.datalayer;
 
+import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -41,15 +42,17 @@ public class SportsSession {
         ArrayList<SportsSession> sessions = new ArrayList<SportsSession>();
         //retrieve all csv files for the given date
         File[] ListOfCsvs = retrieveCsvs(date);
-        for (File f : ListOfCsvs) {
-            //read and interpret every csv file, returns a table with the following columns:
-            //0: UserID, 1: Measurement type, 2:Exact time, 3: Type of activity,
-            //4, 5, 6: Measurements
-            ArrayList<String[]> TableOfActivities = new ArrayList<String[]>();
-            TableOfActivities = readCsv(f);
-            for (SportsSession session : transformToSessions(TableOfActivities)) {
-                sessions.add(session);
-                printSession(session);
+        if (ListOfCsvs != null) {
+            for (File f : ListOfCsvs) {
+                //read and interpret every csv file, returns a table with the following columns:
+                //0: UserID, 1: Measurement type, 2:Exact time, 3: Type of activity,
+                //4, 5, 6: Measurements
+                ArrayList<String[]> TableOfActivities = new ArrayList<String[]>();
+                TableOfActivities = readCsv(f);
+                for (SportsSession session : transformToSessions(TableOfActivities)) {
+                    sessions.add(session);
+                    printSession(session);
+                }
             }
         }
         return sessions;
@@ -60,8 +63,9 @@ public class SportsSession {
         int month = date.get(Calendar.MONTH);
         int day = date.get(Calendar.DAY_OF_MONTH);
         String filename = year + "-" + month + 1 + "-" + String.format("%02d", day);
-        Log.d("date: ", filename);
-        File folder = new File("filename");
+        Log.d("date ", filename);
+        File userDataFolder = new File(Environment.getDataDirectory().toString(), "triathlon");
+        File folder = new File(userDataFolder, "filename");
         File[] listOfFiles = folder.listFiles();
         if (listOfFiles != null) {
             for (int i = 0; i < listOfFiles.length; i++) {
@@ -71,6 +75,8 @@ public class SportsSession {
                     System.out.println("Directory " + listOfFiles[i].getName());
                 }
             }
+        } else {
+            Log.d("Files", "none");
         }
 
         return listOfFiles;

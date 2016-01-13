@@ -40,10 +40,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.hardware.Sensor;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,7 +50,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -89,6 +85,7 @@ public class MainActivity extends Activity {
 
 
     private static final String TAG = "MainActivity";
+    public static MainActivity itself;
     LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
     });
     int current_time = 0;
@@ -102,7 +99,6 @@ public class MainActivity extends Activity {
     private ArrayAdapter<String> adapter;
     private Intent murderousIntent;
     private int warned = 0;
-
     BroadcastReceiver br = new BroadcastReceiver() {
         // Receives broadcasts sent from other points of the app, like the SensorsDataService
         @Override
@@ -140,7 +136,7 @@ public class MainActivity extends Activity {
                     str = str + "d";
 
                 }
-            }else if (intent.getAction().equals(SensorsDataService.UPDATE_GPS_PARAMS)) {
+            } else if (intent.getAction().equals(SensorsDataService.UPDATE_GPS_PARAMS)) {
                 // Prints out the heart rate
                 final TextView speedLabel = (TextView) findViewById(R.id.speedLable);
                 final TextView distanceLabel = (TextView) findViewById(R.id.distanceLabel);
@@ -164,16 +160,37 @@ public class MainActivity extends Activity {
                 final TextView MessageLabel = (TextView) findViewById(R.id.messageLabel);
                 String message = intent.getStringExtra("message");
                 MessageLabel.setText(message);
-            }else if (intent.getAction().equals(SensorsDataService.UPDATE_TIMER_VALUE)) {
-                String newtime = String.valueOf( intent.getIntExtra("minutes",0) )
-                        + ":" + StringUtils.leftPad(Long.toString(intent.getIntExtra("seconds",0)), 2, "0");
+            } else if (intent.getAction().equals(SensorsDataService.UPDATE_TIMER_VALUE)) {
+                String newtime = String.valueOf(intent.getIntExtra("minutes", 0))
+                        + ":" + StringUtils.leftPad(Long.toString(intent.getIntExtra("seconds", 0)), 2, "0");
                 TextView timetext = (TextView) findViewById(R.id.timer);
                 timetext.setText(newtime);
             }
         }
     };
     private DataUpdateReceiver dataUpdateReceiver;
-    public static MainActivity itself;
+    private AdapterView.OnItemSelectedListener OnCatSpinnerCL = new AdapterView.OnItemSelectedListener() {
+        public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+
+            ((TextView) parent.getChildAt(0)).setTextColor(Color.BLUE);
+            ((TextView) parent.getChildAt(0)).setTextSize(5);
+
+        }
+
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    };
+
+    public static void selectSpinnerItemByValue(Spinner spnr, String value) {
+        SimpleCursorAdapter adapter = (SimpleCursorAdapter) spnr.getAdapter();
+        for (int position = 0; position < adapter.getCount(); position++) {
+            if (value.equals(adapter.getItemId(position))) {
+                spnr.setSelection(position);
+                return;
+            }
+        }
+    }
 
     @Override
     public void onCreate(Bundle b) {
@@ -205,25 +222,24 @@ public class MainActivity extends Activity {
 
     }
 
-    void CheckToShowRPE(){
+    void CheckToShowRPE() {
 
-        if (SensorsDataService.itself == null){
+        if (SensorsDataService.itself == null) {
             return;
         }
 
-        if (! SensorsDataService.itself.needToShowRPE ){
+        if (!SensorsDataService.itself.needToShowRPE) {
             return;
         }
-
 
 
         SensorsDataService.itself.needToShowRPE = false;
 
     }
 
-    private void showCurrentAppState(){
+    private void showCurrentAppState() {
 
-        if (SensorsDataService.itself == null){
+        if (SensorsDataService.itself == null) {
             return;
         }
 
@@ -235,32 +251,19 @@ public class MainActivity extends Activity {
             mark = mark.substring(0, idx);
         }
 
-        int selectedIndex = Arrays.asList(SensorsDataService.GetAllStates()).indexOf(mark);
+        int selectedIndex = Arrays.asList(R.array.activities).indexOf(mark);
         Spinner s = (Spinner) findViewById(R.id.sportsAction);
         s.setSelection(selectedIndex);
 
     }
 
-    public static void selectSpinnerItemByValue(Spinner spnr, String value)
-    {
-        SimpleCursorAdapter adapter = (SimpleCursorAdapter) spnr.getAdapter();
-        for (int position = 0; position < adapter.getCount(); position++)
-        {
-            if(value.equals(adapter.getItemId(position)) )
-            {
-                spnr.setSelection(position);
-                return;
-            }
-        }
-    }
-
-    private void initializeScreenOn(){
+    private void initializeScreenOn() {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     }
 
-    private void initializeSelfRestarting(){
+    private void initializeSelfRestarting() {
 
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
         // Intent that kills the app after a certain amount of time after the app has crashed
@@ -287,20 +290,7 @@ public class MainActivity extends Activity {
 
     }
 
-    private AdapterView.OnItemSelectedListener OnCatSpinnerCL = new AdapterView.OnItemSelectedListener() {
-        public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-
-            ((TextView) parent.getChildAt(0)).setTextColor(Color.BLUE);
-            ((TextView) parent.getChildAt(0)).setTextSize(5);
-
-        }
-
-        public void onNothingSelected(AdapterView<?> parent) {
-
-        }
-    };
-
-    private void initializeGraph(){
+    private void initializeGraph() {
 
         GraphView graph = (GraphView) findViewById(R.id.heartRateGraph);
 
@@ -326,12 +316,15 @@ public class MainActivity extends Activity {
     }
 
 
-    private void initializeSportsActions(){
+    private void initializeSportsActions() {
 
-        String [] arraySpinner = SensorsDataService.GetAllStates();
         Spinner s = (Spinner) findViewById(R.id.sportsAction);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, arraySpinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.activities, android.R.layout.simple_spinner_item);
+
         //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item,arraySpinner);
+
+
         s.setAdapter(adapter);
 
 
@@ -340,13 +333,15 @@ public class MainActivity extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                 ((TextView) parent.getChildAt(0)).setTextColor(Color.BLACK);
             }
-            public void onNothingSelected(AdapterView<?> parent) { }
+
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         };
         s.setOnItemSelectedListener(colorSpinnerListener);
 
     }
 
-    private void RegisterBroadcastsReceiver(){
+    private void RegisterBroadcastsReceiver() {
 
 
         IntentFilter filter = new IntentFilter();
@@ -432,8 +427,6 @@ public class MainActivity extends Activity {
         IntentFilter intentFilter = new IntentFilter(SensorsDataService.NEW_MESSAGE_AVAILABLE);
         registerReceiver(dataUpdateReceiver, intentFilter);
 
-        UpdateButtonText();
-
         /*if (SensorsDataService.itself != null){
             SensorsDataService.itself.StopSleepTracking();
         }*/
@@ -456,79 +449,26 @@ public class MainActivity extends Activity {
 
     }
 
-    public void UpdateButtonText() {
-
-        if (SensorsDataService.itself != null) {
-            ImageButton btn = (ImageButton) findViewById(R.id.switchTrainingButton);
-            ImageButton colorbtn = (ImageButton) findViewById(R.id.colorButton);
-            //String outputString = SensorsDataService.itself.allowHRM ? "Stop training" : "Start training";
-            //Only if the button is a TextButton
-            //btn.setText(outputString);
-            TextView HRLabel = (TextView) findViewById(R.id.heartRateLabel);
-            Resources res = getResources();
-            Drawable Selected_Round_Button = res.getDrawable(R.drawable.selectedroundbutton);
-            Drawable Round_Button = res.getDrawable(R.drawable.roundbutton);
-            /*if (outputString.equals("Start training")) {
-                HRLabel.setText("HR");
-            }
-            if (SensorsDataService.itself.allowHRM) {
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                colorbtn.setBackground(Selected_Round_Button);
-            } else {
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                series.resetData(new DataPoint[]{});
-                colorbtn.setBackground(Round_Button);
-            }*/
-
-
-        }
-
-    }
-
     public void onClicked(View view) {
         switch (view.getId()) {
             case R.id.switchTrainingButton:
 
                 // get selected item
-                Spinner mySpinner=(Spinner) findViewById(R.id.sportsAction);
+                Spinner mySpinner = (Spinner) findViewById(R.id.sportsAction);
                 String spinnerText = mySpinner.getSelectedItem().toString();
 
                 if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction( spinnerText );
-                    UpdateButtonText();
+                    SensorsDataService.itself.SwitchSportsAction(spinnerText);
                 }
                 Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
                 v.vibrate(100);
-
-                break;
-            case R.id.exitAppButton:
-
-                // first stop the service so that it does not stop the sleep tracking
-                Intent intent = new Intent(this, SensorsDataService.class);
-                stopService(intent);
-
-                // then launch sleep tracking
-                Intent launchSleepIntent = getPackageManager().getLaunchIntentForPackage("com.urbandroid.sleep");
-                startActivity(launchSleepIntent);
-
-                // finally, kill the app in order to save the battery
-                android.os.Process.killProcess(android.os.Process.myPid());
-
-                /*
-
-                for (int i = 0; i < 10000; i++){
-                    ISSRecordData data = new ISSRecordData(1,1, "yyyy.MM.dd_HH:mm:ss", null, 3.1415926535f,0,0);
-                    SensorsDataService.itself.alldata.add(data);
-                }
-
-                OutputEvent("Created fake data");*/
 
                 break;
             case R.id.searchForHRM:
                 try {
                     final Intent bluetoothSelector = new Intent(this, DeviceScanActivity.class);
                     startActivity(bluetoothSelector);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     Log.e(TAG, ex.toString());
                 }
                 break;
@@ -544,7 +484,7 @@ public class MainActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
-                UpdateButtonText();
+                //UpdateButtonText was called from here, but  that method didn't do anything.
             }
 
 
@@ -565,25 +505,7 @@ public class MainActivity extends Activity {
             updatetimetext();
             handler.postDelayed(this, 1000);
         }
-    };
-
-    private void updatetimetext() {
-        long minutes = time[1];
-        long seconds = time[0];
-        String newtime = String.valueOf(minutes) + ":" + StringUtils.leftPad(Long.toString(seconds), 2, "0");
-        TextView timetext = (TextView) findViewById(R.id.timer);
-        timetext.setText(newtime);
-    }
-
-    public void startTimer() {
-        time[0] = 0;
-        time[1] = 0;
-        handler.postDelayed(runnable, 1000);
-    }
-
-    void stopTimer() {
-        handler.removeCallbacks(runnable);
-    }*/
+    };*/
 
 }
 

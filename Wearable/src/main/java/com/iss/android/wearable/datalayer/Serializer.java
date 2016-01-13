@@ -21,10 +21,9 @@ import java.io.ObjectOutputStream;
 
 /**
  * @author Iaroslav
- * WARNING: (DE)SERIALIZATION IS PERFORMED IN MEMORY FOR BETTER PERFORMANCE
+ *         WARNING: (DE)SERIALIZATION IS PERFORMED IN MEMORY FOR BETTER PERFORMANCE
  */
 public class Serializer {
-
 
 
     public static void SerializeToFile(Object obj, File file) throws IOException {
@@ -36,7 +35,7 @@ public class Serializer {
         }
 
         fileOut = new FileOutputStream(file);
-        byte [] data = SerializeToBytes(obj);
+        byte[] data = SerializeToBytes(obj);
 
         fileOut.write(data);
         fileOut.close();
@@ -48,7 +47,7 @@ public class Serializer {
         FileInputStream fileIn;
 
         fileIn = new FileInputStream(file);
-        byte [] data = InputStreamToByte(fileIn);
+        byte[] data = InputStreamToByte(fileIn);
         fileIn.close();
 
         return DeserializeFromBytes(data);
@@ -69,7 +68,7 @@ public class Serializer {
         }
     }
 
-    public static byte [] InputStreamToByte(InputStream is) throws IOException {
+    public static byte[] InputStreamToByte(InputStream is) throws IOException {
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 

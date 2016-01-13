@@ -1,15 +1,11 @@
 package com.iss.android.wearable.datalayer;
 
-import android.graphics.Color;
-import android.hardware.Sensor;
-import android.os.Bundle;
 import android.app.Activity;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 public class SelectRPE extends Activity {
 
@@ -24,9 +20,9 @@ public class SelectRPE extends Activity {
 
     // android studio has gone full retard on me,
     // so I initialize the items from code isntead of xml
-    private void initializeRPE(){
+    private void initializeRPE() {
 
-        String [] arraySpinner = new String[] {
+        String[] arraySpinner = new String[]{
                 "0 Rest",
                 "1 Very easy",
                 "2 Easy",
@@ -47,7 +43,7 @@ public class SelectRPE extends Activity {
         s.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (SensorsDataService.itself==null){
+                if (SensorsDataService.itself == null) {
                     return;
                 }
 

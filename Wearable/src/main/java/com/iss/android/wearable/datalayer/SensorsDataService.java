@@ -17,7 +17,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -71,8 +70,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             TAG = "MainActivity",
             ASK_USER_FOR_RPE = "show rpe dialog",
             CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb",
-            UPDATE_TIMER_VALUE="update the timer value",
-            UPDATE_GPS_PARAMS="update gps data",
+            UPDATE_TIMER_VALUE = "update the timer value",
+            UPDATE_GPS_PARAMS = "update gps data",
             NEW_MESSAGE_AVAILABLE = "log the output";
     private static final UUID UUID_HRS =
             UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb"),
@@ -324,33 +323,33 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     int timerTime = 0;
     String currentState = "Idle";
-    int timerTimeout = 60*60*24;
+    int timerTimeout = 60 * 60 * 24;
     int COOLING_MEASUREMENT_TIME = 60 * 60; // cooling is measured for 60 minutes
     int RESTING_MEASUREMENT_TIME = 60 * 5; // measure heart rate for 5 min
     int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
     int COOLING_RPE_TIME = 60 * 15;
 
-    public void TimerEvent(){
+    public void TimerEvent() {
 
         timerTime = timerTime + 1;
 
         // this checks for missing hrm
-        if ((timerTime % 60 == 0) && (hrmDisconnected)){
+        if ((timerTime % 60 == 0) && (hrmDisconnected)) {
             mBluetoothAdapter.startLeScan(mLeScanCallback);
         }
 
         // fire this event only with some interval in seconds
-        if (timerTime % SamplingRate == 0){
+        if (timerTime % SamplingRate == 0) {
             ResetSensors();
         }
 
         SendTimerTime(timerTime / 60, timerTime % 60);
 
-        if (timerTime > timerTimeout){
+        if (timerTime > timerTimeout) {
             BringIntoState("Idle");
         }
 
-        if ((timerTime == COOLING_RPE_TIME) && currentState.contains("Cooling")){
+        if ((timerTime == COOLING_RPE_TIME) && currentState.contains("Cooling")) {
             AskUserForRPE();
         }
 
@@ -381,14 +380,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         sendBroadcast(intent);*/
     }
 
-    public void OutputCurrentState(){
+    public void OutputCurrentState() {
 
-        if (currentState.equals("Resting")){
+        if (currentState.equals("Resting")) {
             OutputEvent(currentState);
             return;
         }
 
-        if (currentState.contains("Cooling")){
+        if (currentState.contains("Cooling")) {
             OutputEvent("Cooling down");
             return;
         }
@@ -397,7 +396,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    public void SendTimerTime(int minutes, int seconds){
+    public void SendTimerTime(int minutes, int seconds) {
 
         Intent intent = new Intent(this.UPDATE_TIMER_VALUE);
         intent.putExtra("minutes", minutes);
@@ -407,7 +406,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     public void ResetSensors() {
-
 
 
         if (isInitialising) {
@@ -485,7 +483,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             Serializer.SerializeToFile(savedData, sensorsData);
 
             long totalTime = System.currentTimeMillis() - startTime;
-
 
 
         } catch (Exception e) {
@@ -572,31 +569,19 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    public static  String [] GetAllStates(){
-
-        return new String[] {
-                "Resting",
-                "Swimming",
-                "Cycling",
-                "Running",
-                "Athletics"
-        };
-
-    }
-
-    public void RecordActivitySwitch(){
+    public void RecordActivitySwitch() {
 
         AddNewData(UserID, 0, GetTimeNow(), currentState, 0, 0, 0);
 
     }
 
-    public void SwitchSportsAction( String action ) {
+    public void SwitchSportsAction(String action) {
 
         String newState = "";
 
-        if (!currentState.equals("Idle")){
+        if (!currentState.equals("Idle")) {
 
-            if (currentState.equals("Resting") || currentState.contains("Cooling")){
+            if (currentState.equals("Resting") || currentState.contains("Cooling")) {
                 // stop recording cooling / resting prematurely
                 newState = "Idle";
                 RecordActivitySwitch();
@@ -605,8 +590,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 newState = currentState + ":Cooling";
                 OutputEvent("Cooling down ...");
             }
-        }
-        else { // switch from idle state to measurement
+        } else { // switch from idle state to measurement
 
             newState = action;
             RecordActivitySwitch();
@@ -628,20 +612,29 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         StopMeasuring();
 
-        if (state.equals("Idle")){
+        if (state.equals("Idle")) {
             return;
         }
+        if (state.equals("Sleep")) {
+            Intent intent = new Intent(this, SensorsDataService.class);
+            stopService(intent);
 
-        if (state.equals("Resting")){
+            // then launch sleep tracking
+            Intent launchSleepIntent = getPackageManager().getLaunchIntentForPackage("com.urbandroid.sleep");
+            startActivity(launchSleepIntent);
+
+            // finally, kill the app in order to save the battery
+            android.os.Process.killProcess(android.os.Process.myPid());
+            return;
+        }
+        if (state.equals("Resting")) {
             // stop recording cooling / resting prematurely
             timerTimeout = RESTING_MEASUREMENT_TIME; // measure cooling for 1 hour
-        } else if (state.contains("Cooling"))
-        {
+        } else if (state.contains("Cooling")) {
             timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
             OutputEvent("Cooling down ...");
             StopGPS();
-        }
-        else{
+        } else {
             // start training
             timerTimeout = TRAINING_TIMEOUT;
             StartGPS();
@@ -651,7 +644,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    void StartMeasuring(){
+    void StartMeasuring() {
 
         GetHRMid();
 
@@ -685,7 +678,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    void StopMeasuring(){
+    void StopMeasuring() {
 
         if (wakeLock.isHeld()) {
             wakeLock.release();
@@ -706,11 +699,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
     }
 
-    public void  genData(){
+    public void genData() {
 
-        for (int i = 0; i < 1000; i  ++){
+        for (int i = 0; i < 1000; i++) {
 
-            AddNewData(1,21, GetTimeNow(), currentState, 1, 3.123f, 3 );
+            AddNewData(1, 21, GetTimeNow(), currentState, 1, 3.123f, 3);
 
         }
 
@@ -816,7 +809,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     // this method defined user heart rate monitor prior to the enabling of the training mode
-    public void GetHRMid(){
+    public void GetHRMid() {
 
         String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -945,7 +938,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         //OutputEvent("Mutex state: " + allowHRM);
 
 
-
     }
 
     @Override
@@ -1033,7 +1025,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     public void AddTrainingScore(int position) {
-        AddNewData(0,1024,GetTimeNow(),currentState,position,0,0);
+        AddNewData(0, 1024, GetTimeNow(), currentState, position, 0, 0);
         needToShowRPE = false;
     }
 
@@ -1045,7 +1037,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     Location locPrev = null;
     double totalDistance = 0;
 
-    public void StartGPS(){
+    public void StartGPS() {
 
         gpsListener = new LocationListener() {
             @Override
@@ -1055,12 +1047,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 double longitude = location.getLongitude();
                 double altitude = location.getAltitude();
 
-                AddNewData(UserID, 512, GetTimeNow(), currentState, (float)latitude, (float)longitude, (float)altitude);
+                AddNewData(UserID, 512, GetTimeNow(), currentState, (float) latitude, (float) longitude, (float) altitude);
 
-                float speed  = location.getSpeed() * 3.6f;
-                AddNewData(UserID, 513, GetTimeNow(), currentState, speed , 0, 0);
+                float speed = location.getSpeed() * 3.6f;
+                AddNewData(UserID, 513, GetTimeNow(), currentState, speed, 0, 0);
 
-                if (locPrev != null){
+                if (locPrev != null) {
                     float dis = locPrev.distanceTo(location);
                     totalDistance += dis;
                 }
@@ -1093,7 +1085,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, gpsListener);
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, gpsListener);
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             OutputEvent(ex.toString());
         }
 
@@ -1101,14 +1093,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     // GPS processing
 
-    public void StopGPS(){
+    public void StopGPS() {
 
-        locationManager.removeUpdates( gpsListener);
+        locationManager.removeUpdates(gpsListener);
         totalDistance = 0;
 
     }
 
-    public void SendGPSdata(double speed, double totalDistance){
+    public void SendGPSdata(double speed, double totalDistance) {
 
         Intent intent = new Intent(this.UPDATE_GPS_PARAMS);
         intent.putExtra("speed", speed);

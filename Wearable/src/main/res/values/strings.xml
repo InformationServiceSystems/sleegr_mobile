@@ -53,6 +53,16 @@
         <item>9 —</item>
         <item>10 Maximal</item>
     </string-array>
+
+    <string-array name="activities">
+        <item>Athletics</item>
+        <item>Cycling</item>
+        <item>Swimming</item>
+        <item>Running</item>
+        <item>Resting</item>
+        <item>Sleep</item>
+    </string-array>
+
     <string name="title_activity_select_rpe"></string>
 
 </resources>
