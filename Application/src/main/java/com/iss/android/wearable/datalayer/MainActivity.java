@@ -41,7 +41,6 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.File;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -241,8 +240,8 @@ public class MainActivity extends Activity {
 
     public void onRegisterUser(View view) {
 
-        final Intent bluetoothSelector = new Intent(this, RegisterUserActivity.class);
-        startActivity(bluetoothSelector);
+        final Intent registerUser = new Intent(this, RegisterUserActivity.class);
+        startActivity(registerUser);
 
     }
 

@@ -22,6 +22,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-wearable:7.3.0'
     compile 'com.android.support:support-v13:23.0.0'
     compile 'com.jjoe64:graphview:4.0.1'
+    compile 'com.facebook.android:facebook-android-sdk:4.6.0'
     wearApp project(':Wearable')
 }
 

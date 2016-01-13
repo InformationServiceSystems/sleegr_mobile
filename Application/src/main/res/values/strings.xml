@@ -39,5 +39,6 @@
     <string name="title_activity_intensity_statistics">IntensityStatisticsActivity</string>
     <string name="title_activity_select_available_data">SelectAvailableData</string>
     <string name="title_activity_display_activity_file">DisplayActivityFile</string>
+    <string name="facebook_app_id">1730472480519529</string>
 
 </resources>
