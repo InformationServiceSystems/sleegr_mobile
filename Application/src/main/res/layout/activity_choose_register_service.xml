@@ -18,7 +18,8 @@
         <com.facebook.login.widget.LoginButton
             android:id="@+id/Facebook"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp" />
 
         <Button
             android:id="@+id/Google"

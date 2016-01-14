@@ -15,10 +15,10 @@ public class RegisterUserActivity extends Activity {
         super.onCreate(savedInstanceState);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean regComplete = prefs.getBoolean("registration", false);
-        if (regComplete) {
+        /*if (regComplete) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
-        }
+        }*/
         setContentView(R.layout.activity_register_user);
     }
 
