@@ -43,10 +43,10 @@ public class ChooseRegisterServiceActivity extends Activity {
         FacebookSdk.sdkInitialize(getApplicationContext());
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean regComplete = prefs.getBoolean("registration", false);
-        /*if (regComplete) {
+        if (regComplete) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
-        }*/
+        }
         setContentView(R.layout.activity_choose_register_service);
 
         accessTokenTracker = new AccessTokenTracker() {
