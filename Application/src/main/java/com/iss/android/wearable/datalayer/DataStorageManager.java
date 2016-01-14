@@ -27,8 +27,13 @@ public class DataStorageManager {
 
     }
 
-    static File sleepData = new File(Environment.getDataDirectory().toString() + "/sleep-data/sleep-export.csv");
-    static File userDataFolder = new File(Environment.getDataDirectory().toString(), "triathlon");
+    // Environment.getDataDirectory().toString()
+    // I use here external storage directory, as the previous versions of the
+    // app use the external directory. In case ext. storage is not available, use
+    // Environment.getDataDirectory().toString()
+    static String dataFolder = Environment.getExternalStorageDirectory().toString();
+    static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
+    static File userDataFolder = new File(dataFolder, "triathlon");
 
     public static byte[] FileToBytes(File file) {
 

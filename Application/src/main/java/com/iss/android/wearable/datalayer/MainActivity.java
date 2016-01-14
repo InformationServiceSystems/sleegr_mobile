@@ -427,13 +427,15 @@ public class MainActivity extends Activity {
 
                     ArrayList<TimeSeries> allData = null;
 
-                    File tempdata = new File(Environment.getExternalStorageDirectory().toString() , "data.tmp2" );
+                    /*File tempdata = new File(Environment.getExternalStorageDirectory().toString() , "data.tmp2" );
                     if (!tempdata.exists()) {
                         allData = DataProcessingManager.GetDailyRecoveryParameters(days, UserID);
                         Serializer.SerializeToFile(allData, tempdata);
                     }else {
                         allData = (ArrayList<TimeSeries>) Serializer.DeserializeFromFile(tempdata);
-                    }
+                    }*/
+
+                    allData = DataProcessingManager.GetDailyRecoveryParameters(days, UserID);
 
                     int pred_days = 7;
                     TimeSeries rpeReq = randomRPEReq(days, pred_days);

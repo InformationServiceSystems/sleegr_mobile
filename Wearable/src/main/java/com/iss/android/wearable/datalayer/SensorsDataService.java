@@ -581,7 +581,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         if (!currentState.equals("Idle")) {
 
-            if (currentState.equals("Resting") || currentState.contains("Cooling")) {
+            if (currentState.equals("Resting") || currentState.equals("Other") || currentState.contains("Cooling")) {
                 // stop recording cooling / resting prematurely
                 newState = "Idle";
                 RecordActivitySwitch();
@@ -630,7 +630,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         if (state.equals("Resting")) {
             // stop recording cooling / resting prematurely
             timerTimeout = RESTING_MEASUREMENT_TIME; // measure cooling for 1 hour
-        } else if (state.contains("Cooling")) {
+        }else if(state.equals("Other")){
+            timerTimeout = TRAINING_TIMEOUT;
+        }
+        else if (state.contains("Cooling")) {
             timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
             OutputEvent("Cooling down ...");
             StopGPS();

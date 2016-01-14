@@ -39,7 +39,7 @@ public class VisualizationsPlotter {
     public static void PutTimeSeriesToGraph(GraphView graph,  TimeSeries series, Context context){
 
         LineGraphSeries<DataPoint> data_values = new LineGraphSeries<DataPoint>(new DataPoint[] {});
-        data_values.setDrawDataPoints(true);
+        //data_values.setDrawDataPoints(true);
         data_values.setColor(series.color);
         data_values.setTitle(series.name);
 

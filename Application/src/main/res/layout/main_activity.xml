@@ -35,7 +35,7 @@
         android:layout_below="@+id/button"/>
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:text="Server"
         android:id="@+id/button2"
@@ -44,7 +44,7 @@
         android:layout_alignParentEnd="true" />
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:text="Watch"
         android:id="@+id/button3"
@@ -53,7 +53,7 @@
         android:layout_alignStart="@+id/graphButton" />
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:text="Graph"
         android:id="@+id/graphButton"
@@ -62,9 +62,9 @@
         android:layout_alignParentEnd="true" />
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:text="EXPLORE"
+        android:text="Explore"
         android:id="@+id/button4"
         android:onClick="onExploreData"
         android:layout_above="@+id/button2"
