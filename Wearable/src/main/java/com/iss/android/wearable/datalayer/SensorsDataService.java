@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -169,6 +170,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 }
             };
     public boolean needToShowRPE = false;
+    private String USERID_FORDATASTORAGE = "smartwatch";
+    private int USER_ASSUMED_SYNCTIME = 30*2;
 
     {
         mGattCallback = new BluetoothGattCallback() {
@@ -360,6 +363,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         gpsListener.onLocationChanged(lastKnownLocation);*/
 
+
+        DataStorageManager.InitializeTriathlonFolder();
+
     }
 
     private void AskUserForRPE() {
@@ -455,7 +461,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         if (alldata.size() % 30 == 0) {
 
-            SaveNewDataToFile(alldata);
+            ArrayList<ISSRecordData> copy = new ArrayList<>(alldata); // copy needed in order to avoid synchronization issues
+            SaveNewDataToFile(copy);
             alldata.clear();
             System.gc();
 
@@ -465,31 +472,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     private void SaveNewDataToFile(ArrayList<ISSRecordData> data) {
 
-        try {
-
-            if (!sensorsData.exists()) {
-                Serializer.SerializeToFile(new ArrayList<ISSRecordData>(), sensorsData);
-            }
-
-            //OutputEvent("Started saving the data ... ");
-
-            long startTime = System.currentTimeMillis();
-
-            ArrayList<ISSRecordData> savedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromFile(sensorsData);
-            savedData.addAll(data);
-
-            //OutputEvent("Overall items so far: " + savedData.size());
-
-            Serializer.SerializeToFile(savedData, sensorsData);
-
-            long totalTime = System.currentTimeMillis() - startTime;
-
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
+        DataStorageManager.SaveNewDataToFile(data, USERID_FORDATASTORAGE);
 
     }
 
@@ -725,18 +708,35 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                 //genData();
 
-                byte[] data = null;
+                ArrayList<ISSRecordData> allData = new ArrayList<>();
 
-                long startTime = System.currentTimeMillis();
+                // I assume that user synced with sw in last 2 month
+                ArrayList<File> files = DataStorageManager.GetAllFilesToUpload(USERID_FORDATASTORAGE, USER_ASSUMED_SYNCTIME);
+                Collections.reverse(files); // make sure that files are from oldest to newest
 
-                try {
-                    data = Serializer.FileToBytes(sensorsData);
-                    //data = Serializer.SerializeToBytes(alldata);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                for (File file:files){
+
+                    if (file.exists()){
+
+                        try {
+                            List<ISSRecordData> issRecordDatas = CSVManager.ReadCSVdata(file);
+                            allData.addAll(issRecordDatas);
+                        }catch (Exception ex){
+
+                        }
+
+                    }
+                    //allData.add();
+
                 }
 
-                long totalTime = System.currentTimeMillis() - startTime;
+                byte [] data = null;
+
+                try {
+                    data = Serializer.SerializeToBytes(allData);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 if (nodes.size() > 0) {
                     for (int i = 0; i < nodes.size(); i++) {
@@ -788,12 +788,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 OutputEvent("Data saved");
                 alldata.clear();
 
-                if (sensorsData.exists()) {
-                    sensorsData.delete();
-                    try {
-                        Serializer.SerializeToFile(new ArrayList<ISSRecordData>(), sensorsData);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                // clear the existing data on the smartwatch
+
+                ArrayList<File> files = DataStorageManager.GetAllFilesToUpload(USERID_FORDATASTORAGE, USER_ASSUMED_SYNCTIME);
+                Collections.reverse(files); // make sure that files are from oldest to newest
+
+                for (File file:files){
+                    if (file.exists()){
+                        file.delete();
                     }
                 }
 

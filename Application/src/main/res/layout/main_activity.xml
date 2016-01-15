@@ -49,17 +49,17 @@
         android:text="Watch"
         android:id="@+id/button3"
         android:onClick="onWatchSync"
-        android:layout_above="@+id/graphButton"
-        android:layout_alignStart="@+id/graphButton" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
 
     <Button
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:text="Graph"
+        android:text="Analyze"
         android:id="@+id/graphButton"
         android:onClick="onGraphPlot"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_above="@+id/button4"
+        android:layout_alignStart="@+id/button4" />
 
     <Button
         android:layout_width="100dp"
