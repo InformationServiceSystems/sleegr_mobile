@@ -457,6 +457,10 @@ public class MainActivity extends Activity {
                 Spinner mySpinner = (Spinner) findViewById(R.id.sportsAction);
                 String spinnerText = mySpinner.getSelectedItem().toString();
 
+                if (spinnerText.equals(" ")){ // see strings.xml for why
+                    return;
+                }
+
                 if (SensorsDataService.itself != null) {
                     SensorsDataService.itself.SwitchSportsAction(spinnerText);
                 }

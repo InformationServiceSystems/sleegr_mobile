@@ -62,6 +62,14 @@
         <item>Running</item>
         <item>Resting</item>
         <item>Sleep</item>
+        <!--
+        the other day I noticed that the sleep item is missing in dropdown list
+        it seems that you simply cannot scroll to some of the items if there are a lot of them
+        I have neither time nor desire to find intelligent solutions to google's bugs
+        so I added empty items, to make others scrollable
+         -->
+        <item> </item>
+        <item> </item>
     </string-array>
 
     <string name="title_activity_select_rpe"></string>
