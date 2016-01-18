@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/button2"
+        android:title="Server" />
+
+
+    <item
+        android:id="@+id/button3"
+        android:title="Watch" />
+
+
+    <item
+        android:id="@+id/graphButton"
+        android:title="Graphs" />
+
+
+    <item
+        android:id="@+id/button4"
+        android:title="Explore" />
+
+
+</menu>

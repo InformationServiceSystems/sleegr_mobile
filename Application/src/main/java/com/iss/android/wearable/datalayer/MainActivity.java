@@ -16,7 +16,6 @@
 
 package com.iss.android.wearable.datalayer;
 
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,10 +23,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -40,7 +42,6 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,7 +56,9 @@ import java.util.HashSet;
  * item every second while it is open. Also allows user to take a photo and send that as an asset
  * to the paired wearable.
  */
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity implements
+        MainFragment.OnFragmentInteractionListener,
+        ManageDateFragment.OnFragmentInteractionListener {
 
     private static final String TAG = "MainActivity";
 
@@ -65,6 +68,7 @@ public class MainActivity extends Activity {
     private ListView mDataItemList;
     private DataItemAdapter mDataItemListAdapter;
     private Handler mHandler;
+    private Calendar date = new GregorianCalendar();
 
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -77,19 +81,24 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main_activity);
         setupViews();
         //Necessary, terminating the choose register service activity
-        //ChooseRegisterServiceActivity.instance.finish();
-
+        ChooseRegisterServiceActivity.instance.finish();
         // Stores DataItems received by the local broadcaster or from the paired watch.
         mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
         mDataItemList.setAdapter(mDataItemListAdapter);
 
-        Calendar date = new GregorianCalendar();
+        date = new GregorianCalendar();
         SportsSession.retrieveCsvs(date);
+
+        TextView text = (TextView) findViewById(R.id.text);
+        String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));
+        text.setText("Heute ist der " + datestring + ".");
 
         if (DataSyncService.itself == null) {
             Intent intent = new Intent(this, DataSyncService.class);
             startService(intent);
         }
+
+        fillViewerFragment();
 
 /*
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
@@ -108,6 +117,11 @@ public class MainActivity extends Activity {
 
     }
 
+    private void fillViewerFragment() {
+        //TODO: build up viewer fragment for the current date
+        return;
+    }
+
 
     PendingIntent pendingInt = null;
 
@@ -122,7 +136,40 @@ public class MainActivity extends Activity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.button2:
+                onServerSync();
+                return true;
+            case R.id.button3:
+                onWatchSync();
+                return true;
+            case R.id.button4:
+                onExploreData();
+                return true;
+            case R.id.graphButton:
+                onGraphPlot();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private DataUpdateReceiver dataUpdateReceiver;
+
+    @Override
+    public void changeDisplayDate(Calendar calendar) {
+
+    }
 
     // this is used to communicate with Service
     private class DataUpdateReceiver extends BroadcastReceiver {
@@ -238,6 +285,19 @@ public class MainActivity extends Activity {
         return results;
     }
 
+    public void onButtonPressed(View view) {
+        if (view.equals(findViewById(R.id.left))) {
+            date.add(Calendar.DATE, -1);
+        } else {
+            date.add(Calendar.DATE, 1);
+        }
+        TextView text = (TextView) findViewById(R.id.text);
+        String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));
+        text.setText("Today is the " + datestring + ".");
+        TextView ViewerText = (TextView) findViewById(R.id.ViewerText);
+        ViewerText.setText("I'm a stupid dummy that shows all the data for the " + datestring + ".");
+    }
+
     public void onRegisterUser(View view) {
 
         final Intent registerUser = new Intent(this, RegisterUserActivity.class);
@@ -262,7 +322,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void onServerSync(View view) {
+    public void onServerSync() {
 
         if (DataSyncService.itself != null) {
             DataSyncService.itself.ShareDataWithServer();
@@ -270,7 +330,7 @@ public class MainActivity extends Activity {
 
     }
 
-    public void onWatchSync(View view) {
+    public void onWatchSync() {
 
         if (DataSyncService.itself != null) {
             DataSyncService.itself.RequestDataFromWatch();
@@ -414,7 +474,7 @@ public class MainActivity extends Activity {
 
     }
 
-    public void onGraphPlot(View view){
+    public void onGraphPlot() {
 
         new Thread(new Runnable() {
             @Override
@@ -542,7 +602,7 @@ public class MainActivity extends Activity {
 
     }
 
-    public void onExploreData(View view){
+    public void onExploreData() {
 
         Intent i = new Intent(MainActivity.this, SelectAvailableData.class);
         startActivity(i);

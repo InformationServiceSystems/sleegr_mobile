@@ -15,6 +15,7 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -27,48 +28,29 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
 
+    <fragment
+        class="com.iss.android.wearable.datalayer.ManageDateFragment"
+        android:id="@+id/chooser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button"
+        tools:layout="@layout/fragment_manage_date"
+        android:layout_centerInParent="true" />
+
+    <fragment
+        class="com.iss.android.wearable.datalayer.MainFragment"
+        android:id="@+id/viewer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/chooser"
+        tools:layout="@layout/fragment_main" />
+
     <ListView
         android:id="@+id/data_item_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:transcriptMode="alwaysScroll"
-        android:layout_below="@+id/button"/>
-
-    <Button
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:text="Server"
-        android:id="@+id/button2"
-        android:onClick="onServerSync"
-        android:layout_above="@+id/button3"
-        android:layout_alignParentEnd="true" />
-
-    <Button
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:text="Watch"
-        android:id="@+id/button3"
-        android:onClick="onWatchSync"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
-
-    <Button
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:text="Analyze"
-        android:id="@+id/graphButton"
-        android:onClick="onGraphPlot"
-        android:layout_above="@+id/button4"
-        android:layout_alignStart="@+id/button4" />
-
-    <Button
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:text="Explore"
-        android:id="@+id/button4"
-        android:onClick="onExploreData"
-        android:layout_above="@+id/button2"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/viewer" />
 
 
 </RelativeLayout>
