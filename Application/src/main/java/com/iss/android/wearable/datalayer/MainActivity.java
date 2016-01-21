@@ -39,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -55,6 +56,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Receives its own events using a listener API designed for foreground activities. Updates a data
@@ -90,7 +92,7 @@ public class MainActivity extends FragmentActivity implements
         setContentView(R.layout.main_activity);
         setupViews();
         //Necessary, terminating the choose register service activity
-        ChooseRegisterServiceActivity.instance.finish();
+        //ChooseRegisterServiceActivity.instance.finish();
         // Stores DataItems received by the local broadcaster or from the paired watch.
         mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
         mDataItemList.setAdapter(mDataItemListAdapter);
@@ -107,6 +109,12 @@ public class MainActivity extends FragmentActivity implements
 
         TextView text = (TextView) findViewById(R.id.text);
         String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));
+        text.setText(datestring);
+        TextView day = (TextView) findViewById(R.id.day);
+        day.setText(String.format("%1$tA", date).substring(0, 3).toUpperCase());
+        datestring = String.valueOf(date.get(GregorianCalendar.MONTH) + 1) + " / " + String.valueOf(date.get(GregorianCalendar.YEAR));
+        TextView year = (TextView) findViewById(R.id.year);
+        year.setText(datestring);
 
         // Watch for button clicks.
         Button button = (Button) findViewById(R.id.left);
@@ -121,7 +129,6 @@ public class MainActivity extends FragmentActivity implements
                 mPager.setCurrentItem(mPager.getCurrentItem() + 1);
             }
         });
-        text.setText("Today is the " + datestring + ".");
 
         if (DataSyncService.itself == null) {
             Intent intent = new Intent(this, DataSyncService.class);
@@ -267,13 +274,41 @@ public class MainActivity extends FragmentActivity implements
             View v = inflater.inflate(R.layout.fragment_pager_list, container, false);
             View tv = v.findViewById(R.id.pagertext);
             ((TextView) tv).setText("Fragment #" + mNum);
+            Calendar date = new GregorianCalendar();
+            date.add(Calendar.DATE, -29 + mNum);
+            Log.d("date", String.valueOf(-29 + mNum));
+            //Find the activities for that day
+            //DUMMY LIST
+            String datestring = (String.valueOf(date.get(GregorianCalendar.YEAR))) + "-"
+                    + (String.valueOf(date.get(GregorianCalendar.MONTH) + 1)) + "-"
+                    + (String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH)));
+            String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
+            Log.d("userid", UserID);
+            String[] activities = {"Swimming", "Athletics", "Cycling", "Running"};
+            ArrayList<List<ISSRecordData>> sessionlist = new ArrayList<>();
+            for (String activity : activities) {
+                sessionlist.addAll(CSVManager.ReadSplitCSVdata(datestring, UserID, activity));
+            }
+            ArrayList<String> list = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                list.add(String.valueOf(i));
+            }
+            //For each of them, construct a layout that is openable which contains the graphs
+            //Readsplitcsvdata is the method to be called to retrieve all sessions for a given date, user and activity.
+            View pl = v.findViewById(R.id.root_layout);
+            for (List<ISSRecordData> l : sessionlist) {
+                LayoutInflater layoutInflater = getLayoutInflater(savedInstanceState);
+                View ll = layoutInflater.inflate(R.layout.display_session, container, false);
+                TextView t = (TextView) ll.findViewById(R.id.session_text);
+                t.setText("Dummy for " + datestring + ": " + l.get(0).MeasurementType);
+                ((LinearLayout) pl).addView(ll);
+            }
             return v;
         }
 
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
-            //TODO: Fill up with the data of current day
         }
 
 

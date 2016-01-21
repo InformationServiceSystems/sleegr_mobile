@@ -1,15 +1,24 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:drawable/gallery_thumb">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical|center_horizontal">
 
-    <TextView
-        android:id="@+id/pagertext"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/root_layout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="match_parent"
+        android:background="@android:drawable/gallery_thumb"
         android:gravity="center_vertical|center_horizontal"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/hello_world" />
+        android:orientation="vertical">
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/pagertext"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/hello_world"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    </LinearLayout>
+
+</ScrollView>

@@ -136,11 +136,11 @@
         <activity
             android:name=".DisplayActivityFile"
             android:label="@string/title_activity_display_activity_file"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".SelectAvailableData">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".SelectAvailableData" />
         </activity>
     </application>
 
