@@ -79,6 +79,10 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
+    public static String getUserID() {
+        return DataStorageManager.getProperUserID(itself.UserID);
+    }
+
     @Override
     public void onCreate() {
 

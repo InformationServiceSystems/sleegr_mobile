@@ -224,6 +224,9 @@ public class MainActivity extends FragmentActivity implements
             case R.id.graphButton:
                 onGraphPlot();
                 return true;
+            case R.id.registerUserMenu:
+                onRegisterUser();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -434,7 +437,7 @@ public class MainActivity extends FragmentActivity implements
         return results;
     }
 
-    public void onRegisterUser(View view) {
+    public void onRegisterUser() {
 
         final Intent registerUser = new Intent(this, RegisterUserActivity.class);
         startActivity(registerUser);

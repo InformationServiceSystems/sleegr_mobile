@@ -50,6 +50,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -65,7 +67,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * The main activity with a view pager, containing three pages:<p/>
@@ -138,7 +139,7 @@ public class MainActivity extends Activity {
                 }
             } else if (intent.getAction().equals(SensorsDataService.UPDATE_GPS_PARAMS)) {
                 // Prints out the heart rate
-                final TextView speedLabel = (TextView) findViewById(R.id.speedLable);
+                /*final TextView speedLabel = (TextView) findViewById(R.id.speedLable);
                 final TextView distanceLabel = (TextView) findViewById(R.id.distanceLabel);
 
                 double speed = intent.getDoubleExtra("speed", 0);
@@ -148,7 +149,7 @@ public class MainActivity extends Activity {
 
                 // Need to convert the Int to String or else the app crashes. GJ Google.
                 speedLabel.setText(formatter.format(speed));
-                distanceLabel.setText(formatter.format(totalDistance));
+                distanceLabel.setText(formatter.format(totalDistance));*/
 
 
             } else if (intent.getAction().equals(SensorsDataService.ASK_USER_FOR_RPE)) {
@@ -166,6 +167,9 @@ public class MainActivity extends Activity {
                 TextView timetext = (TextView) findViewById(R.id.timer);
                 timetext.setText(newtime);
             }
+
+            showCurrentAppState();
+
         }
     };
     private DataUpdateReceiver dataUpdateReceiver;
@@ -210,7 +214,7 @@ public class MainActivity extends Activity {
 
         initializeSWBatteryChecker();
 
-        initializeSportsActions();
+        //initializeSportsActions();
 
         initializeScreenOn();
 
@@ -243,17 +247,21 @@ public class MainActivity extends Activity {
             return;
         }
 
-        String mark = SensorsDataService.itself.currentState;
+        ImageButton cdButton = (ImageButton) findViewById(R.id.startCooldown);
+        ImageButton hrButton = (ImageButton) findViewById(R.id.morningEveningHR);
 
-        int idx = mark.indexOf(":");
+        cdButton.setBackgroundColor(Color.GRAY);
+        hrButton.setBackgroundColor(Color.GRAY);
 
-        if (idx >= 0) {
-            mark = mark.substring(0, idx);
+        int bkg = Color.RED;
+
+        if (SensorsDataService.itself.currentState.equals("Cooldown")){
+            cdButton.setBackgroundColor(bkg);
         }
 
-        int selectedIndex = Arrays.asList(R.array.activities).indexOf(mark);
-        Spinner s = (Spinner) findViewById(R.id.sportsAction);
-        s.setSelection(selectedIndex);
+        if (SensorsDataService.itself.currentState.equals("Resting")){
+            hrButton.setBackgroundColor(bkg);
+        }
 
     }
 
@@ -316,7 +324,7 @@ public class MainActivity extends Activity {
     }
 
 
-    private void initializeSportsActions() {
+    /*private void initializeSportsActions() {
 
         Spinner s = (Spinner) findViewById(R.id.sportsAction);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -339,7 +347,7 @@ public class MainActivity extends Activity {
         };
         s.setOnItemSelectedListener(colorSpinnerListener);
 
-    }
+    }*/
 
     private void RegisterBroadcastsReceiver() {
 
@@ -451,21 +459,20 @@ public class MainActivity extends Activity {
 
     public void onClicked(View view) {
         switch (view.getId()) {
-            case R.id.switchTrainingButton:
-
-                // get selected item
-                Spinner mySpinner = (Spinner) findViewById(R.id.sportsAction);
-                String spinnerText = mySpinner.getSelectedItem().toString();
-
-                if (spinnerText.equals(" ")){ // see strings.xml for why
-                    return;
-                }
+            case R.id.startCooldown:
 
                 if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction(spinnerText);
+                    SensorsDataService.itself.SwitchSportsAction("Cooldown");
                 }
-                Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(100);
+
+
+                break;
+            case R.id.morningEveningHR:
+
+                if (SensorsDataService.itself != null) {
+                    SensorsDataService.itself.SwitchSportsAction("Resting");
+                }
+
 
                 break;
             case R.id.searchForHRM:
@@ -480,6 +487,8 @@ public class MainActivity extends Activity {
 
                 Log.e(TAG, "Unknown click event registered");
         }
+
+        showCurrentAppState();
 
     }
 

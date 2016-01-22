@@ -20,12 +20,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="Register"
-        android:onClick="onRegisterUser"
-        android:id="@+id/button" />
 
     <fragment
         class="com.iss.android.wearable.datalayer.ManageDateFragment"

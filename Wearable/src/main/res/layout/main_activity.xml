@@ -23,30 +23,31 @@
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/statusbar"
         android:layout_width="wrap_content"
-        android:layout_height="36dp"
+        android:layout_height="45dp"
         android:background="@color/white">
 
-        <ImageButton
-            android:id="@+id/imageButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="1dp"
-            android:layout_marginRight="1dp"
-            android:layout_marginStart="14dp"
-            android:background="@drawable/roundbutton" />
 
         <ImageButton
             android:id="@+id/searchForHRM"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignStart="@+id/imageButton"
-            android:layout_alignTop="@+id/imageButton"
-            android:layout_marginStart="3dp"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/ic_settings_bluetooth_black_24dp"
+            android:layout_width="40dp"
+            android:layout_height="fill_parent"
+            android:layout_margin="3dp"
+            android:background="@color/grey"
+            android:src="@drawable/ic_settings_bluetooth_black_24dp"
             android:contentDescription="@string/StartTrainingButton"
             android:onClick="onClicked" />
+
+
+        <TextView
+            android:id="@+id/timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:layout_toEndOf="@+id/searchForHRM"
+            android:text="0:00"
+            android:textColor="@color/black" />
 
         <TextView
             android:id="@+id/messageLabel"
@@ -75,16 +76,6 @@
             android:text="HRM:"
             android:textColor="@color/black" />
 
-        <TextView
-            android:id="@+id/timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="3dp"
-            android:layout_marginRight="3dp"
-            android:layout_toEndOf="@+id/imageButton"
-            android:text="0:00"
-            android:textColor="@color/black" />
 
     </RelativeLayout>
 
@@ -116,38 +107,13 @@
                 android:id="@+id/heartRateLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
                 android:editable="true"
                 android:gravity="center"
                 android:text="HR"
                 android:textColor="@color/black"
-                android:textSize="@dimen/diag_button_side_padding_right_round" />
-
-            <TextView
-                android:id="@+id/distanceLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/heartRateLabel"
-                android:editable="true"
-                android:gravity="center"
-                android:text="DS"
-                android:textColor="@color/black"
-                android:textSize="@dimen/diag_button_side_padding_right_round" />
-
-            <TextView
-                android:id="@+id/speedLable"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/distanceLabel"
-                android:editable="true"
-                android:gravity="center"
-                android:text="SP"
-                android:textColor="@color/black"
-                android:textSize="@dimen/diag_button_side_padding_right_round" />
+                android:textSize="@dimen/diag_button_side_padding_right_round"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true" />
 
         </RelativeLayout>
 
@@ -168,41 +134,40 @@
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/BottomLayout"
         android:layout_width="wrap_content"
-        android:layout_height="37dp"
+        android:layout_height="45dp"
         android:layout_alignParentBottom="true"
         android:background="@color/white">
 
-        <ImageButton
-            android:id="@+id/colorButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true"
-            android:layout_margin="1dp"
-            android:background="@drawable/roundbutton" />
+
 
         <ImageButton
-            android:id="@+id/switchTrainingButton"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignParentBottom="true"
+            android:id="@+id/startCooldown"
             android:layout_alignParentStart="true"
-            android:layout_marginBottom="4dp"
-            android:layout_marginStart="4dp"
-            android:background="@drawable/ic_directions_run_black_24dp"
+            android:layout_width="40dp"
+            android:background="@color/grey"
+            android:layout_height="fill_parent"
+            android:layout_margin="3dp"
+            android:src="@drawable/ic_ac_unit_black_24dp"
             android:contentDescription="@string/StartTrainingButton"
             android:onClick="onClicked" />
 
-        <Spinner
-            android:id="@+id/sportsAction"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_alignParentBottom="true"
-            android:layout_toRightOf="@+id/colorButton"
-            android:gravity="center" />
+
 
 
     </RelativeLayout>
+
+    <ImageButton
+        android:id="@+id/morningEveningHR"
+        android:layout_width="40dp"
+        android:layout_height="fill_parent"
+        android:layout_margin="3dp"
+        android:background="@color/grey"
+        android:src="@drawable/ic_hotel_black_24dp"
+        android:contentDescription="@string/StartTrainingButton"
+        android:onClick="onClicked"
+        android:layout_alignBottom="@+id/BottomLayout"
+        android:layout_toEndOf="@+id/BottomLayout"
+        android:layout_alignTop="@+id/BottomLayout" />
 
 
 </RelativeLayout>

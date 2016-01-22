@@ -13,6 +13,9 @@ import java.util.HashMap;
 public class TimeSeries implements Serializable {
 
     static final long serialVersionUID = 1L;
+    public enum SeriesLineTypes{Line, Bar}
+
+    public SeriesLineTypes LineType = SeriesLineTypes.Line;
 
     public class Tuple<X, Y> implements Serializable {
         static final long serialVersionUID = 1L;

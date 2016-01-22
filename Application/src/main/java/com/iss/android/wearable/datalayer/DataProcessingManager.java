@@ -572,7 +572,9 @@ public class DataProcessingManager {
             }
         }
 
-        return new ArrayList<>( Arrays.asList(valueOfRPE, avgHRtraining, recoverySpeed,  eveningHR, morningHR) ) ;
+        ArrayList<TimeSeries> result = new ArrayList<>(Arrays.asList(valueOfRPE, avgHRtraining, recoverySpeed, eveningHR, morningHR));
+
+        return result;
     }
 
     public static TimeSeries ComputeExponent(double [] p, TimeSeries series){

@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -337,7 +338,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         timerTime = timerTime + 1;
 
         // this checks for missing hrm
-        if ((timerTime % 60 == 0) && (hrmDisconnected)) {
+        if ((timerTime % 300 == 0) && (hrmDisconnected)) {
             mBluetoothAdapter.startLeScan(mLeScanCallback);
         }
 
@@ -349,7 +350,19 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         SendTimerTime(timerTime / 60, timerTime % 60);
 
         if (timerTime > timerTimeout) {
-            BringIntoState("Idle");
+
+            Calendar cl = Calendar.getInstance();
+            boolean sleepMode = (cl.get(Calendar.HOUR_OF_DAY) > 18) && currentState.equals("Resting");
+
+            if (sleepMode){
+                BringIntoState("Resting");
+                startSleeping();
+            }
+            else{
+                BringIntoState("Idle");
+            }
+
+
         }
 
         if ((timerTime == COOLING_RPE_TIME) && currentState.contains("Cooling")) {
@@ -388,17 +401,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     public void OutputCurrentState() {
 
-        if (currentState.equals("Resting")) {
-            OutputEvent(currentState);
-            return;
-        }
-
-        if (currentState.contains("Cooling")) {
-            OutputEvent("Cooling down");
-            return;
-        }
-
-        OutputEvent("Training");
+        OutputEvent(currentState);
 
     }
 
@@ -558,20 +561,35 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    public boolean nonCooldownable(String action){
+
+        return action.equals("Resting") ||
+                action.equals("Other") ||
+                action.equals("Cooldown") ||
+                action.contains("Cooling");
+
+    }
+
     public void SwitchSportsAction(String action) {
 
         String newState = "";
 
         if (!currentState.equals("Idle")) {
 
-            if (currentState.equals("Resting") || currentState.equals("Other") || currentState.contains("Cooling")) {
-                // stop recording cooling / resting prematurely
-                newState = "Idle";
-                RecordActivitySwitch();
-            } else {
-                // start measuring cooling down
-                newState = currentState + ":Cooling";
-                OutputEvent("Cooling down ...");
+            if (action.equals(currentState)){
+                if (nonCooldownable(currentState)) {
+                    // stop recording cooling / resting prematurely
+                    newState = "Idle";
+                    RecordActivitySwitch();
+                } else {
+                    // start measuring cooling down
+                    newState = currentState + ":Cooling";
+                    OutputEvent("Cooling down ...");
+                }
+            }
+            else
+            {
+                newState = action;
             }
         } else { // switch from idle state to measurement
 
@@ -580,13 +598,19 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
 
         BringIntoState(newState);
+    }
 
-        try {
-            Serializer.SerializeToFile(newState, mutexFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void startSleeping(){
+        Intent intent = new Intent(this, SensorsDataService.class);
+        stopService(intent);
 
+        // then launch sleep tracking
+        Intent launchSleepIntent = getPackageManager().getLaunchIntentForPackage("com.urbandroid.sleep");
+        startActivity(launchSleepIntent);
+
+        // finally, kill the app in order to save the battery
+        android.os.Process.killProcess(android.os.Process.myPid());
+        return;
     }
 
     private void BringIntoState(String state) {
@@ -595,35 +619,31 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         StopMeasuring();
 
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        // Vibrate for 500 milliseconds
+        v.vibrate(500);
+
+        try {
+            Serializer.SerializeToFile(state, mutexFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (state.equals("Idle")) {
             return;
         }
-        if (state.equals("Sleep")) {
-            Intent intent = new Intent(this, SensorsDataService.class);
-            stopService(intent);
 
-            // then launch sleep tracking
-            Intent launchSleepIntent = getPackageManager().getLaunchIntentForPackage("com.urbandroid.sleep");
-            startActivity(launchSleepIntent);
-
-            // finally, kill the app in order to save the battery
-            android.os.Process.killProcess(android.os.Process.myPid());
-            return;
-        }
         if (state.equals("Resting")) {
             // stop recording cooling / resting prematurely
             timerTimeout = RESTING_MEASUREMENT_TIME; // measure cooling for 1 hour
-        }else if(state.equals("Other")){
-            timerTimeout = TRAINING_TIMEOUT;
-        }
-        else if (state.contains("Cooling")) {
+        }else if (state.contains("Cooling")) {
             timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
             OutputEvent("Cooling down ...");
-            StopGPS();
+            //StopGPS();
         } else {
             // start training
             timerTimeout = TRAINING_TIMEOUT;
-            StartGPS();
+            //StartGPS();
         }
 
         StartMeasuring();
@@ -1041,7 +1061,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     Location locPrev = null;
     double totalDistance = 0;
-
+/*
     public void StartGPS() {
 
         gpsListener = new LocationListener() {
@@ -1113,5 +1133,5 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         sendBroadcast(intent);
 
     }
-
+*/
 }

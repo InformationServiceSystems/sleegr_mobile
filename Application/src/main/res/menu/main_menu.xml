@@ -20,5 +20,9 @@
         android:id="@+id/button4"
         android:title="Explore" />
 
+    <item
+        android:id="@+id/registerUserMenu"
+        android:title="Register" />
+
 
 </menu>
