@@ -47,6 +47,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,7 +59,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * Receives its own events using a listener API designed for foreground activities. Updates a data
@@ -103,9 +105,6 @@ public class MainActivity extends FragmentActivity implements
         mPager.setAdapter(mAdapter);
         mPager.setCurrentItem(30);
         mPager.setOnPageChangeListener(mPageChangeListener);
-
-        date = new GregorianCalendar();
-        SportsSession.retrieveCsvs(date);
 
         TextView text = (TextView) findViewById(R.id.text);
         String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));
@@ -195,7 +194,6 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-<<<<<<< HEAD
     @Override
     protected void onStart() {
         super.onStart();
@@ -233,8 +231,6 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
-=======
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
     private DataUpdateReceiver dataUpdateReceiver;
 
     @Override
@@ -277,38 +273,34 @@ public class MainActivity extends FragmentActivity implements
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             // Inflate the layout for this fragment
+            // Give the view a headline to be able to see what number it is
             View v = inflater.inflate(R.layout.fragment_pager_list, container, false);
             View tv = v.findViewById(R.id.pagertext);
             ((TextView) tv).setText("Fragment #" + mNum);
             Calendar date = new GregorianCalendar();
             date.add(Calendar.DATE, -29 + mNum);
             Log.d("date", String.valueOf(-29 + mNum));
-            //Find the activities for that day
-            //DUMMY LIST
+            //Supply the current date
             String datestring = (String.valueOf(date.get(GregorianCalendar.YEAR))) + "-"
                     + (String.valueOf(date.get(GregorianCalendar.MONTH) + 1)) + "-"
                     + (String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH)));
-            String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
-            Log.d("userid", UserID);
-            String[] activities = {"Swimming", "Athletics", "Cycling", "Running"};
-            ArrayList<List<ISSRecordData>> sessionlist = new ArrayList<>();
-            for (String activity : activities) {
-                sessionlist.addAll(CSVManager.ReadSplitCSVdata(datestring, UserID, activity));
-            }
-            ArrayList<String> list = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
-                list.add(String.valueOf(i));
-            }
-            //For each of them, construct a layout that is openable which contains the graphs
-            //Readsplitcsvdata is the method to be called to retrieve all sessions for a given date, user and activity.
             View pl = v.findViewById(R.id.root_layout);
-            for (List<ISSRecordData> l : sessionlist) {
-                LayoutInflater layoutInflater = getLayoutInflater(savedInstanceState);
-                View ll = layoutInflater.inflate(R.layout.display_session, container, false);
-                TextView t = (TextView) ll.findViewById(R.id.session_text);
-                t.setText("Dummy for " + datestring + ": " + l.get(0).MeasurementType);
-                ((LinearLayout) pl).addView(ll);
-            }
+            LayoutInflater layoutInflater = getLayoutInflater(savedInstanceState);
+            View ll = layoutInflater.inflate(R.layout.display_session, container, false);
+            TextView t = (TextView) ll.findViewById(R.id.session_text);
+            t.setText("Dummy for " + datestring);
+            GraphView graph = (GraphView) ll.findViewById(R.id.graphtoday);
+            //FILL THE GRAPH WITH DATA FOR THE CURRENT DAY
+            // currently sample data to see if it's working dynamically.
+            LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
+                    new DataPoint(mNum, 1),
+                    new DataPoint(1, 5),
+                    new DataPoint(2, 3),
+                    new DataPoint(3, 2),
+                    new DataPoint(4, 6)
+            });
+            graph.addSeries(series);
+            ((LinearLayout) pl).addView(ll);
             return v;
         }
 
@@ -352,7 +344,6 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-<<<<<<< HEAD
     @Override
     protected void onStop() {
         super.onStop();
@@ -360,20 +351,12 @@ public class MainActivity extends FragmentActivity implements
 
 
     public void OutputEvent(final String content) {
-=======
-
-    private void OutputEvent(final String content) {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
-
         final String cont = content;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-<<<<<<< HEAD
-                mDataItemListAdapter.add(new Event("Event", content));
-=======
+                mDataItemListAdapter.add(new Event("Event"));
                 mDataItemListAdapter.add(new Event(content));
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
             }
         });
 
@@ -449,12 +432,7 @@ public class MainActivity extends FragmentActivity implements
         return results;
     }
 
-<<<<<<< HEAD
     public void onRegisterUser() {
-=======
-    public void onSyncClick() {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
-
         final Intent registerUser = new Intent(this, RegisterUserActivity.class);
         startActivity(registerUser);
 
@@ -494,12 +472,7 @@ public class MainActivity extends FragmentActivity implements
     }
 
 
-<<<<<<< HEAD
     public TimeSeries randomRPEReq(int past, int future){
-=======
-    public void onSendToServerClick() {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
-
         TimeSeries requirements = new TimeSeries("RPE schedule");
 
         for (int i=0; i < past; i++){
@@ -558,12 +531,7 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-<<<<<<< HEAD
     public void smoothenBins(double [] bins, double [] counts){
-=======
-    public void onRegisterUser() {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
-
         double cv = 0;
 
         for (int i= 0;i < bins.length; i++){

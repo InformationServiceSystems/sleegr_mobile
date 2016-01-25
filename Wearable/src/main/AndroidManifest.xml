@@ -59,7 +59,6 @@
             android:value="@integer/google_play_services_version" />
 
         <receiver
-<<<<<<< HEAD
             android:name=".Alarm"
             android:exported="true" >
             <intent-filter>
@@ -67,10 +66,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".StartMyActivityAtBootReceiver"
-=======
             android:name="com.iss.android.wearable.datalayer.StartMyActivityAtBootReceiver"
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
             android:enabled="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
             <intent-filter>

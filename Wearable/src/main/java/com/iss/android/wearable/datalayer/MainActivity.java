@@ -39,19 +39,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Vibrator;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -64,9 +64,8 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.logging.Handler;
 
 /**
  * The main activity with a view pager, containing three pages:<p/>
@@ -86,12 +85,8 @@ public class MainActivity extends Activity {
 
 
     private static final String TAG = "MainActivity";
-<<<<<<< HEAD
     public static MainActivity itself;
-    LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
-=======
     private final LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[]{
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
     });
     private int current_time = 0;
     private PendingIntent pendingInt = null;
@@ -104,12 +99,8 @@ public class MainActivity extends Activity {
     private ArrayAdapter<String> adapter;
     private Intent murderousIntent;
     private int warned = 0;
-<<<<<<< HEAD
-    BroadcastReceiver br = new BroadcastReceiver() {
-=======
 
     private final BroadcastReceiver br = new BroadcastReceiver() {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
         // Receives broadcasts sent from other points of the app, like the SensorsDataService
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -195,7 +186,7 @@ public class MainActivity extends Activity {
         }
     };
 
-    public static void selectSpinnerItemByValue(Spinner spnr, String value) {
+    public void selectSpinnerItemByValue(Spinner spnr, String value) {
         SimpleCursorAdapter adapter = (SimpleCursorAdapter) spnr.getAdapter();
         for (int position = 0; position < adapter.getCount(); position++) {
             if (value.equals(adapter.getItemId(position))) {
@@ -262,11 +253,11 @@ public class MainActivity extends Activity {
 
         int bkg = Color.RED;
 
-        if (SensorsDataService.itself.currentState.equals("Cooldown")){
+        if (SensorsDataService.itself.currentState.equals("Cooldown")) {
             cdButton.setBackgroundColor(bkg);
         }
 
-        if (SensorsDataService.itself.currentState.equals("Resting")){
+        if (SensorsDataService.itself.currentState.equals("Resting")) {
             hrButton.setBackgroundColor(bkg);
         }
 
@@ -331,8 +322,6 @@ public class MainActivity extends Activity {
 
     }
 
-
-<<<<<<< HEAD
     /*private void initializeSportsActions() {
 
         Spinner s = (Spinner) findViewById(R.id.sportsAction);
@@ -340,9 +329,7 @@ public class MainActivity extends Activity {
                 R.array.activities, android.R.layout.simple_spinner_item);
 
         //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item,arraySpinner);
-=======
     }
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 
 
         s.setAdapter(adapter);
@@ -470,8 +457,7 @@ public class MainActivity extends Activity {
 
     }
 
-<<<<<<< HEAD
-=======
+
     private void UpdateButtonText() {
 
         if (SensorsDataService.itself != null) {
@@ -501,7 +487,6 @@ public class MainActivity extends Activity {
 
     }
 
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
     public void onClicked(View view) {
         switch (view.getId()) {
             case R.id.startCooldown:
@@ -551,15 +536,12 @@ public class MainActivity extends Activity {
     }
 
     // Need to declare the handler here so it can be called off later
-<<<<<<< HEAD
    /* Handler handler = new Handler();
     long[] time = {0, 0};
     Runnable runnable = new Runnable() {
-=======
     private final Handler handler = new Handler();
     private final long[] time = {0, 0};
     private final Runnable runnable = new Runnable() {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
         @Override
         public void run() {
             time[0] += 1;

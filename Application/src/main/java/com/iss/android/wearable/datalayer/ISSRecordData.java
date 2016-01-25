@@ -1,7 +1,6 @@
 package com.iss.android.wearable.datalayer;
 
 import java.io.Serializable;
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -14,10 +13,10 @@ class ISSRecordData implements Serializable {
 
     static final long serialVersionUID = 1L;
     private final int UserID;
-    private final int MeasurementType;
-    private final String Timestamp;
-    private String ExtraData = null;
-    private final float Value1;
+    public final int MeasurementType;
+    public final String Timestamp;
+    public String ExtraData = null;
+    public final float Value1;
     private final float Value2;
     private final float Value3;
 
