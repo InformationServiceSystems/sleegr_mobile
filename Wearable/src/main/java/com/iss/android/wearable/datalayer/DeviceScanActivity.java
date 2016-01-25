@@ -28,7 +28,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +50,7 @@ public class DeviceScanActivity extends ListActivity {
     private boolean mScanning;
     private Handler mHandler;
     // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+    private final BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
 
                 @Override
@@ -92,7 +91,6 @@ public class DeviceScanActivity extends ListActivity {
             if (mBluetoothAdapter == null) {
                 Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
                 finish();
-                return;
             }
         } catch (Exception ex) {
             ex.toString();
@@ -140,10 +138,8 @@ public class DeviceScanActivity extends ListActivity {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = pref.edit();
         editor.putString(getString(R.string.device_address), device.getAddress());
-        Log.d("Device Address", device.getAddress());
         editor.putString(getString(R.string.device_name), device.getName());
         editor.apply();
-        Log.d("Device Address", "has been stored");
 
         if (mScanning) {
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
@@ -157,7 +153,6 @@ public class DeviceScanActivity extends ListActivity {
         final Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);*/
         finish();
-        Log.d("MainActivity", "has been called");
     }
 
     private void scanLeDevice(final boolean enable) {
@@ -188,12 +183,12 @@ public class DeviceScanActivity extends ListActivity {
 
     // Adapter for holding devices found through scanning.
     private class LeDeviceListAdapter extends BaseAdapter {
-        private ArrayList<BluetoothDevice> mLeDevices;
-        private LayoutInflater mInflator;
+        private final ArrayList<BluetoothDevice> mLeDevices;
+        private final LayoutInflater mInflator;
 
         public LeDeviceListAdapter() {
             super();
-            mLeDevices = new ArrayList<BluetoothDevice>();
+            mLeDevices = new ArrayList<>();
             mInflator = DeviceScanActivity.this.getLayoutInflater();
         }
 

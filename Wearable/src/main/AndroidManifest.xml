@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
  Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,11 +13,12 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
---><!-- version code and name should be the same for smartphone and watch apps -->
+-->
+<!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iss.android.wearable.datalayer"
     android:versionCode="15"
-    android:versionName="Regulus">
+    android:versionName="Regulus" >
 
     <uses-sdk
         android:minSdkVersion="21"
@@ -51,22 +53,26 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.DeviceDefault">
+        android:theme="@android:style/Theme.DeviceDefault" >
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <receiver
+<<<<<<< HEAD
             android:name=".Alarm"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="com.iss.android.wearable.datalayer.ALARM" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".StartMyActivityAtBootReceiver"
+=======
+            android:name="com.iss.android.wearable.datalayer.StartMyActivityAtBootReceiver"
+>>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
             android:enabled="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
@@ -74,7 +80,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".DataLayerListenerService">
+        <service android:name=".DataLayerListenerService" >
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
@@ -83,8 +89,8 @@
         <activity
             android:name=".MainActivity"
             android:enabled="true"
-            android:launchMode="singleTask"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -99,7 +105,7 @@
         <activity
             android:name=".DeviceScanActivity"
             android:enabled="true"
-            android:label="hello">
+            android:label="hello" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -123,7 +129,11 @@
 
         <activity
             android:name=".SelectRPE"
-            android:label="@string/title_activity_select_rpe"></activity>
+            android:label="@string/title_activity_select_rpe" />
+        <activity
+            android:name=".DALDActivity"
+            android:label="@string/title_activity_dald" >
+        </activity>
     </application>
 
 </manifest>

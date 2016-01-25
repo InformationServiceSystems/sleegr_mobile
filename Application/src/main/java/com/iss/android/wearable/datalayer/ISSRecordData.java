@@ -10,16 +10,16 @@ import java.util.Date;
 /**
  * Created by Euler on 10/8/2015.
  */
-public class ISSRecordData implements Serializable {
+class ISSRecordData implements Serializable {
 
     static final long serialVersionUID = 1L;
-    public int UserID;
-    public int MeasurementType;
-    public String Timestamp;
-    public String ExtraData = null;
-    public float Value1;
-    public float Value2;
-    public float Value3;
+    private final int UserID;
+    private final int MeasurementType;
+    private final String Timestamp;
+    private String ExtraData = null;
+    private final float Value1;
+    private final float Value2;
+    private final float Value3;
 
     public static ISSRecordData fromString(String str){
 
