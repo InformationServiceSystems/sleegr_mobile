@@ -253,7 +253,7 @@ public class MainActivity extends Activity {
         cdButton.setBackgroundColor(Color.GRAY);
         hrButton.setBackgroundColor(Color.GRAY);
 
-        int bkg = Color.RED;
+        int bkg = Color.YELLOW;
 
         if (SensorsDataService.itself.currentState.equals("Cooldown")){
             cdButton.setBackgroundColor(bkg);

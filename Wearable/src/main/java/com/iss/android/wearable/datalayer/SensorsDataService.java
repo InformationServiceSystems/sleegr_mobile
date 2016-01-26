@@ -351,8 +351,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         if (timerTime > timerTimeout) {
 
-            Calendar cl = Calendar.getInstance();
-            boolean sleepMode = (cl.get(Calendar.HOUR_OF_DAY) > 18) && currentState.equals("Resting");
+            boolean sleepMode = isNowASleepingHour() && currentState.equals("Resting");
 
             if (sleepMode){
                 BringIntoState("Resting");
@@ -365,9 +364,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         }
 
-        if ((timerTime == COOLING_RPE_TIME) && currentState.contains("Cooling")) {
-            AskUserForRPE();
-        }
+
 
         OutputCurrentState();
 
@@ -381,13 +378,18 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    private void AskUserForRPE() {
+    boolean isNowASleepingHour(){
 
-        Intent myIntent = new Intent(this, SelectRPE.class);
+        Calendar clnd = Calendar.getInstance();
+        return (clnd.get(Calendar.HOUR_OF_DAY) >= 12) || (clnd.get(Calendar.HOUR_OF_DAY) < 5);
+    }
+
+
+    private void AskUserForFeedback() {
+
+        Intent myIntent = new Intent(this, DALDActivity.class);
         myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(myIntent);
-        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        v.vibrate(1000);
 
         /*SensorsDataService.itself.needToShowRPE = true;
 
@@ -635,7 +637,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         if (state.equals("Resting")) {
             // stop recording cooling / resting prematurely
-            timerTimeout = RESTING_MEASUREMENT_TIME; // measure cooling for 1 hour
+            timerTimeout = RESTING_MEASUREMENT_TIME;
+
+            if (isNowASleepingHour()){
+                AskUserForFeedback();
+            }
+
         }else if (state.contains("Cooling")) {
             timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
             OutputEvent("Cooling down ...");
@@ -1049,8 +1056,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    public void AddTrainingScore(int position) {
-        AddNewData(0, 1024, GetTimeNow(), currentState, position, 0, 0);
+    public void AddTrainingScore(float position, String typeof) {
+        AddNewData(0, 1024, GetTimeNow(), "Feedback:" + typeof, position, 0, 0);
         needToShowRPE = false;
     }
 

@@ -73,5 +73,9 @@
     </string-array>
 
     <string name="title_activity_select_rpe"></string>
+    <string name="title_activity_dald">DALDActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

@@ -743,8 +743,10 @@ public class MainActivity extends FragmentActivity implements
 
     public void onExploreData() {
 
-        Intent i = new Intent(MainActivity.this, SelectAvailableData.class);
-        startActivity(i);
+        /*Intent i = new Intent(MainActivity.this, SelectAvailableData.class);
+        startActivity(i);*/
+
+        UserParameters params = new UserParameters(30);
 
     }
 

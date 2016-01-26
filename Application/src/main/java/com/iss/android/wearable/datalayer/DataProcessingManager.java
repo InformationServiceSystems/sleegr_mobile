@@ -430,12 +430,18 @@ public class DataProcessingManager {
         if (cntm == 0){
             avg_m = -1;
         }
+        else{
+            avg_m /= cntm;
+        }
 
         if (cnte == 0){
             avg_e = -1;
         }
+        else{
+            avg_e /= cnte;
+        }
 
-        return  new double[]{avg_m / cntm, avg_e / cnte};
+        return  new double[]{avg_m , avg_e };
 
     }
 

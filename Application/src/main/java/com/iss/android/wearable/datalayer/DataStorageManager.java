@@ -3,15 +3,18 @@ package com.iss.android.wearable.datalayer;
 import android.os.Environment;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by Euler on 12/19/2015.
@@ -26,6 +29,35 @@ public class DataStorageManager {
         }
 
     }
+
+    public static TimeSeries readUserSchedule(){
+
+        TimeSeries result = new TimeSeries("RPE required");
+        File csvSchedule = new File(userDataFolder, "schedule.csv");
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
+
+        try (BufferedReader br = new BufferedReader(new FileReader(csvSchedule))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+
+                String dateStr = line.substring(0, 10);
+                String contents = line.substring(11);
+
+                Date date = dateFormat.parse(dateStr);
+                Double value = Double.parseDouble(contents);
+
+                result.AddValue(date,value);
+
+            }
+        } catch (Exception e) {
+
+        }
+
+        return result;
+
+    }
+
 
     // Environment.getDataDirectory().toString()
     // I use here external storage directory, as the previous versions of the
