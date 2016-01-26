@@ -14,8 +14,8 @@ class ISSRecordData implements Serializable {
     static final long serialVersionUID = 1L;
     private final int UserID;
     private final int MeasurementType;
-    public final String Timestamp;
-    public String ExtraData = null;
+    private final String Timestamp;
+    private String ExtraData = null;
     private final float Value1;
     private final float Value2;
     private final float Value3;

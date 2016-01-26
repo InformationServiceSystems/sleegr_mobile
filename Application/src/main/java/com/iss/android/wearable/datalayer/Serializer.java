@@ -53,7 +53,7 @@ class Serializer {
         return DeserializeFromBytes(data);
     }
 
-    public static byte[] SerializeToBytes(Object object) throws IOException {
+    private static byte[] SerializeToBytes(Object object) throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              ObjectOutput out = new ObjectOutputStream(bos)) {
             out.writeObject(object);
