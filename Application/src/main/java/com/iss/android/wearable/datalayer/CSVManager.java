@@ -41,7 +41,7 @@ public class CSVManager {
             out.close();
         } catch (IOException e) {
             //exception handling left as an exercise for the reader
-            DataSyncService.itself.OutputEvent("error occured: "  + e.toString());
+
         }
 
     }
@@ -91,6 +91,23 @@ public class CSVManager {
         return result;
 
     }
+
+    public static boolean UserActivityExists(String date, String userID,  String activity){
+
+        File file = new File(DataStorageManager.userDataFolder, date  + File.separator + userID + "-" + date + "_" + activity + ".csv");
+
+        if (!file.exists()){
+            file = new File(DataStorageManager.userDataFolder, date  + File.separator + userID + "_" + date + "_" + activity + ".csv");
+        }
+
+        if (!file.exists()){
+            return false;
+        }
+
+        return true;
+
+    }
+
 
     public static List<ISSRecordData> ReadCSVdata(String date, String userID,  String activity){
 

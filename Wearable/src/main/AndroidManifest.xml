@@ -130,6 +130,10 @@
             android:name=".DALDActivity"
             android:label="@string/title_activity_dald" >
         </activity>
+        <activity
+            android:name=".TrainingStartTimeActivity"
+            android:label="@string/title_activity_training_start_time" >
+        </activity>
     </application>
 
 </manifest>

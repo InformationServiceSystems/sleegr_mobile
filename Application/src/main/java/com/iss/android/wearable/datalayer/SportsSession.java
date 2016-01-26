@@ -167,7 +167,7 @@ public class SportsSession {
                         }
                     }
                     //If this line doesn't contain "Cooling" but the next one does,
-                    //that means a cooldown phase just started.
+                    //that means a recoveryCD phase just started.
                     if (!s[3].contains("Cooling")) {
                         if (i < TableOfActivities.size() + 1) {
                             if (TableOfActivities.get(i + 1)[3].contains("Cooling")) {

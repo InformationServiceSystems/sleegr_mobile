@@ -468,7 +468,7 @@ public class DataProcessingManager {
             return result;
         }
 
-        // get the last cooldown
+        // get the last recoveryCD
         ArrayList<ISSRecordData> lastCooldown = extractLastCooldown(lastActivity);
         ArrayList<ISSRecordData> lastTraining = extractLastTraining(lastActivity);
 
@@ -496,7 +496,7 @@ public class DataProcessingManager {
         }*/
 
 
-        // extract cooldown parameters
+        // extract recoveryCD parameters
         double[] cooldownParameters = getCooldownParameters(lastCooldown);
 
         // exponential model with bias is fit to the data:

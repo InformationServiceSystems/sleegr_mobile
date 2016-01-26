@@ -97,6 +97,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     TimerTask timerTask = null;
     Timer timer = null;
     File mutexFile = new File(Environment.getExternalStorageDirectory(), "/triathlon_state.backup");
+
+
     File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon_iss_package.bin");
     BluetoothDevice hrmDevice = null;
     BluetoothGatt mBluetoothGatt = null;
@@ -378,7 +380,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    boolean isNowASleepingHour(){
+    static boolean isNowASleepingHour(){
 
         Calendar clnd = Calendar.getInstance();
         return (clnd.get(Calendar.HOUR_OF_DAY) >= 12) || (clnd.get(Calendar.HOUR_OF_DAY) < 5);
@@ -563,11 +565,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    public boolean nonCooldownable(String action){
+    public boolean nonCoolable(String action){
 
         return action.equals("Resting") ||
                 action.equals("Other") ||
                 action.equals("Cooldown") ||
+                action.equals("Recovery") ||
                 action.contains("Cooling");
 
     }
@@ -579,7 +582,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         if (!currentState.equals("Idle")) {
 
             if (action.equals(currentState)){
-                if (nonCooldownable(currentState)) {
+                if (nonCoolable(currentState)) {
                     // stop recording cooling / resting prematurely
                     newState = "Idle";
                     RecordActivitySwitch();
@@ -615,6 +618,64 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         return;
     }
 
+    static File getRecordedActivitiesFile(){
+
+        String daystr = DataStorageManager.getDayFromToday(0);
+        File file = new File(DataStorageManager.userDataFolder, daystr + ".dat0004");
+        return file;
+
+    }
+
+    public static void RecordActivityMeasured(String state){
+
+
+        File file = getRecordedActivitiesFile();
+        HashMap<String, Boolean> dictionary = new HashMap<>();
+
+        try {
+            if (!file.exists()){
+                Serializer.SerializeToFile(dictionary, file);
+            }
+
+            dictionary = (HashMap<String, Boolean>) Serializer.DeserializeFromFile(file);
+
+            if (dictionary.containsKey(state))
+                return;
+
+            if (state.equals("Resting")){
+                state = state + ":" + itself.isNowASleepingHour();
+            }
+
+            dictionary.put(state, true);
+
+            Serializer.SerializeToFile(dictionary, file);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public static HashMap<String, Boolean> getRecordedActivities(){
+
+        File file = getRecordedActivitiesFile();
+        HashMap<String, Boolean> dictionary = new HashMap<>();
+
+        try {
+
+            if (file.exists()){
+                dictionary = (HashMap<String, Boolean>) Serializer.DeserializeFromFile(file);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dictionary;
+
+    }
+
     private void BringIntoState(String state) {
 
         currentState = state;
@@ -631,6 +692,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             e.printStackTrace();
         }
 
+        RecordActivityMeasured(state);
+
         if (state.equals("Idle")) {
             return;
         }
@@ -643,7 +706,20 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 AskUserForFeedback();
             }
 
-        }else if (state.contains("Cooling")) {
+        }else if (state.contains("Cooldown")) {
+            timerTimeout = RESTING_MEASUREMENT_TIME; // needed to recover the state of the app properly
+            //StopGPS();
+        }else if (state.contains("Recovery")) {
+            timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
+
+            if (!getRecordedActivities().containsKey("Cooldown")){
+                Intent myIntent = new Intent(this, TrainingStartTimeActivity.class);
+                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(myIntent);
+            }
+
+            //StopGPS();
+        } else if (state.contains("Cooling")) {
             timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
             OutputEvent("Cooling down ...");
             //StopGPS();
@@ -1068,6 +1144,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     Location locPrev = null;
     double totalDistance = 0;
+
+    public void TrainingEnd(float hour, float minute) {
+
+        AddNewData(0, 13, GetTimeNow(), currentState, hour, minute, 0.0f);
+
+    }
 /*
     public void StartGPS() {
 

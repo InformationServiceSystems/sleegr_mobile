@@ -50,7 +50,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
@@ -64,9 +63,8 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * The main activity with a view pager, containing three pages:<p/>
@@ -247,20 +245,39 @@ public class MainActivity extends Activity {
             return;
         }
 
-        ImageButton cdButton = (ImageButton) findViewById(R.id.startCooldown);
-        ImageButton hrButton = (ImageButton) findViewById(R.id.morningEveningHR);
+        // get measured states
+        HashMap<String, Boolean> recordedActivities = SensorsDataService.getRecordedActivities();
 
-        cdButton.setBackgroundColor(Color.GRAY);
-        hrButton.setBackgroundColor(Color.GRAY);
+        ImageButton morningHR = (ImageButton) findViewById(R.id.morningHR);
+        ImageButton startCooldown = (ImageButton) findViewById(R.id.startCooldown);
+        ImageButton continueCooldown = (ImageButton) findViewById(R.id.continueCooldown);
+        ImageButton eveningHR = (ImageButton) findViewById(R.id.eveningHR);
 
-        int bkg = Color.YELLOW;
+        morningHR.setBackgroundColor( recordedActivities.containsKey("Resting:false") ? Color.GREEN : Color.GRAY);
+        startCooldown.setBackgroundColor(recordedActivities.containsKey("Cooldown") ? Color.GREEN : Color.GRAY);
+        continueCooldown.setBackgroundColor(recordedActivities.containsKey("Recovery") ? Color.GREEN : Color.GRAY);
+        eveningHR.setBackgroundColor(recordedActivities.containsKey("Resting:true") ? Color.GREEN : Color.GRAY);
+
+        int inProgressColor = Color.argb(255,255,165,0);
 
         if (SensorsDataService.itself.currentState.equals("Cooldown")){
-            cdButton.setBackgroundColor(bkg);
+            startCooldown.setBackgroundColor(inProgressColor);
         }
 
-        if (SensorsDataService.itself.currentState.equals("Resting")){
-            hrButton.setBackgroundColor(bkg);
+        if (SensorsDataService.itself.currentState.equals("Recovery")){
+            continueCooldown.setBackgroundColor(inProgressColor);
+        }
+
+        if (SensorsDataService.itself.currentState.equals("Resting") ){
+
+            if (SensorsDataService.itself.isNowASleepingHour()){
+                eveningHR.setBackgroundColor(inProgressColor);
+            }
+            else
+            {
+                morningHR.setBackgroundColor(inProgressColor);
+            }
+
         }
 
     }
@@ -459,6 +476,15 @@ public class MainActivity extends Activity {
 
     public void onClicked(View view) {
         switch (view.getId()) {
+            case R.id.morningHR:
+
+                if (SensorsDataService.itself != null) {
+
+                    if (!SensorsDataService.itself.isNowASleepingHour())
+                        SensorsDataService.itself.SwitchSportsAction("Resting");
+                }
+
+                break;
             case R.id.startCooldown:
 
                 if (SensorsDataService.itself != null) {
@@ -467,10 +493,19 @@ public class MainActivity extends Activity {
 
 
                 break;
-            case R.id.morningEveningHR:
+            case R.id.continueCooldown:
 
                 if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction("Resting");
+                    SensorsDataService.itself.SwitchSportsAction("Recovery");
+                }
+
+
+                break;
+            case R.id.eveningHR:
+
+                if (SensorsDataService.itself != null) {
+                    if (SensorsDataService.itself.isNowASleepingHour())
+                        SensorsDataService.itself.SwitchSportsAction("Resting");
                 }
 
 

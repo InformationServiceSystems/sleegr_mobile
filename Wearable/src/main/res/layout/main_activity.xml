@@ -139,35 +139,57 @@
         android:background="@color/white">
 
 
+        <ImageButton
+            android:id="@+id/morningHR"
+            android:layout_width="40dp"
+            android:layout_height="fill_parent"
+            android:background="@color/grey"
+            android:src="@drawable/ic_hotel_black_24dp"
+            android:onClick="onClicked"
+            android:layout_marginBottom="3dp"
+            android:layout_marginLeft="3dp"
+            android:layout_alignParentStart="true" />
+
+
 
         <ImageButton
             android:id="@+id/startCooldown"
-            android:layout_alignParentStart="true"
             android:layout_width="40dp"
-            android:background="@color/grey"
             android:layout_height="fill_parent"
-            android:layout_margin="3dp"
+            android:background="@color/grey"
             android:src="@drawable/ic_ac_unit_black_24dp"
-            android:contentDescription="@string/StartTrainingButton"
-            android:onClick="onClicked" />
+            android:onClick="onClicked"
+            android:layout_marginBottom="3dp"
+            android:layout_marginLeft="3dp"
+            android:layout_toRightOf="@+id/morningHR"/>
+
+
+        <ImageButton
+            android:id="@+id/continueCooldown"
+            android:layout_width="40dp"
+            android:layout_height="fill_parent"
+            android:background="@color/grey"
+            android:src="@drawable/ic_trending_down_black_24dp"
+            android:onClick="onClicked"
+            android:layout_marginBottom="3dp"
+            android:layout_marginLeft="3dp"
+            android:layout_toRightOf="@+id/startCooldown"/>
+
+        <ImageButton
+            android:id="@+id/eveningHR"
+            android:layout_width="40dp"
+            android:layout_height="fill_parent"
+            android:background="@color/grey"
+            android:src="@drawable/ic_hotel_black_24dp"
+            android:onClick="onClicked"
+            android:layout_marginBottom="3dp"
+            android:layout_marginLeft="3dp"
+            android:layout_toRightOf="@+id/continueCooldown"/>
 
 
 
 
     </RelativeLayout>
-
-    <ImageButton
-        android:id="@+id/morningEveningHR"
-        android:layout_width="40dp"
-        android:layout_height="fill_parent"
-        android:layout_margin="3dp"
-        android:background="@color/grey"
-        android:src="@drawable/ic_hotel_black_24dp"
-        android:contentDescription="@string/StartTrainingButton"
-        android:onClick="onClicked"
-        android:layout_alignBottom="@+id/BottomLayout"
-        android:layout_toEndOf="@+id/BottomLayout"
-        android:layout_alignTop="@+id/BottomLayout" />
 
 
 </RelativeLayout>
