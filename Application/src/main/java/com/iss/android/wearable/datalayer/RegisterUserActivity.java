@@ -5,12 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-<<<<<<< HEAD
 import android.view.View;
-=======
-import android.view.Menu;
-import android.view.MenuItem;
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 import android.widget.EditText;
 
 public class RegisterUserActivity extends Activity {
@@ -27,7 +22,7 @@ public class RegisterUserActivity extends Activity {
         setContentView(R.layout.activity_register_user);
     }
 
-    public void onUserConfirm() {
+    public void onUserConfirm(View view){
 
         EditText editText = (EditText) findViewById(R.id.editText);
         String emailid = editText.getText().toString().replace(" ","");

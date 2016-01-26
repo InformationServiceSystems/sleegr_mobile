@@ -8,13 +8,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created by Euler on 12/18/2015.
  */
 public class CSVManager {
+
 
     public static StringBuilder RecordsToCSV(List<ISSRecordData> exampleData ){
 
@@ -43,52 +43,6 @@ public class CSVManager {
             //exception handling left as an exercise for the reader
             DataSyncService.itself.OutputEvent("error occured: "  + e.toString());
         }
-
-    }
-
-    public static HashMap<String, Double> ReadSleepData(){
-
-        HashMap<String, Double> result = new HashMap<>();
-
-        if (!DataStorageManager.sleepData.exists()){
-            return result;
-        }
-
-        // read file line by line
-        try (BufferedReader br = new BufferedReader(new FileReader(DataStorageManager.sleepData))) {
-
-            String line;
-
-            // every second line contains data, other lines contain column names
-            boolean skip = false;
-            while ((line = br.readLine()) != null) {
-
-                skip = !skip;
-
-                if (skip)
-                    continue;
-
-                // split thee line
-
-                String[] split = line.split("\",\"");
-
-                String date = split[3].substring(0,12);
-                String[] date_split = date.split(". ");
-                date = date_split[2] + "-" + date_split[1] + "-" + date_split[0] ;
-                Double value = Double.parseDouble(split[12]);
-
-                result.put(date, value);
-
-
-            }
-
-        } catch (IOException e) {
-
-            System.out.print(e);
-
-        }
-
-        return result;
 
     }
 

@@ -32,6 +32,7 @@
 package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -57,7 +58,6 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -86,30 +86,21 @@ public class MainActivity extends Activity {
 
 
     private static final String TAG = "MainActivity";
-<<<<<<< HEAD
     public static MainActivity itself;
     LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
-=======
-    private final LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[]{
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
     });
-    private int current_time = 0;
-    private PendingIntent pendingInt = null;
+    int current_time = 0;
+    PendingIntent pendingInt = null;
     float heartbeat = 10;
     int steps = 1000;
     boolean allowHRM = false;
     private GoogleApiClient mGoogleApiClient;
     private Handler mHandler;
-    private ArrayList<String> listItems = new ArrayList<>();
+    private ArrayList<String> listItems = new ArrayList<String>();
     private ArrayAdapter<String> adapter;
     private Intent murderousIntent;
     private int warned = 0;
-<<<<<<< HEAD
     BroadcastReceiver br = new BroadcastReceiver() {
-=======
-
-    private final BroadcastReceiver br = new BroadcastReceiver() {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
         // Receives broadcasts sent from other points of the app, like the SensorsDataService
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -208,6 +199,8 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle b) {
 
+        Log.d("MainActivity", "is now being created");
+
         super.onCreate(b);
         itself = this;
 
@@ -284,7 +277,7 @@ public class MainActivity extends Activity {
         // Intent that kills the app after a certain amount of time after the app has crashed
         murderousIntent = new Intent(this, SensorsDataService.class);
         // start handler which starts pending-intent after Application Crash
-        /*Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
                 Log.d("Killer", "kills");
@@ -301,7 +294,7 @@ public class MainActivity extends Activity {
                 System.exit(2);
 
             }
-        });*/
+        });
 
     }
 
@@ -321,7 +314,6 @@ public class MainActivity extends Activity {
         staticLabelsFormatter.setHorizontalLabels(new String[]{"120", "60", "0"});
         graph.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
         graph.getGridLabelRenderer().setGridColor(Color.BLACK);
-        graph.getGridLabelRenderer().setGridStyle(GridLabelRenderer.GridStyle.BOTH);
         graph.getGridLabelRenderer().setHighlightZeroLines(true);
         graph.getGridLabelRenderer().setVerticalLabelsColor(Color.BLACK);
         graph.getGridLabelRenderer().setHorizontalLabelsColor(Color.BLACK);
@@ -332,7 +324,6 @@ public class MainActivity extends Activity {
     }
 
 
-<<<<<<< HEAD
     /*private void initializeSportsActions() {
 
         Spinner s = (Spinner) findViewById(R.id.sportsAction);
@@ -340,9 +331,6 @@ public class MainActivity extends Activity {
                 R.array.activities, android.R.layout.simple_spinner_item);
 
         //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item,arraySpinner);
-=======
-    }
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 
 
         s.setAdapter(adapter);
@@ -388,8 +376,7 @@ public class MainActivity extends Activity {
                 IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
                 Intent batteryStatus = registerReceiver(null, ifilter);
 
-                int level = batteryStatus != null ? batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) : 0;
-                assert batteryStatus != null;
+                int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
                 int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
                 int batteryPct = (int) (level / (float) scale * 100);
@@ -470,38 +457,6 @@ public class MainActivity extends Activity {
 
     }
 
-<<<<<<< HEAD
-=======
-    private void UpdateButtonText() {
-
-        if (SensorsDataService.itself != null) {
-            ImageButton btn = (ImageButton) findViewById(R.id.switchTrainingButton);
-            ImageButton colorbtn = (ImageButton) findViewById(R.id.colorButton);
-            String outputString = SensorsDataService.itself.allowHRM ? "Stop training" : "Start training";
-            //Only if the button is a TextButton
-            //btn.setText(outputString);
-            TextView HRLabel = (TextView) findViewById(R.id.heartRateLabel);
-            Resources res = getResources();
-            Drawable Selected_Round_Button = res.getDrawable(R.drawable.selectedroundbutton);
-            Drawable Round_Button = res.getDrawable(R.drawable.roundbutton);
-            if (outputString.equals("Start training")) {
-                HRLabel.setText("HR");
-            }
-            if (SensorsDataService.itself.allowHRM) {
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                colorbtn.setBackground(Selected_Round_Button);
-            } else {
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                series.resetData(new DataPoint[]{});
-                colorbtn.setBackground(Round_Button);
-            }
-
-
-        }
-
-    }
-
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
     public void onClicked(View view) {
         switch (view.getId()) {
             case R.id.startCooldown:
@@ -521,7 +476,6 @@ public class MainActivity extends Activity {
 
                 break;
             case R.id.searchForHRM:
-
                 try {
                     final Intent bluetoothSelector = new Intent(this, DeviceScanActivity.class);
                     startActivity(bluetoothSelector);
@@ -551,15 +505,9 @@ public class MainActivity extends Activity {
     }
 
     // Need to declare the handler here so it can be called off later
-<<<<<<< HEAD
    /* Handler handler = new Handler();
     long[] time = {0, 0};
     Runnable runnable = new Runnable() {
-=======
-    private final Handler handler = new Handler();
-    private final long[] time = {0, 0};
-    private final Runnable runnable = new Runnable() {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
         @Override
         public void run() {
             time[0] += 1;

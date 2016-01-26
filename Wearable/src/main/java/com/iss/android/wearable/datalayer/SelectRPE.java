@@ -47,7 +47,7 @@ public class SelectRPE extends Activity {
                     return;
                 }
 
-                SensorsDataService.itself.AddTrainingScore(position, "RPE");
+                SensorsDataService.itself.AddTrainingScore(position);
                 finish();
 
             }

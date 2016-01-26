@@ -6,10 +6,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-<<<<<<< HEAD
 import android.content.pm.ServiceInfo;
-=======
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -39,11 +36,8 @@ import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-<<<<<<< HEAD
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
-=======
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -71,10 +65,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     private boolean mResolvingError = false;
     private Handler mHandler;
 
-    public static final String NEW_MESSAGE_AVAILABLE = "log the output";
+    public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
 
-<<<<<<< HEAD
 
     String uploadUrl = "http://46.101.214.58:5001/upload2/";
 
@@ -87,13 +80,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     }
 
     public static String getUserID() {
-        //return DataStorageManager.getProperUserID(itself.UserID);
-        return "1024";
+        return DataStorageManager.getProperUserID(itself.UserID);
     }
-=======
-    private final File sleepData = new File(Environment.getExternalStorageDirectory().toString() + "/sleep-data/sleep-export.csv");
-    private final String uploadUrl = "http://46.101.214.58:5001/upload";
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 
     @Override
     public void onCreate() {
@@ -125,31 +113,10 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    private final SyncAlarm alarm = new SyncAlarm();
+    SyncAlarm alarm = new SyncAlarm();
 
-    private String UserID = "userID";
+    public String UserID = "userID";
 
-<<<<<<< HEAD
-=======
-    private File getSensorsFile() {
-        return getSensorsFile(0);
-    }
-
-    private File getSensorsFile(int dayoffset) {
-
-        DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-        Calendar cl = Calendar.getInstance();
-        cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
-        String currentDateandTime = df.format(cl.getTime());
-
-        String uids = UserID.replace("@", "_at_");
-
-        File sensorsData = new File(Environment.getExternalStorageDirectory(),  "User_" + uids +  "_" + currentDateandTime + "_triathlon_iss_package.bin");
-        return sensorsData;
-
-    }
-
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -218,7 +185,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    private void StopSleepTracking() {
+    public void StopSleepTracking(){
         try{
             Intent intent = new Intent("com.urbandroid.sleep.alarmclock.STOP_SLEEP_TRACK");
             sendBroadcast(intent);
@@ -258,7 +225,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    private void SendHRtoServer(String HR) {
+    public void SendHRtoServer(String HR){
 
         try {
             URL obj = new URL("http://46.101.214.58:5100/realtime?hrm=" + HR);
@@ -271,7 +238,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         con.getInputStream()));
                 String inputLine;
-                StringBuilder response = new StringBuilder();
+                StringBuffer response = new StringBuffer();
 
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
@@ -312,7 +279,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }
     }
 
-    private void SaveDataFromAsset(Asset asset) {
+    public void SaveDataFromAsset(Asset asset) {
 
         if (asset == null) {
             throw new IllegalArgumentException("Asset must be non-null");
@@ -350,9 +317,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    private void OutputEvent(String str) {
+    public void OutputEvent(String str) {
 
-        Intent intent = new Intent(NEW_MESSAGE_AVAILABLE);
+        Intent intent = new Intent(this.NEW_MESSAGE_AVAILABLE);
         intent.putExtra("message", str);
         sendBroadcast(intent);
 
@@ -385,7 +352,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    private void ClearWatchData() {
+    public void ClearWatchData() {
 
         OutputEvent("Data saved. Clearing data on the watch");
 
@@ -408,7 +375,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }).start();
     }
 
-    private void ConfirmSleepTrackingStopped() {
+    public void ConfirmSleepTrackingStopped() {
 
         OutputEvent("Stopped the sleep tracking");
 
@@ -431,70 +398,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }).start();
     }
 
-<<<<<<< HEAD
-=======
-    private byte[] FileToBytes(File file) {
-
-        int size = (int) file.length();
-        byte[] bytes = new byte[size];
-
-        try {
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-            buf.read(bytes, 0, bytes.length);
-            buf.close();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return bytes;
-    }
-
-    // Returns String which is a server response
-    private void UploadFileToServer(File fileToUpload, String uploadUrl) {
-
-        if (!fileToUpload.exists()){
-            return;
-        }
-
-        final File file = fileToUpload;
-        final String serverurl = uploadUrl;
-
-        /*StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);*/
-
-        OutputEvent("Starting to sync with server ... ");
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-
-                    // Static stuff:
-
-                    String attachmentName = "file";
-                    String attachmentFileName = "User_" + UserID + "_" + file.getName();
-                    String crlf = "\r\n";
-                    String twoHyphens = "--";
-                    String boundary = "*****";
-
-                    //Setup the request:
-
-                    HttpURLConnection httpUrlConnection = null;
-                    URL url = new URL(serverurl);
-                    httpUrlConnection = (HttpURLConnection) url.openConnection();
-                    httpUrlConnection.setUseCaches(false);
-                    httpUrlConnection.setDoOutput(true);
-
-                    httpUrlConnection.setRequestMethod("POST");
-                    httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
-                    httpUrlConnection.setRequestProperty("Cache-Control", "no-cache");
-                    httpUrlConnection.setRequestProperty(
-                            "Content-Type", "multipart/form-data;boundary=" + boundary);
-
-                    // Start content wrapper:
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 
 
     // Magic that is supposed to keep the process running on the Android v 4.4 even

@@ -7,7 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -24,13 +23,10 @@ public class DailyCooldown {
     public TimeSeries expAllData = null;
     public TimeSeries exp2min = null;
 
-    public Double alphaAllData = null;
-    public Double alpha2min = null;
-    public Double morningHR = null;
-    public Double eveningHR = null;
-    public Double RPE = null;
-    public Double DALDA = null;
-    public Double DeepSleep = null;
+    public double alphaAllData = -1;
+    public double alpha2min = -1;
+    public double morningHR = -1;
+    public double eveningHR = -1;
 
     Visualizations visualizations = new Visualizations();
 
@@ -81,7 +77,6 @@ public class DailyCooldown {
             }
         }
 
-        // process cooldown to get recovery curves
         if (cooldown != null){
 
             cooldown2min.addAll(eveningHRdata);
@@ -102,40 +97,10 @@ public class DailyCooldown {
 
         }
 
-        // get morning / evening hrs. Could use the loaded data, but using existing function is easier
         double[] morningEveningHRs = DataProcessingManager.getMorningEveningHRs(daystr, userID);
 
-        if (morningEveningHRs[0] > 0)
-            morningHR = morningEveningHRs[0];
-        if (morningEveningHRs[1] > 0)
-            eveningHR = morningEveningHRs[1];
-
-        // read the Feedback activity file, if it exists
-
-        List<ISSRecordData> feedback = CSVManager.ReadCSVdata(daystr, userID, "Feedback");
-
-        if (feedback != null){
-
-            DALDA = 0.0;
-
-            for (ISSRecordData record: feedback){
-                if (record.ExtraData.contains("RPE")){
-                    RPE = Double.valueOf(record.Value1);
-                }
-                else{
-                    DALDA += record.Value1;
-                }
-            }
-
-        }
-
-        // read the sleep file
-
-        HashMap<String, Double> sleepData = CSVManager.ReadSleepData();
-
-        if (sleepData.containsKey(daystr)){
-            DeepSleep = sleepData.get(daystr);
-        }
+        morningHR = morningEveningHRs[0];
+        eveningHR = morningEveningHRs[1];
 
     }
 

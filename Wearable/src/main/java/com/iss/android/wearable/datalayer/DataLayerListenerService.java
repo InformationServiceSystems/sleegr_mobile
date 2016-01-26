@@ -39,11 +39,11 @@ public class DataLayerListenerService extends WearableListenerService {
     private static final String TAG = "DataLayerListenerServic";
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
-    private static final String DATA_ITEM_RECEIVED_PATH = "ID: 1, Heartbeat: 9, Steps: 1001 ";
-    private static final String COUNT_PATH = "/count";
+    public static String DATA_ITEM_RECEIVED_PATH = "ID: 1, Heartbeat: 9, Steps: 1001 ";
+    public static final String COUNT_PATH = "/count";
     public static final String IMAGE_PATH = "/image";
     public static final String IMAGE_KEY = "photo";
-    private GoogleApiClient mGoogleApiClient;
+    GoogleApiClient mGoogleApiClient;
 
     @Override
     public void onCreate() {

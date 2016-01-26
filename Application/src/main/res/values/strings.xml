@@ -14,7 +14,6 @@
 -->
 
 <resources>
-<<<<<<< HEAD
 
     <string-array name="sports_actions_list">
         <item>Morning / Evening HR</item>
@@ -24,8 +23,6 @@
         <item>Athletics</item>
     </string-array>
 
-=======
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
     <string name="start_wearable_activity">Start Wearable Activity</string>
     <string name="start">Start</string>
     <string name="take_photo">Take a Photo</string>

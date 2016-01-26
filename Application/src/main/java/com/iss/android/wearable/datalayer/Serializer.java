@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +23,7 @@ import java.io.ObjectOutputStream;
  * @author Iaroslav
  * WARNING: (DE)SERIALIZATION IS PERFORMED IN MEMORY FOR BETTER PERFORMANCE
  */
-class Serializer {
+public class Serializer {
 
 
 
@@ -42,7 +43,7 @@ class Serializer {
 
     }
 
-    public static Object DeserializeFromFile(File file) throws IOException, ClassNotFoundException {
+    public static Object DeserializeFromFile(File file) throws FileNotFoundException, IOException, ClassNotFoundException {
 
         FileInputStream fileIn;
 
@@ -53,7 +54,7 @@ class Serializer {
         return DeserializeFromBytes(data);
     }
 
-    private static byte[] SerializeToBytes(Object object) throws IOException {
+    public static byte[] SerializeToBytes(Object object) throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              ObjectOutput out = new ObjectOutputStream(bos)) {
             out.writeObject(object);
@@ -94,6 +95,9 @@ class Serializer {
             BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
             buf.read(bytes, 0, bytes.length);
             buf.close();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

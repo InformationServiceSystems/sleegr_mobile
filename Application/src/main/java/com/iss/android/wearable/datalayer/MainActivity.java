@@ -94,7 +94,7 @@ public class MainActivity extends FragmentActivity implements
         //Necessary, terminating the choose register service activity
         //ChooseRegisterServiceActivity.instance.finish();
         // Stores DataItems received by the local broadcaster or from the paired watch.
-        mDataItemListAdapter = new DataItemAdapter(this);
+        mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
         mDataItemList.setAdapter(mDataItemListAdapter);
 
         mAdapter = new MyAdapter(getSupportFragmentManager());
@@ -188,14 +188,13 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    private PendingIntent pendingInt = null;
+    PendingIntent pendingInt = null;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
     }
 
-<<<<<<< HEAD
     @Override
     protected void onStart() {
         super.onStart();
@@ -233,8 +232,6 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
-=======
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
     private DataUpdateReceiver dataUpdateReceiver;
 
     @Override
@@ -352,7 +349,6 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-<<<<<<< HEAD
     @Override
     protected void onStop() {
         super.onStop();
@@ -360,20 +356,12 @@ public class MainActivity extends FragmentActivity implements
 
 
     public void OutputEvent(final String content) {
-=======
-
-    private void OutputEvent(final String content) {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 
         final String cont = content;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-<<<<<<< HEAD
                 mDataItemListAdapter.add(new Event("Event", content));
-=======
-                mDataItemListAdapter.add(new Event(content));
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
             }
         });
 
@@ -386,8 +374,8 @@ public class MainActivity extends FragmentActivity implements
 
         private final Context mContext;
 
-        public DataItemAdapter(Context context) {
-            super(context, android.R.layout.simple_list_item_1);
+        public DataItemAdapter(Context context, int unusedResource) {
+            super(context, unusedResource);
             mContext = context;
         }
 
@@ -420,10 +408,10 @@ public class MainActivity extends FragmentActivity implements
 
     private class Event {
 
-        final String title;
-        final String text;
+        String title;
+        String text;
 
-        public Event(String text) {
+        public Event(String title, String text) {
             this.title = GetTimeNow();
             this.text = text;
         }
@@ -449,11 +437,7 @@ public class MainActivity extends FragmentActivity implements
         return results;
     }
 
-<<<<<<< HEAD
     public void onRegisterUser() {
-=======
-    public void onSyncClick() {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 
         final Intent registerUser = new Intent(this, RegisterUserActivity.class);
         startActivity(registerUser);
@@ -494,11 +478,7 @@ public class MainActivity extends FragmentActivity implements
     }
 
 
-<<<<<<< HEAD
     public TimeSeries randomRPEReq(int past, int future){
-=======
-    public void onSendToServerClick() {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 
         TimeSeries requirements = new TimeSeries("RPE schedule");
 
@@ -558,11 +538,7 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-<<<<<<< HEAD
     public void smoothenBins(double [] bins, double [] counts){
-=======
-    public void onRegisterUser() {
->>>>>>> b4c08e84067c7e2c7b888488173fff30e8f65351
 
         double cv = 0;
 
@@ -767,11 +743,8 @@ public class MainActivity extends FragmentActivity implements
 
     public void onExploreData() {
 
-        /*Intent i = new Intent(MainActivity.this, SelectAvailableData.class);
-        startActivity(i);*/
-
-        UserParameters userParameters = new UserParameters(30);
-        //DailyCooldown cooldown = new DailyCooldown(DataProcessingManager.getDateFromToday(2));
+        Intent i = new Intent(MainActivity.this, SelectAvailableData.class);
+        startActivity(i);
 
     }
 
