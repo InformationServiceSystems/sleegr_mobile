@@ -31,10 +31,15 @@ public class DataProcessingManager {
     }
 
     public static double[] getCooldownParameters(ArrayList<ISSRecordData> data) {
+        return  getCooldownParameters(data, 0);
+    }
+
+    public static double[] getCooldownParameters(ArrayList<ISSRecordData> data, double timeShift) {
 
         Calendar startTime = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
 
+        // get the first reference time
         try {
             startTime.setTime(sdf.parse(data.get(0).Timestamp));
         } catch (ParseException e) {
@@ -45,6 +50,7 @@ public class DataProcessingManager {
         ArrayList<Double> heartRates = new ArrayList<>();
         ArrayList<Double> times = new ArrayList<>();
 
+        // convert sequence to arrays X and Y of time and corresponding values
         for (ISSRecordData record : data) {
 
             if (record.MeasurementType != 21) {
@@ -57,6 +63,9 @@ public class DataProcessingManager {
             }
 
             double time = (currentTime.getTime().getTime() - startTime.getTime().getTime()) / 1000;
+
+            // add the time shift, in case data does not start from the zero time
+            time = time + timeShift;
             double hr = record.Value1;
 
             heartRates.add(hr);

@@ -354,10 +354,13 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         if (timerTime > timerTimeout) {
 
             boolean sleepMode = isNowASleepingHour() && currentState.equals("Resting");
+            boolean startRecovery = currentState.equals("Cooldown");
 
             if (sleepMode){
                 BringIntoState("Resting");
                 startSleeping();
+            } else if(startRecovery){
+                BringIntoState("Recovery");
             }
             else{
                 BringIntoState("Idle");
@@ -621,7 +624,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     static File getRecordedActivitiesFile(){
 
         String daystr = DataStorageManager.getDayFromToday(0);
-        File file = new File(DataStorageManager.userDataFolder, daystr + ".dat0004");
+        File file = new File(DataStorageManager.userDataFolder, daystr + ".binary_file");
         return file;
 
     }

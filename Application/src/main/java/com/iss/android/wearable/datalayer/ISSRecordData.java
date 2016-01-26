@@ -13,6 +13,12 @@ import java.util.Date;
 public class ISSRecordData implements Serializable {
 
     static final long serialVersionUID = 1L;
+
+    static final int MEASUREMENT_HR = 21,
+            MEASUREMENT_ACCELEROMETER = 1,
+            MEASUREMENT_GPS = 512,
+            MEASUREMENT_TRAINING_END = 13;
+
     public int UserID;
     public int MeasurementType;
     public String Timestamp;

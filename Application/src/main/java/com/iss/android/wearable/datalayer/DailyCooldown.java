@@ -54,6 +54,7 @@ public class DailyCooldown {
             }
         }
 
+        // extract resting heart rate data
         ArrayList<List<ISSRecordData>> resting = CSVManager.ReadSplitCSVdata(daystr, userID, "Resting");
 
         for (List<ISSRecordData> rest: resting){
@@ -73,6 +74,7 @@ public class DailyCooldown {
         // extract first 5 min of recoveryCD
         Visualizations.Subplot subplot = visualizations.AddGraph("Cooldown analysis");
 
+        // makes things easier
         if (recoveryCD == null){
             recoveryCD = new ArrayList<>();
         }
@@ -88,13 +90,16 @@ public class DailyCooldown {
 
 
         ArrayList<ISSRecordData> controlledData = new ArrayList<>();
-        allData.addAll(cooldown);
-        allData.addAll(eveningHRdata);
+        controlledData.addAll(cooldown);
+        controlledData.addAll(eveningHRdata);
 
+
+        cooldownSeries = ConvertToTS(allData, "Raw data");
         subplot.Add(cooldownSeries, Color.BLUE);
 
         alphaAllData = ComputeExponentFit(allData, allData, subplot, "Intensity, all data");
         alpha2min = ComputeExponentFit(controlledData, allData, subplot, "Intensity, controlled");
+
 
         // get morning / evening hrs. Could use the loaded data, but using existing function is easier
         double[] morningEveningHRs = DataProcessingManager.getMorningEveningHRs(daystr, userID);
@@ -136,15 +141,36 @@ public class DailyCooldown {
 
     Double ComputeExponentFit(ArrayList<ISSRecordData> data,ArrayList<ISSRecordData> allData, Visualizations.Subplot subplot, String label){
 
-        if (data.size() == 0)
+        if (data.size() == 0){
             return null;
+        }
 
-        cooldown.addAll(eveningHRdata);
-        double[] cooldownParameters = DataProcessingManager.getCooldownParameters((ArrayList<ISSRecordData>) data);
+
+        // check if timeshift might be needed (if the data was collected right after the exercise)
+
+        Double timeshift = 0.0;
+
+        for (ISSRecordData record: data){
+            if (record.MeasurementType == ISSRecordData.MEASUREMENT_TRAINING_END){
+                ISSRecordData first = data.get(0);
+                Date timestamp = first.getTimestamp();
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(timestamp);
+                long firstTime = cal.getTime().getTime();
+                cal.set(Calendar.HOUR_OF_DAY, (int) record.Value1);
+                cal.set(Calendar.MINUTE, (int) record.Value2);
+                long endTime = cal.getTime().getTime();
+
+                timeshift = Double.valueOf(firstTime - endTime) / 1000.0;
+            }
+        }
+
+
+        double[] cooldownParameters = DataProcessingManager.getCooldownParameters((ArrayList<ISSRecordData>) data, timeshift);
 
         Double alpha = cooldownParameters[0];
 
-        cooldownSeries = ConvertToTS((ArrayList<ISSRecordData>) recoveryCD, label);
+        cooldownSeries = ConvertToTS((ArrayList<ISSRecordData>) allData, label);
         expAllData = DataProcessingManager.ComputeExponent(cooldownParameters, cooldownSeries);
 
         subplot.Add(expAllData, Color.GREEN);
