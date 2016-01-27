@@ -44,7 +44,7 @@ public class VisualizationsPlotter {
         data_values.setTitle(series.name);
 
         boolean anything = false;
-        for (int i = 0; i < series.Values.size(); i++){
+        for (int i = 0; i < series.Values.size(); i += 30) {
 
             if (series.Values.get(i).y < 0){
                 continue;

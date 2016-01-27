@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -39,7 +40,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -47,6 +47,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+import com.jjoe64.graphview.GraphView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,7 +57,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * Receives its own events using a listener API designed for foreground activities. Updates a data
@@ -103,9 +103,6 @@ public class MainActivity extends FragmentActivity implements
         mPager.setAdapter(mAdapter);
         mPager.setCurrentItem(30);
         mPager.setOnPageChangeListener(mPageChangeListener);
-
-        date = new GregorianCalendar();
-        SportsSession.retrieveCsvs(date);
 
         TextView text = (TextView) findViewById(R.id.text);
         String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));
@@ -280,32 +277,21 @@ public class MainActivity extends FragmentActivity implements
             Calendar date = new GregorianCalendar();
             date.add(Calendar.DATE, -29 + mNum);
             Log.d("date", String.valueOf(-29 + mNum));
-            //Find the activities for that day
-            //DUMMY LIST
-            String datestring = (String.valueOf(date.get(GregorianCalendar.YEAR))) + "-"
-                    + (String.valueOf(date.get(GregorianCalendar.MONTH) + 1)) + "-"
-                    + (String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH)));
-            String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
-            Log.d("userid", UserID);
-            String[] activities = {"Swimming", "Athletics", "Cycling", "Running"};
-            ArrayList<List<ISSRecordData>> sessionlist = new ArrayList<>();
-            for (String activity : activities) {
-                sessionlist.addAll(CSVManager.ReadSplitCSVdata(datestring, UserID, activity));
-            }
-            ArrayList<String> list = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
-                list.add(String.valueOf(i));
-            }
-            //For each of them, construct a layout that is openable which contains the graphs
-            //Readsplitcsvdata is the method to be called to retrieve all sessions for a given date, user and activity.
-            View pl = v.findViewById(R.id.root_layout);
-            for (List<ISSRecordData> l : sessionlist) {
-                LayoutInflater layoutInflater = getLayoutInflater(savedInstanceState);
-                View ll = layoutInflater.inflate(R.layout.display_session, container, false);
-                TextView t = (TextView) ll.findViewById(R.id.session_text);
-                t.setText("Dummy for " + datestring + ": " + l.get(0).MeasurementType);
-                ((LinearLayout) pl).addView(ll);
-            }
+            // Fill the GraphView with data for the current date
+            // currently sample data to see if it's working dynamically.
+            DailyCooldown cooldown = new DailyCooldown(date.getTime());
+            GraphView graph = (GraphView) v.findViewById(R.id.graphtoday);
+            TextView text = (TextView) v.findViewById(R.id.textV1);
+            new PlotGraphsTask(graph, text, v.getContext()).execute(cooldown);
+            // Fill the TextViews below with the appropriate data
+            TextView intensity = (TextView) v.findViewById(R.id.intensity);
+            intensity.setText("Intensity: " + String.valueOf(cooldown.alpha2min));
+            TextView dalda = (TextView) v.findViewById(R.id.dalda);
+            dalda.setText("DALDA scale: " + String.valueOf(cooldown.DALDA));
+            TextView rpe = (TextView) v.findViewById(R.id.rpe);
+            rpe.setText("RPE scale: " + String.valueOf(cooldown.RPE));
+            TextView sleep = (TextView) v.findViewById(R.id.sleep);
+            sleep.setText("Deep Sleep Cycles: " + String.valueOf(cooldown.DeepSleep));
             return v;
         }
 
@@ -314,8 +300,27 @@ public class MainActivity extends FragmentActivity implements
             super.onActivityCreated(savedInstanceState);
         }
 
-
     }
+
+    private static class PlotGraphsTask extends AsyncTask<DailyCooldown, Void, Void> {
+        public GraphView graph;
+        public TextView text;
+        public Context context;
+
+        public PlotGraphsTask(GraphView arggraph, TextView argtext, Context argcontext) {
+            this.graph = arggraph;
+            this.text = argtext;
+            this.context = argcontext;
+        }
+
+        protected Void doInBackground(DailyCooldown... cooldown) {
+            GraphView[] graphs = {graph};
+            TextView[] labels = new TextView[]{text};
+            VisualizationsPlotter.Plot(cooldown[0].visualizations, graphs, labels, context);
+            return null;
+        }
+    }
+
 
     public static class MyAdapter extends FragmentPagerAdapter {
         public MyAdapter(FragmentManager fm) {
@@ -356,7 +361,6 @@ public class MainActivity extends FragmentActivity implements
 
 
     public void OutputEvent(final String content) {
-
         final String cont = content;
         mHandler.post(new Runnable() {
             @Override
@@ -478,19 +482,19 @@ public class MainActivity extends FragmentActivity implements
     }
 
 
-    public TimeSeries randomRPEReq(int past, int future){
+    public TimeSeries randomRPEReq(int past, int future) {
 
         TimeSeries requirements = new TimeSeries("RPE schedule");
 
-        for (int i=0; i < past; i++){
+        for (int i = 0; i < past; i++) {
             long round = Math.round(Math.random() * 10);
             Date date = DataProcessingManager.getDateFromToday(i);
             requirements.AddFirstValue(date, round);
         }
 
-        for (int i=0; i < future; i++){
+        for (int i = 0; i < future; i++) {
             long round = Math.round(Math.random() * 10);
-            Date date = DataProcessingManager.getDateFromToday(-i-1);
+            Date date = DataProcessingManager.getDateFromToday(-i - 1);
             requirements.AddValue(date, round);
         }
 
@@ -498,24 +502,24 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    public double predictRecovery(ArrayList<Double> pastX, ArrayList<Double> pastY, Double futureX){
+    public double predictRecovery(ArrayList<Double> pastX, ArrayList<Double> pastY, Double futureX) {
 
 
         double result = -1;
 
         // collect values of past records into bins
 
-        double [] bins = new double[11];
-        double [] counts = new double[11];
+        double[] bins = new double[11];
+        double[] counts = new double[11];
 
-        for (int i = 0; i < 11; i++){
+        for (int i = 0; i < 11; i++) {
             bins[i] = 0;
             counts[i] = 0;
         }
 
-        for (int i = 0; i < pastY.size(); i++){
+        for (int i = 0; i < pastY.size(); i++) {
 
-            if (pastX.get(i) <0){
+            if (pastX.get(i) < 0) {
                 continue;
             }
 
@@ -523,8 +527,8 @@ public class MainActivity extends FragmentActivity implements
             counts[((int) Math.round(pastX.get(i)))] += 1;
         }
 
-        for (int i = 0; i < 11; i++){
-            if(counts[i] == 0){
+        for (int i = 0; i < 11; i++) {
+            if (counts[i] == 0) {
                 continue;
             }
             bins[i] = bins[i] / counts[i];
@@ -538,19 +542,19 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    public void smoothenBins(double [] bins, double [] counts){
+    public void smoothenBins(double[] bins, double[] counts) {
 
         double cv = 0;
 
-        for (int i= 0;i < bins.length; i++){
-            if (counts[i] > 0){
+        for (int i = 0; i < bins.length; i++) {
+            if (counts[i] > 0) {
                 cv = bins[i];
             }
             bins[i] = cv;
         }
 
-        for (int i=  bins.length-1;i >= 0; i--){
-            if (counts[i] > 0){
+        for (int i = bins.length - 1; i >= 0; i--) {
+            if (counts[i] > 0) {
                 cv = bins[i];
             }
             bins[i] = cv;
@@ -558,7 +562,7 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    public Date offsetDate(Date input, int offset){
+    public Date offsetDate(Date input, int offset) {
 
         Calendar clnd = Calendar.getInstance();
         clnd.setTime(input);
@@ -567,19 +571,19 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    public TimeSeries predictTimeSeries(TimeSeries xReq, TimeSeries xActual, TimeSeries yActual, int offset){
+    public TimeSeries predictTimeSeries(TimeSeries xReq, TimeSeries xActual, TimeSeries yActual, int offset) {
 
-        TimeSeries result = new TimeSeries(yActual.name+", pred.");
+        TimeSeries result = new TimeSeries(yActual.name + ", pred.");
 
-        for (int i = 0; i < xReq.Values.size()-offset; i++){
+        for (int i = 0; i < xReq.Values.size() - offset; i++) {
 
-            Date date  = xReq.Values.get(i).x;
-            Double val  = xReq.Values.get(i).y;
+            Date date = xReq.Values.get(i).x;
+            Double val = xReq.Values.get(i).y;
 
             TimeSeries xActBefore = xActual.beforeDate(date);
             TimeSeries yActBefore = yActual.beforeDate(date);
 
-            if (xActBefore.Values.size() == 0){
+            if (xActBefore.Values.size() == 0) {
                 continue;
             }
 
@@ -589,12 +593,12 @@ public class MainActivity extends FragmentActivity implements
             ArrayList<Double> yvalues = new ArrayList<>();
 
             // generate training set
-            for (int j = 0; j < xActBefore.Values.size(); j++){
+            for (int j = 0; j < xActBefore.Values.size(); j++) {
 
-                Date locdate = offsetDate( xActBefore.Values.get(j).x, offset);
+                Date locdate = offsetDate(xActBefore.Values.get(j).x, offset);
                 double x = xActBefore.Values.get(j).y;
 
-                if (!predValues.containsKey( TimeSeries.formatData(locdate) )){
+                if (!predValues.containsKey(TimeSeries.formatData(locdate))) {
                     continue;
                 }
 
@@ -618,7 +622,7 @@ public class MainActivity extends FragmentActivity implements
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
 
                     int days = 21;
                     //String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
@@ -651,7 +655,7 @@ public class MainActivity extends FragmentActivity implements
                     subplot.Add(avgDeviationsRPE, Color.GRAY);
 
                     // add prediction graphs
-                    for (int i = 1; i < allData.size(); i++){
+                    for (int i = 1; i < allData.size(); i++) {
 
                         int offset = 0;
 
@@ -667,12 +671,11 @@ public class MainActivity extends FragmentActivity implements
                     i.putExtra("visualizations", Serializer.SerializeToBytes(visualizations));
                     startActivity(i);
 
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     OutputEvent(ex.toString());
                 }
             }
         }).start();
-
 
 
     }
@@ -681,7 +684,7 @@ public class MainActivity extends FragmentActivity implements
 
         TimeSeries result = new TimeSeries(values.name + ", avg. divergence");
 
-        for (int i = 0; i < values.Values.size(); i++){
+        for (int i = 0; i < values.Values.size(); i++) {
 
             Date x = requirements.Values.get(i).x;
 
@@ -694,28 +697,28 @@ public class MainActivity extends FragmentActivity implements
             // construct data
             HashMap<String, Double> reqVals = req.toDictionary();
 
-            for (int j = 0; j < vals.Values.size(); j++){
+            for (int j = 0; j < vals.Values.size(); j++) {
 
                 int last = vals.Values.size() - j - 1;
 
                 Date d = vals.Values.get(last).x;
 
-                if (!reqVals.containsKey( TimeSeries.formatData(d) ))
+                if (!reqVals.containsKey(TimeSeries.formatData(d)))
                     continue;
 
                 Double yp = reqVals.get(TimeSeries.formatData(d));
                 Double y = vals.Values.get(last).y;
 
-                seq1.add(0,yp);
+                seq1.add(0, yp);
                 seq2.add(0, y);
 
-                if (seq1.size() >= timewindow){
+                if (seq1.size() >= timewindow) {
                     break;
                 }
 
             }
 
-            if (seq1.size() == 0){
+            if (seq1.size() == 0) {
                 result.AddValue(x, -1);
                 continue;
             }
@@ -733,8 +736,8 @@ public class MainActivity extends FragmentActivity implements
 
         double result = 0;
 
-        for (int i = 0; i < seq1.size(); i++){
-            result += Math.abs( seq1.get(i) - seq2.get(i) ) / seq1.size();
+        for (int i = 0; i < seq1.size(); i++) {
+            result += Math.abs(seq1.get(i) - seq2.get(i)) / seq1.size();
         }
 
         return result;
