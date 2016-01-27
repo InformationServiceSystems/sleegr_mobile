@@ -1,7 +1,6 @@
 package com.iss.android.wearable.datalayer;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.jjoe64.graphview.GraphView;
@@ -18,8 +17,6 @@ import java.util.Date;
  * Created by Euler on 1/12/2016.
  */
 public class VisualizationsPlotter {
-
-    static double maxX = 0;
 
     public static void Plot(Visualizations vis, GraphView[] graphs, TextView[] labels, Context context, String range) {
 
@@ -60,15 +57,9 @@ public class VisualizationsPlotter {
             Double y = series.Values.get(i).y;
             if (range.equals("week")) {
                 x = getDateWithOutTime(x);
-                SimpleDateFormat daydf = new SimpleDateFormat("dd.MM kk:mm");
-                Log.d("Date", daydf.format(x));
             }
 
             data_values.appendData(new DataPoint(x, y), true, series.Values.size());
-        }
-
-        if (data_values.getHighestValueX() > maxX) {
-            maxX = data_values.getHighestValueX();
         }
 
         if (!anything) {
@@ -78,18 +69,16 @@ public class VisualizationsPlotter {
         graph.addSeries(data_values);
 
         if (range.equals("week")) {
-            graph.getViewport().setMinX(data_values.getLowestValueX());
-            graph.getViewport().setMaxX(maxX);
             graph.getViewport().setXAxisBoundsManual(true);
             graph.getGridLabelRenderer().setNumHorizontalLabels(7);
             SimpleDateFormat weekdf = new SimpleDateFormat("EEE");
             graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(context, weekdf));
         }
         if (range.equals("day")) {
+            graph.getViewport().setXAxisBoundsManual(true);
             SimpleDateFormat daydf = new SimpleDateFormat("kk:mm");
             graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(context, daydf));
         }
-        //graph.getGridLabelRenderer().setNumHorizontalLabels(3);
 
         graph.getLegendRenderer().setVisible(true);
         graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
