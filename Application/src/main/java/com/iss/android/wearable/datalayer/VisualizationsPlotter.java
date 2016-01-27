@@ -6,6 +6,7 @@ import android.widget.TextView;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
+import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -40,33 +41,66 @@ public class VisualizationsPlotter {
 
     public static void PutTimeSeriesToGraph(GraphView graph, TimeSeries series, Context context, String range) {
 
-        LineGraphSeries<DataPoint> data_values = new LineGraphSeries<DataPoint>(new DataPoint[]{});
-        //data_values.setDrawDataPoints(true);
-        data_values.setColor(series.color);
-        data_values.setTitle(series.name);
+        if (series.name.equals("RPE schedule")) {
+            BarGraphSeries<DataPoint> data_values = new BarGraphSeries<DataPoint>(new DataPoint[]{});
+            //data_values.setDrawDataPoints(true);
+            data_values.setColor(series.color);
+            data_values.setTitle(series.name);
 
-        boolean anything = false;
-        for (int i = 0; i < series.Values.size(); i += 1) {
+            boolean anything = false;
+            for (int i = 0; i < series.Values.size(); i += 1) {
 
-            if (series.Values.get(i).y < 0) {
-                continue;
+                if (series.Values.get(i).y < 0) {
+                    continue;
+                }
+                anything = true;
+
+                Date x = series.Values.get(i).x;
+                Double y = series.Values.get(i).y;
+                if (range.equals("week")) {
+                    x = getDateWithOutTime(x);
+                }
+
+                data_values.appendData(new DataPoint(x, y), true, series.Values.size());
             }
-            anything = true;
 
-            Date x = series.Values.get(i).x;
-            Double y = series.Values.get(i).y;
-            if (range.equals("week")) {
-                x = getDateWithOutTime(x);
+            if (!anything) {
+                return;
             }
 
-            data_values.appendData(new DataPoint(x, y), true, series.Values.size());
-        }
+            data_values.setSpacing(50);
 
-        if (!anything) {
-            return;
-        }
+            graph.addSeries(data_values);
+        } else {
 
-        graph.addSeries(data_values);
+            LineGraphSeries<DataPoint> data_values = new LineGraphSeries<DataPoint>(new DataPoint[]{});
+            //data_values.setDrawDataPoints(true);
+            data_values.setColor(series.color);
+            data_values.setTitle(series.name);
+
+            boolean anything = false;
+            for (int i = 0; i < series.Values.size(); i += 1) {
+
+                if (series.Values.get(i).y < 0) {
+                    continue;
+                }
+                anything = true;
+
+                Date x = series.Values.get(i).x;
+                Double y = series.Values.get(i).y;
+                if (range.equals("week")) {
+                    x = getDateWithOutTime(x);
+                }
+
+                data_values.appendData(new DataPoint(x, y), true, series.Values.size());
+            }
+
+            if (!anything) {
+                return;
+            }
+
+            graph.addSeries(data_values);
+        }
 
         if (range.equals("week")) {
             graph.getViewport().setXAxisBoundsManual(true);

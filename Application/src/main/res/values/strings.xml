@@ -31,14 +31,14 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_choose_register_service">ChooseRegisterService</string>
+    <string name="title_activity_choose_register_service">Registration</string>
     <string name="FacebookButtonText">Login via Facebook</string>
     <string name="GoogleButtonText">Login via Google</string>
     <string name="EMailButtonText">Login via E-Mail</string>
     <string name="title_activity_delete_me">DeleteMeActivity</string>
-    <string name="title_activity_intensity_statistics">IntensityStatisticsActivity</string>
-    <string name="title_activity_select_available_data">SelectAvailableData</string>
-    <string name="title_activity_display_activity_file">DisplayActivityFile</string>
+    <string name="title_activity_intensity_statistics">Intensity Statistics</string>
+    <string name="title_activity_select_available_data">Browse Files</string>
+    <string name="title_activity_display_activity_file">Display File</string>
     <string name="facebook_app_id">1730472480519529</string>
 
     <!-- TODO: Remove or change this placeholder text -->
