@@ -8,6 +8,9 @@ import android.widget.TextView;
 
 import com.jjoe64.graphview.GraphView;
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class IntensityStatisticsActivity extends Activity {
 
     Visualizations visualizations = null;
@@ -51,7 +54,7 @@ public class IntensityStatisticsActivity extends Activity {
                 (TextView) findViewById(R.id.textV4),
                 (TextView) findViewById(R.id.textV5)};
 
-        VisualizationsPlotter.Plot(vis, graphs, labels, this);
+        VisualizationsPlotter.Plot(vis, graphs, labels, this, "week");
 
     }
 
@@ -63,7 +66,20 @@ public class IntensityStatisticsActivity extends Activity {
         Visualizations vis = visualizations.subsetForWeek(week);
         visualizeData(vis);
         TextView weekView = (TextView)findViewById(R.id.weekTextView);
-        weekView.setText("Displaying week: " + week);
+        Calendar cal = Calendar.getInstance();
+
+        cal.add(Calendar.WEEK_OF_YEAR, week);
+
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+
+        Date start = cal.getTime();
+
+        cal.add(Calendar.DAY_OF_MONTH, 6);
+
+        Date end = cal.getTime();
+        android.text.format.DateFormat df = new android.text.format.DateFormat();
+        weekView.setText("Displaying week: " + df.format("MM/dd/yyyy", start) + " - " + df.format("MM/dd/yyyy", end));
 
     }
 

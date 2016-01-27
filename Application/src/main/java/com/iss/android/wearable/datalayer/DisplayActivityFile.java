@@ -51,7 +51,7 @@ public class DisplayActivityFile extends Activity {
         TextView [] labels = new TextView[]{
                 (TextView) findViewById(R.id.textV1)};
 
-        VisualizationsPlotter.Plot(vis, graphs, labels, this);
+        VisualizationsPlotter.Plot(vis, graphs, labels, this, "week");
 
         textView.setText("Displaying session:" + (session + 1) + "/" + (sessions.size() ));
 

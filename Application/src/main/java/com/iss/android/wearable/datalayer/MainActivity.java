@@ -283,6 +283,11 @@ public class MainActivity extends FragmentActivity implements
             GraphView graph = (GraphView) v.findViewById(R.id.graphtoday);
             TextView text = (TextView) v.findViewById(R.id.textV1);
             new PlotGraphsTask(graph, text, v.getContext()).execute(cooldown);
+            // I'll think about a solution with ASyncTask that will plot the graphs point for point.
+            // Currently ultralaggy.
+            GraphView[] graphs = {graph};
+            TextView[] labels = new TextView[]{text};
+            VisualizationsPlotter.Plot(cooldown.visualizations, graphs, labels, v.getContext(), "day");
             // Fill the TextViews below with the appropriate data
             TextView intensity = (TextView) v.findViewById(R.id.intensity);
             intensity.setText("Intensity: " + String.valueOf(cooldown.alpha2min));
@@ -314,9 +319,9 @@ public class MainActivity extends FragmentActivity implements
         }
 
         protected Void doInBackground(DailyCooldown... cooldown) {
-            GraphView[] graphs = {graph};
+            /*GraphView[] graphs = {graph};
             TextView[] labels = new TextView[]{text};
-            VisualizationsPlotter.Plot(cooldown[0].visualizations, graphs, labels, context);
+            VisualizationsPlotter.Plot(cooldown[0].visualizations, graphs, labels, context, "day");*/
             return null;
         }
     }
