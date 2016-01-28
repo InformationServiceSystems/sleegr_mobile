@@ -96,7 +96,7 @@ public class ExponentFitter {
         double norm = 100;
         double pval = 0;
 
-        int maxidx = 30000; // protects against convergence problems
+        int maxidx = 10000; // protects against convergence problems
 
         while(maxidx > 0){
             maxidx--;
