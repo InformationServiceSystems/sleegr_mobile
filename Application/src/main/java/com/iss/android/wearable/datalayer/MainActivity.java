@@ -16,6 +16,7 @@
 
 package com.iss.android.wearable.datalayer;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -47,8 +48,12 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 
+import java.io.File;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -131,11 +136,11 @@ public class MainActivity extends FragmentActivity implements
             Intent intent = new Intent(this, DataSyncService.class);
             startService(intent);
         }
-/*
+
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
         // start handler which starts pending-intent after Application-Crash
         // That stuff may be cool for end users, but for developers it's nasty
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+        /*Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
 
@@ -272,8 +277,6 @@ public class MainActivity extends FragmentActivity implements
                                  Bundle savedInstanceState) {
             // Inflate the layout for this fragment
             View v = inflater.inflate(R.layout.fragment_pager_list, container, false);
-            View tv = v.findViewById(R.id.pagertext);
-            ((TextView) tv).setText("Fragment #" + mNum);
             Calendar date = new GregorianCalendar();
             date.add(Calendar.DATE, -29 + mNum);
             Log.d("date", String.valueOf(-29 + mNum));
@@ -287,16 +290,41 @@ public class MainActivity extends FragmentActivity implements
             // Currently ultralaggy.
             GraphView[] graphs = {graph};
             TextView[] labels = new TextView[]{text};
-            VisualizationsPlotter.Plot(cooldown.visualizations, graphs, labels, v.getContext(), "day");
+
+            // I create specific formatter inline. This is more general and java-ish :)
+            VisualizationsPlotter.Plot(cooldown.visualizations, graphs, labels, 5, new DefaultLabelFormatter() {
+                @Override
+                public String formatLabel(double value, boolean isValueX) {
+                    if (isValueX) {
+                        // show normal x values
+
+                        Calendar mCalendar = Calendar.getInstance();
+                        mCalendar.setTimeInMillis((long) value);
+                        String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
+
+                        return time;
+                    } else {
+                        // show currency for y values
+                        return super.formatLabel(value, isValueX);
+                    }
+                }
+            });
+
             // Fill the TextViews below with the appropriate data
+            TextView intctr = (TextView) v.findViewById(R.id.intensityCtr);
+            intctr.setText("Intensity ctr.: " + formatDouble(cooldown.alpha2min));
             TextView intensity = (TextView) v.findViewById(R.id.intensity);
-            intensity.setText("Intensity: " + String.valueOf(cooldown.alpha2min));
+            intensity.setText("Intensity: " + formatDouble(cooldown.alphaAllData));
+
+            TextView meHR = (TextView) v.findViewById(R.id.morningEveningHR);
+            meHR.setText("HR: " + formatDouble(cooldown.morningHR) + " / " + formatDouble(cooldown.eveningHR));
+
             TextView dalda = (TextView) v.findViewById(R.id.dalda);
-            dalda.setText("DALDA scale: " + String.valueOf(cooldown.DALDA));
+            dalda.setText("DALDA scale: " + formatDouble(cooldown.DALDA));
             TextView rpe = (TextView) v.findViewById(R.id.rpe);
-            rpe.setText("RPE scale: " + String.valueOf(cooldown.RPE));
+            rpe.setText("RPE scale: " + formatDouble(cooldown.RPE));
             TextView sleep = (TextView) v.findViewById(R.id.sleep);
-            sleep.setText("Deep Sleep Cycles: " + String.valueOf(cooldown.DeepSleep));
+            sleep.setText("Deep Sleep Cycles: " + formatDouble(cooldown.DeepSleep));
             return v;
         }
 
@@ -305,6 +333,14 @@ public class MainActivity extends FragmentActivity implements
             super.onActivityCreated(savedInstanceState);
         }
 
+    }
+
+    static String formatDouble(Double value){
+        if (value == null)
+            return "not measured";
+
+        NumberFormat formatter = new DecimalFormat("#0.00");
+        return formatter.format(value);
     }
 
     private static class PlotGraphsTask extends AsyncTask<DailyCooldown, Void, Void> {
@@ -370,7 +406,8 @@ public class MainActivity extends FragmentActivity implements
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mDataItemListAdapter.add(new Event("Event", content));
+                TextView tv = (TextView) findViewById(R.id.systemMessage);
+                tv.setText(content);
             }
         });
 
@@ -623,25 +660,26 @@ public class MainActivity extends FragmentActivity implements
     }
 
     public void onGraphPlot() {
+        StartAnalysis();
+    }
 
+    public void onAnalysisClick(View view){
+        StartAnalysis();
+    }
+
+    public void StartAnalysis(){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
 
-                    int days = 21;
+                    /*int days = 21;
                     //String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
                     String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
 
                     ArrayList<TimeSeries> allData = null;
 
-                    /*File tempdata = new File(Environment.getExternalStorageDirectory().toString() , "data.tmp2" );
-                    if (!tempdata.exists()) {
-                        allData = DataProcessingManager.GetDailyRecoveryParameters(days, UserID);
-                        Serializer.SerializeToFile(allData, tempdata);
-                    }else {
-                        allData = (ArrayList<TimeSeries>) Serializer.DeserializeFromFile(tempdata);
-                    }*/
+
 
                     allData = DataProcessingManager.GetDailyRecoveryParameters(days, UserID);
 
@@ -674,6 +712,22 @@ public class MainActivity extends FragmentActivity implements
 
                     Intent i = new Intent(MainActivity.this, IntensityStatisticsActivity.class);
                     i.putExtra("visualizations", Serializer.SerializeToBytes(visualizations));
+                    startActivity(i);*/
+
+                    Visualizations vis = null;
+
+                    /*File file  = new File( DataStorageManager.userDataFolder, "data2.bin");
+                    if (file.exists()){
+                        vis = (Visualizations) Serializer.DeserializeFromFile(file);}
+                    else {
+                        vis = (new UserParameters(14)).visualizations;
+                        Serializer.SerializeToFile(vis, file);
+                    }*/
+
+                    vis = (new UserParameters(30)).visualizations;
+
+                    Intent i = new Intent(MainActivity.this, IntensityStatisticsActivity.class);
+                    i.putExtra("visualizations", Serializer.SerializeToBytes(vis));
                     startActivity(i);
 
                 } catch (Exception ex) {
@@ -681,8 +735,6 @@ public class MainActivity extends FragmentActivity implements
                 }
             }
         }).start();
-
-
     }
 
     private TimeSeries ComputeCompliences(TimeSeries requirements, TimeSeries values, int timewindow) {

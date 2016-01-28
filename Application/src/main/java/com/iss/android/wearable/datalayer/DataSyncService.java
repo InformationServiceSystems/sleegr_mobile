@@ -80,7 +80,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     }
 
     public static String getUserID() {
+
         return DataStorageManager.getProperUserID(itself.UserID);
+        //return "1024";
     }
 
     @Override
@@ -268,8 +270,15 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             if (event.getType() == DataEvent.TYPE_CHANGED && event.getDataItem().getUri().getPath().equals("/sensorData")) {
                 try {
                     DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
-                    Asset asset = dataMapItem.getDataMap().getAsset("sensorData");
-                    SaveDataFromAsset(asset);
+                    final Asset asset = dataMapItem.getDataMap().getAsset("sensorData");
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            SaveDataFromAsset(asset);
+                        }
+                    }).start();
+
 
                 }catch(Exception ex){
                     ex.printStackTrace();

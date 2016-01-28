@@ -6,8 +6,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -44,17 +47,31 @@ public class IntensityStatisticsActivity extends Activity {
                 (GraphView) findViewById(R.id.graph1),
                 (GraphView) findViewById(R.id.graph2),
                 (GraphView) findViewById(R.id.graph3),
-                (GraphView) findViewById(R.id.graph4),
-                (GraphView) findViewById(R.id.graph5)};
+                (GraphView) findViewById(R.id.graph4)};
 
         TextView [] labels = new TextView[]{
                 (TextView) findViewById(R.id.textV1),
                 (TextView) findViewById(R.id.textV2),
                 (TextView) findViewById(R.id.textV3),
-                (TextView) findViewById(R.id.textV4),
-                (TextView) findViewById(R.id.textV5)};
+                (TextView) findViewById(R.id.textV4)};
 
-        VisualizationsPlotter.Plot(vis, graphs, labels, this, "week");
+        VisualizationsPlotter.Plot(vis, graphs, labels, 7, new DefaultLabelFormatter() {
+            @Override
+            public String formatLabel(double value, boolean isValueX) {
+                if (isValueX) {
+                    // show normal x values
+
+                    Calendar mCalendar = Calendar.getInstance();
+                    mCalendar.setTimeInMillis((long) value);
+                    String day = new SimpleDateFormat("EEE").format(mCalendar.getTime());
+
+                    return day;
+                } else {
+                    // show currency for y values
+                    return super.formatLabel(value, isValueX);
+                }
+            }
+        });
 
     }
 

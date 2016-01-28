@@ -28,48 +28,65 @@ public class UserParameters {
         TimeSeries userDS = new TimeSeries("Deep sleep");
 
         for (int i = 0; i < timespan; i++){
-            Date date = DataProcessingManager.getDateFromToday(i);
-            DailyCooldown dailyCooldown = new DailyCooldown(date);
 
-            if (dailyCooldown.DALDA != null){
-                userDALDA.AddValue(date, dailyCooldown.DALDA);
-            }
+            try {
 
-            if (dailyCooldown.RPE != null){
-                userRPE.AddValue(date, dailyCooldown.RPE);
-            }
-            if (dailyCooldown.alpha2min != null){
-                alpha2min.AddValue(date, dailyCooldown.alpha2min);
-            }
-            if (dailyCooldown.alphaAllData != null){
-                alpha.AddValue(date, dailyCooldown.alphaAllData);
-            }
+                DataSyncService.OutputEventSq("Processing day " + i + " / " + timespan + " ...");
 
-            if (dailyCooldown.DeepSleep != null){
-                userDS.AddValue(date, dailyCooldown.DeepSleep);
+                Date date = DataProcessingManager.getDateFromToday(i);
+                DailyCooldown dailyCooldown = new DailyCooldown(date);
+
+                if (dailyCooldown.DALDA != null) {
+                    userDALDA.AddFirstValue(date, dailyCooldown.DALDA);
+                }
+
+                if (dailyCooldown.RPE != null) {
+                    userRPE.AddFirstValue(date, dailyCooldown.RPE);
+                }
+                if (dailyCooldown.alpha2min != null) {
+                    alpha2min.AddFirstValue(date, dailyCooldown.alpha2min);
+                }
+                if (dailyCooldown.alphaAllData != null) {
+                    alpha.AddFirstValue(date, dailyCooldown.alphaAllData);
+                }
+
+                if (dailyCooldown.DeepSleep != null) {
+                    userDS.AddFirstValue(date, dailyCooldown.DeepSleep);
+                }
+
+            }catch (Exception ex){
+                DataSyncService.OutputEventSq(ex.toString());
             }
 
         }
 
         Visualizations.Subplot rpe = visualizations.AddGraph("RPE");
         TimeSeries schedule = DataStorageManager.readUserSchedule();
-        rpe.Add(schedule, Color.GREEN);
+        userRPE.LineType = TimeSeries.SeriesLineTypes.Bar;
         rpe.Add(userRPE, Color.RED);
+        rpe.Add(schedule, Color.GREEN);
         rpe.Add(ComputeCompliences(schedule, userRPE,3), Color.GRAY);
 
         Visualizations.Subplot alphaGrph = visualizations.AddGraph("Alpha value predictions");
+        alpha.LineType = TimeSeries.SeriesLineTypes.Bar;
         alphaGrph.Add(alpha, Color.RED);
         alphaGrph.Add(predictTimeSeries(schedule, userRPE, alpha, 0), Color.BLUE);
 
         Visualizations.Subplot alphaPred = visualizations.AddGraph("Alpha 2 min value predictions");
+        alpha2min.LineType = TimeSeries.SeriesLineTypes.Bar;
         alphaPred.Add(alpha2min, Color.RED);
         alphaPred.Add(predictTimeSeries(schedule, userRPE, alpha2min, 0), Color.BLUE);
 
         Visualizations.Subplot sleepGrph = visualizations.AddGraph("Deep sleep perc. predictions");
+        userDS.LineType = TimeSeries.SeriesLineTypes.Bar;
         sleepGrph.Add(userDS, Color.RED);
         sleepGrph.Add(predictTimeSeries(schedule, userRPE, userDS, 0), Color.BLUE);
 
+        DataSyncService.OutputEventSq("Analysis finished");
+
     }
+
+
 
     public void smoothenBins(double [] bins, double [] counts){
 
@@ -190,7 +207,7 @@ public class UserParameters {
 
         TimeSeries result = new TimeSeries(values.name + ", avg. divergence");
 
-        for (int i = 0; i < values.Values.size(); i++){
+        for (int i = 0; i < requirements.Values.size(); i++){
 
             Date x = requirements.Values.get(i).x;
 

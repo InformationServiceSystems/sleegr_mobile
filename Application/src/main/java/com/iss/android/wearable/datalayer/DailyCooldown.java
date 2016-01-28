@@ -97,8 +97,10 @@ public class DailyCooldown {
         cooldownSeries = ConvertToTS(allData, "Raw data");
         subplot.Add(cooldownSeries, Color.BLUE);
 
-        alphaAllData = ComputeExponentFit(allData, allData, subplot, "Intensity, all data");
-        alpha2min = ComputeExponentFit(controlledData, allData, subplot, "Intensity, controlled");
+
+        if (cooldown.size()>0)
+            alpha2min = ComputeExponentFit(controlledData, allData, subplot, "Controlled data", Color.RED);
+        alphaAllData = ComputeExponentFit(allData, allData, subplot, "All data", Color.GREEN);
 
 
         // get morning / evening hrs. Could use the loaded data, but using existing function is easier
@@ -139,7 +141,7 @@ public class DailyCooldown {
     }
 
 
-    Double ComputeExponentFit(ArrayList<ISSRecordData> data,ArrayList<ISSRecordData> allData, Visualizations.Subplot subplot, String label){
+    Double ComputeExponentFit(ArrayList<ISSRecordData> data,ArrayList<ISSRecordData> allData, Visualizations.Subplot subplot, String label, int color){
 
         if (data.size() == 0){
             return null;
@@ -173,7 +175,7 @@ public class DailyCooldown {
         cooldownSeries = ConvertToTS((ArrayList<ISSRecordData>) allData, label);
         expAllData = DataProcessingManager.ComputeExponent(cooldownParameters, cooldownSeries);
 
-        subplot.Add(expAllData, Color.GREEN);
+        subplot.Add(expAllData, color);
 
         return alpha;
 

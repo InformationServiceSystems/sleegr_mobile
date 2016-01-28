@@ -96,7 +96,10 @@ public class ExponentFitter {
         double norm = 100;
         double pval = 0;
 
-        while(true){
+        int maxidx = 30000; // protects against convergence problems
+
+        while(maxidx > 0){
+            maxidx--;
             double[] grad = computeFitGrd(result, X, Y);
             double alpha = 1;
 

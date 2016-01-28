@@ -33,6 +33,31 @@ public class TimeSeries implements Serializable {
 
     public int color = 0;
 
+    public Date [] min_max(){
+
+        if (Values.size() == 0)
+            return null;
+
+        Date [] result = new Date [2];
+        result[0] = Values.get(0).x;
+        result[1] = Values.get(0).x;
+
+        for (Tuple<Date, Double> tuple: Values){
+
+            if (tuple.x.getTime() < result[0].getTime()){
+                result[0] = tuple.x;
+            }
+
+            if (tuple.x.getTime() > result[1].getTime()){
+                result[1] = tuple.x;
+            }
+
+        }
+
+        return result;
+
+    }
+
     public void AddValue(Date x, double y){
         Values.add(new Tuple<>(x,y));
     }
@@ -44,6 +69,7 @@ public class TimeSeries implements Serializable {
     public TimeSeries(TimeSeries series){
         this.name = series.name;
         this.color = series.color;
+        this.LineType = series.LineType;
     }
 
     public void AddFirstValue(Date x, double y) {
@@ -70,14 +96,13 @@ public class TimeSeries implements Serializable {
 
     }
 
-
     public TimeSeries inTimeRange(Date startDate, Date endDate){
 
         TimeSeries result = new TimeSeries(this);
 
         for (int i = 0; i < this.Values.size(); i ++){
             Date time = this.Values.get(i).x;
-            if (startDate.before(time) && endDate.after(time)){
+            if ( (startDate.getTime() <= time.getTime()) && (endDate.getTime() >= time.getTime()) ){
                 result.Values.add(this.Values.get(i));
             }
         }
@@ -85,7 +110,6 @@ public class TimeSeries implements Serializable {
         return result;
 
     }
-
 
     public static final SimpleDateFormat dictionary_format = new SimpleDateFormat("yyyy.MM.dd");
 

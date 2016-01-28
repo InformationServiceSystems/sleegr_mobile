@@ -12,20 +12,13 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/pagertext"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:gravity="center_vertical|center_horizontal"
-            android:text="@string/hello_world"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
             android:id="@+id/textV1"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:gravity="center_vertical|center_horizontal"
             android:text="@string/hello_world"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:visibility="gone" />
 
         <com.jjoe64.graphview.GraphView
             android:layout_width="match_parent"
@@ -33,7 +26,25 @@
             android:id="@+id/graphtoday" />
 
         <TextView
+            android:id="@+id/intensityCtr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:gravity="center_vertical"
+            android:text="@string/hello_world"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <TextView
             android:id="@+id/intensity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:gravity="center_vertical"
+            android:text="@string/hello_world"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <TextView
+            android:id="@+id/morningEveningHR"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"

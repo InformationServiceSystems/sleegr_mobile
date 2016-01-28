@@ -33,7 +33,11 @@ public class DataStorageManager {
     public static TimeSeries readUserSchedule(){
 
         TimeSeries result = new TimeSeries("RPE required");
+
         File csvSchedule = new File(userDataFolder, "schedule.csv");
+
+        if (!csvSchedule.exists())
+            return result;
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
 
@@ -97,6 +101,8 @@ public class DataStorageManager {
         return currentDateandTime;
 
     }
+
+
 
     public static String getProperUserID(String UserID){
 

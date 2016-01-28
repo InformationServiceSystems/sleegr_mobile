@@ -3,10 +3,13 @@ package com.iss.android.wearable.datalayer;
 import android.content.Context;
 import android.widget.TextView;
 
+import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.LabelFormatter;
 import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.BarGraphSeries;
+import com.jjoe64.graphview.series.BaseSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -19,104 +22,88 @@ import java.util.Date;
  */
 public class VisualizationsPlotter {
 
-    public static void Plot(Visualizations vis, GraphView[] graphs, TextView[] labels, Context context, String range) {
+    public static void Plot(Visualizations vis, GraphView [] graphs, TextView [] labels, int numLabels, LabelFormatter labelFormatter){
 
-        for (int i = 0; i < vis.AllSubplots.size(); i++) {
+        for (int i = 0; i < vis.AllSubplots.size(); i++){
 
             Visualizations.Subplot subplot = vis.AllSubplots.get(i);
             labels[i].setText(subplot.name);
 
             GraphView graph = graphs[i];
-            graph.removeAllSeries();
 
-            for (TimeSeries series : subplot.data) {
-                PutTimeSeriesToGraph(graph, series, context, range);
+            Date[] dates = subplot.getBounds();
+            if (dates != null){
+                graph.getViewport().setXAxisBoundsManual(true);
+                graph.getViewport().setMinX(dates[0].getTime());
+                graph.getViewport().setMaxX(dates[1].getTime());
             }
 
-            graph.getGridLabelRenderer().setLabelVerticalWidth(100);
+            graph.removeAllSeries();
+
+            for (TimeSeries series: subplot.data){
+                PutTimeSeriesToGraph(graph, series);
+            }
+
+            graph.getGridLabelRenderer().setLabelVerticalWidth(120);
+
+            graph.getGridLabelRenderer().setLabelFormatter(labelFormatter);
+            graph.getGridLabelRenderer().setNumHorizontalLabels(numLabels);
+
+            graph.getLegendRenderer().setVisible(true);
+            graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
+
+
+
+
 
         }
 
     }
 
-    public static void PutTimeSeriesToGraph(GraphView graph, TimeSeries series, Context context, String range) {
+    public static void PutTimeSeriesToGraph(GraphView graph,  TimeSeries series){
 
-        if (series.name.equals("RPE schedule")) {
-            BarGraphSeries<DataPoint> data_values = new BarGraphSeries<DataPoint>(new DataPoint[]{});
-            //data_values.setDrawDataPoints(true);
-            data_values.setColor(series.color);
-            data_values.setTitle(series.name);
+        BaseSeries<DataPoint> data_values= null;
 
-            boolean anything = false;
-            for (int i = 0; i < series.Values.size(); i += 1) {
+        switch (series.LineType){
+            case Line:
+                data_values = new LineGraphSeries<DataPoint>(new DataPoint[] {});
+                break;
+            case Bar:
+                data_values = new BarGraphSeries<DataPoint>(new DataPoint[] {});
+                ((BarGraphSeries<DataPoint>)data_values).setSpacing(20);
+                break;
+        }
 
-                if (series.Values.get(i).y < 0) {
-                    continue;
-                }
-                anything = true;
+        //data_values.setDrawDataPoints(true);
+        data_values.setColor(series.color);
+        data_values.setTitle(series.name);
 
-                Date x = series.Values.get(i).x;
-                Double y = series.Values.get(i).y;
-                if (range.equals("week")) {
-                    x = getDateWithOutTime(x);
-                }
+        boolean anything = false;
+        for (int i = 0; i < series.Values.size(); i += 1) { // the step needs to be one, otherwise the weekly plot breaks
 
+            if (series.Values.get(i).y < 0){
+                continue;
+            }
+            anything = true;
+
+            Date x = series.Values.get(i).x;
+            Double y = series.Values.get(i).y;
+
+
+
+            try {
                 data_values.appendData(new DataPoint(x, y), true, series.Values.size());
+            }catch (Exception ex)
+            {
+                System.out.print(ex.toString());
             }
-
-            if (!anything) {
-                return;
-            }
-
-            data_values.setSpacing(50);
-
-            graph.addSeries(data_values);
-        } else {
-
-            LineGraphSeries<DataPoint> data_values = new LineGraphSeries<DataPoint>(new DataPoint[]{});
-            //data_values.setDrawDataPoints(true);
-            data_values.setColor(series.color);
-            data_values.setTitle(series.name);
-
-            boolean anything = false;
-            for (int i = 0; i < series.Values.size(); i += 1) {
-
-                if (series.Values.get(i).y < 0) {
-                    continue;
-                }
-                anything = true;
-
-                Date x = series.Values.get(i).x;
-                Double y = series.Values.get(i).y;
-                if (range.equals("week")) {
-                    x = getDateWithOutTime(x);
-                }
-
-                data_values.appendData(new DataPoint(x, y), true, series.Values.size());
-            }
-
-            if (!anything) {
-                return;
-            }
-
-            graph.addSeries(data_values);
         }
 
-        if (range.equals("week")) {
-            graph.getViewport().setXAxisBoundsManual(true);
-            graph.getGridLabelRenderer().setNumHorizontalLabels(7);
-            SimpleDateFormat weekdf = new SimpleDateFormat("EEE");
-            graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(context, weekdf));
-        }
-        if (range.equals("day")) {
-            graph.getViewport().setXAxisBoundsManual(true);
-            SimpleDateFormat daydf = new SimpleDateFormat("kk:mm");
-            graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(context, daydf));
+        if (!anything){
+            return;
         }
 
-        graph.getLegendRenderer().setVisible(true);
-        graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
-
+        graph.addSeries(data_values);
 
     }
 
@@ -132,5 +119,6 @@ public class VisualizationsPlotter {
         return newDate.getTime();
 
     }
+
 
 }
