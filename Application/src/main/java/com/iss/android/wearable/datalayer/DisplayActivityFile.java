@@ -54,21 +54,32 @@ public class DisplayActivityFile extends Activity {
         TextView [] labels = new TextView[]{
                 (TextView) findViewById(R.id.textV1)};
 
-        VisualizationsPlotter.Plot(vis, graphs, labels, 5, new DefaultLabelFormatter() {
+        VisualizationsPlotter.Plot(vis, graphs, labels, new GraphStyler() {
             @Override
-            public String formatLabel(double value, boolean isValueX) {
-                if (isValueX) {
-                    // show normal x values
+            public void styleGraph(GraphView graphView, Visualizations.Subplot subplot) {
 
-                    Calendar mCalendar = Calendar.getInstance();
-                    mCalendar.setTimeInMillis((long) value);
-                    String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
+                // set label formatting
+                graphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                    @Override
+                    public String formatLabel(double value, boolean isValueX) {
+                        if (isValueX) {
+                            // show normal x values
 
-                    return time;
-                } else {
-                    // show currency for y values
-                    return super.formatLabel(value, isValueX);
-                }
+                            Calendar mCalendar = Calendar.getInstance();
+                            mCalendar.setTimeInMillis((long) value);
+                            String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
+
+                            return time;
+                        } else {
+                            // show currency for y values
+                            return super.formatLabel(value, isValueX);
+                        }
+                    }
+                });
+
+                // set number of labels on the horiz axis
+                graphView.getGridLabelRenderer().setNumHorizontalLabels(5);
+
             }
         });
 

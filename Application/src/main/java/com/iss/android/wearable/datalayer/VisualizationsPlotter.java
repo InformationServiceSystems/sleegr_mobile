@@ -22,7 +22,7 @@ import java.util.Date;
  */
 public class VisualizationsPlotter {
 
-    public static void Plot(Visualizations vis, GraphView [] graphs, TextView [] labels, int numLabels, LabelFormatter labelFormatter){
+    public static void Plot(Visualizations vis, GraphView [] graphs, TextView [] labels, GraphStyler graphStyler){
 
         for (int i = 0; i < vis.AllSubplots.size(); i++){
 
@@ -31,7 +31,10 @@ public class VisualizationsPlotter {
 
             GraphView graph = graphs[i];
 
+            graphStyler.styleGraph(graph,subplot);
+
             Date[] dates = subplot.getBounds();
+
             if (dates != null){
                 graph.getViewport().setXAxisBoundsManual(true);
                 graph.getViewport().setMinX(dates[0].getTime());
@@ -45,9 +48,6 @@ public class VisualizationsPlotter {
             }
 
             graph.getGridLabelRenderer().setLabelVerticalWidth(120);
-
-            graph.getGridLabelRenderer().setLabelFormatter(labelFormatter);
-            graph.getGridLabelRenderer().setNumHorizontalLabels(numLabels);
 
             graph.getLegendRenderer().setVisible(true);
             graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);

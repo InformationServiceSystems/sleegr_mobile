@@ -34,7 +34,6 @@ public class IntensityStatisticsActivity extends Activity {
 
             VisualizeWeek(week);
 
-
         }catch (Exception ex){
 
         }
@@ -55,21 +54,32 @@ public class IntensityStatisticsActivity extends Activity {
                 (TextView) findViewById(R.id.textV3),
                 (TextView) findViewById(R.id.textV4)};
 
-        VisualizationsPlotter.Plot(vis, graphs, labels, 7, new DefaultLabelFormatter() {
+        VisualizationsPlotter.Plot(vis, graphs, labels, new GraphStyler() {
             @Override
-            public String formatLabel(double value, boolean isValueX) {
-                if (isValueX) {
-                    // show normal x values
+            public void styleGraph(GraphView graphView, Visualizations.Subplot subplot) {
 
-                    Calendar mCalendar = Calendar.getInstance();
-                    mCalendar.setTimeInMillis((long) value);
-                    String day = new SimpleDateFormat("EEE").format(mCalendar.getTime());
+                // set graph label format
+                graphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                    @Override
+                    public String formatLabel(double value, boolean isValueX) {
+                        if (isValueX) {
+                            // show normal x values
 
-                    return day;
-                } else {
-                    // show currency for y values
-                    return super.formatLabel(value, isValueX);
-                }
+                            Calendar mCalendar = Calendar.getInstance();
+                            mCalendar.setTimeInMillis((long) value);
+                            String day = new SimpleDateFormat("EEE").format(mCalendar.getTime());
+
+                            return day;
+                        } else {
+                            // show currency for y values
+                            return super.formatLabel(value, isValueX);
+                        }
+                    }
+                });
+
+                // set the number of labels
+                graphView.getGridLabelRenderer().setNumHorizontalLabels(7);
+
             }
         });
 
