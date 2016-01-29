@@ -63,6 +63,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToday;
+
 /**
  * Receives its own events using a listener API designed for foreground activities. Updates a data
  * item every second while it is open. Also allows user to take a photo and send that as an asset
@@ -318,6 +320,12 @@ public class MainActivity extends FragmentActivity implements
                     // set number of labels on the horiz axis
                     graphView.getGridLabelRenderer().setNumHorizontalLabels(5);
 
+                    graphView.getViewport().setYAxisBoundsManual(true);
+                    graphView.getViewport().setMinY(30);
+                    graphView.getViewport().setMaxY(200);
+
+                    subplot.setBounds(subplot.min_max_x());
+
                 }
             });
 
@@ -541,13 +549,13 @@ public class MainActivity extends FragmentActivity implements
 
         for (int i = 0; i < past; i++) {
             long round = Math.round(Math.random() * 10);
-            Date date = DataProcessingManager.getDateFromToday(i);
+            Date date = getDateFromToday(i);
             requirements.AddFirstValue(date, round);
         }
 
         for (int i = 0; i < future; i++) {
             long round = Math.round(Math.random() * 10);
-            Date date = DataProcessingManager.getDateFromToday(-i - 1);
+            Date date = getDateFromToday(-i - 1);
             requirements.AddValue(date, round);
         }
 

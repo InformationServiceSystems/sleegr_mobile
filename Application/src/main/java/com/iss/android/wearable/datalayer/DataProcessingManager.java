@@ -13,6 +13,9 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToday;
+import static com.iss.android.wearable.datalayer.DateTimeManager.getDayFromToday;
+
 /**
  * Created by Euler on 1/7/2016.
  */
@@ -240,38 +243,8 @@ public class DataProcessingManager {
         return result;
     }
 
-    public static String getDayFromToday(int dayoffset){
 
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar cl = Calendar.getInstance();
-        cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
-        String currentDateandTime = df.format(cl.getTime());
 
-        return currentDateandTime;
-
-    }
-
-    public static Date getDateFromToday(int dayoffset){
-
-        Calendar cl = Calendar.getInstance();
-        cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
-
-        return getDateWithOutTime(cl.getTime());
-
-    }
-
-    private static Date getDateWithOutTime(Date targetDate) {
-        Calendar newDate = Calendar.getInstance();
-        newDate.setLenient(false);
-        newDate.setTime(targetDate);
-        newDate.set(Calendar.HOUR_OF_DAY, 0);
-        newDate.set(Calendar.MINUTE, 0);
-        newDate.set(Calendar.SECOND, 0);
-        newDate.set(Calendar.MILLISECOND, 0);
-
-        return newDate.getTime();
-
-    }
 
     static ArrayList<ISSRecordData> extractLastCooldown(ArrayList<ISSRecordData> lastActivity){
 

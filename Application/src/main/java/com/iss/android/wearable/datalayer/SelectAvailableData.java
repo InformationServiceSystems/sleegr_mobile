@@ -13,6 +13,8 @@ import android.widget.ListView;
 import java.io.File;
 import java.util.ArrayList;
 
+import static com.iss.android.wearable.datalayer.DateTimeManager.getDayFromToday;
+
 public class SelectAvailableData extends Activity {
 
 
@@ -30,7 +32,7 @@ public class SelectAvailableData extends Activity {
 
         for (int i = 0; i < 60; i++){
 
-            String val = DataStorageManager.getDayFromToday(i);
+            String val = getDayFromToday(i);
 
             // get all files in the folder
 

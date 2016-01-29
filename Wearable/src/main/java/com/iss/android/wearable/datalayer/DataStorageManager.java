@@ -59,6 +59,7 @@ public class DataStorageManager {
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cl = Calendar.getInstance();
+        cl.add(Calendar.HOUR_OF_DAY, -3);
         cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
         String currentDateandTime = df.format(cl.getTime());
 

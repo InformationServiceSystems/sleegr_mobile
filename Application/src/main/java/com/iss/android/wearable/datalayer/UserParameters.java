@@ -7,6 +7,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
+import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToday;
+
 /**
  * Created by Euler on 1/23/2016.
  */
@@ -33,7 +35,7 @@ public class UserParameters {
 
                 DataSyncService.OutputEventSq("Processing day " + i + " / " + timespan + " ...");
 
-                Date date = DataProcessingManager.getDateFromToday(i);
+                Date date = getDateFromToday(i);
                 DailyCooldown dailyCooldown = new DailyCooldown(date);
 
                 if (dailyCooldown.DALDA != null) {

@@ -624,7 +624,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     static File getRecordedActivitiesFile(){
 
         String daystr = DataStorageManager.getDayFromToday(0);
-        File file = new File(DataStorageManager.userDataFolder, daystr + ".bin");
+        File file = new File(DataStorageManager.userDataFolder, daystr + ".activities");
         return file;
 
     }

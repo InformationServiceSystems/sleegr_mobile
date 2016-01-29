@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import static com.iss.android.wearable.datalayer.DateTimeManager.getDayFromToday;
+
 /**
  * Created by Euler on 12/19/2015.
  */
@@ -90,19 +92,6 @@ public class DataStorageManager {
 
         return bytes;
     }
-
-    public static String getDayFromToday(int dayoffset){
-
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar cl = Calendar.getInstance();
-        cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
-        String currentDateandTime = df.format(cl.getTime());
-
-        return currentDateandTime;
-
-    }
-
-
 
     public static String getProperUserID(String UserID){
 
