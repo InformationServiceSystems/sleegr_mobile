@@ -42,6 +42,8 @@ public class CSVManager {
         } catch (IOException e) {
             //exception handling left as an exercise for the reader
 
+            System.out.print(e.toString());
+
         }
 
     }

@@ -86,6 +86,7 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
                 this.finish();
             case R.id.saveSchedule:
                 commit(RPE_array);
+                finish(); // added this to close the activity when the rpe's are inserted.
         }
     }
 
@@ -99,7 +100,7 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
             Log.d(dateString, String.valueOf(array[i]));
             cal.add(Calendar.DAY_OF_MONTH, 1);
             date = cal.getTime();
-            String scheduleString = dateString + String.valueOf(array[i]);
+            String scheduleString = dateString + "," + String.valueOf(array[i]) + "\n";
             DataStorageManager.storeScheduleLine(scheduleString);
         }
         return true;
