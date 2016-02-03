@@ -23,6 +23,20 @@
         <item>Athletics</item>
     </string-array>
 
+    <string-array name="RPE_Difficulties">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+
     <string name="start_wearable_activity">Start Wearable Activity</string>
     <string name="start">Start</string>
     <string name="take_photo">Take a Photo</string>
@@ -40,8 +54,12 @@
     <string name="title_activity_select_available_data">Browse Files</string>
     <string name="title_activity_display_activity_file">Display File</string>
     <string name="facebook_app_id">1730472480519529</string>
+    <string name="title_activity_set_schedule">Set your Schedule</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="PlaceholderText">Default Text</string>
+    <string name="saveSchedule">Save Schedule</string>
+    <string name="cancelSchedule">Cancel</string>
 
 </resources>

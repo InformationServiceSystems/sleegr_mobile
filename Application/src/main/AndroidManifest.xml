@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
  Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +12,11 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
--->
-<!-- version code and name should be the same for smartphone and watch apps -->
+--><!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iss.android.wearable.datalayer"
     android:versionCode="15"
-    android:versionName="Regulus" >
+    android:versionName="Regulus">
 
     <uses-sdk
         android:minSdkVersion="19"
@@ -60,7 +58,7 @@
 
         <receiver
             android:name=".SyncAlarm"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.iss.android.wearable.datalayer.ALARM" />
             </intent-filter>
@@ -68,7 +66,7 @@
         <receiver
             android:name=".StartMyActivityAtBootReceiver"
             android:enabled="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
@@ -79,9 +77,8 @@
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:label="@string/app_name" />
-
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -95,11 +92,10 @@
 
         <activity
             android:name=".RegisterUserActivity"
-            android:label="@string/title_activity_register_user" >
-        </activity>
+            android:label="@string/title_activity_register_user"></activity>
         <activity
             android:name=".ChooseRegisterServiceActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -110,6 +106,7 @@
             android:name=".DeleteMeActivity"
             android:label="@string/title_activity_delete_me"
             android:parentActivityName=".MainActivity">
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -119,7 +116,8 @@
             android:name=".IntensityStatisticsActivity"
             android:label="@string/title_activity_intensity_statistics"
             android:parentActivityName=".MainActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
+
+        <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -128,7 +126,8 @@
             android:name=".SelectAvailableData"
             android:label="@string/title_activity_select_available_data"
             android:parentActivityName=".MainActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
+
+        <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -137,10 +136,21 @@
             android:name=".DisplayActivityFile"
             android:label="@string/title_activity_display_activity_file"
             android:parentActivityName=".SelectAvailableData">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
+
+        <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".SelectAvailableData" />
+        </activity>
+        <activity
+            android:name=".SetScheduleActivity"
+            android:label="@string/title_activity_set_schedule"
+            android:parentActivityName=".MainActivity">
+
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
     </application>
 

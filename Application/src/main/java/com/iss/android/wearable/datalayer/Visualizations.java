@@ -1,7 +1,6 @@
 package com.iss.android.wearable.datalayer;
 
 import java.io.Serializable;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -82,7 +81,7 @@ public class Visualizations implements Serializable {
 
         Date start = cal.getTime();
 
-        cal.add(Calendar.DAY_OF_MONTH, 7);
+        cal.add(Calendar.DAY_OF_MONTH, 6);
 
         /*cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 59);

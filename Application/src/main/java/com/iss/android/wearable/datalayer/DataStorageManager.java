@@ -1,6 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -9,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -221,4 +221,21 @@ public class DataStorageManager {
         return result;
     }
 
+    public static void storeScheduleLine(String scheduleString) {
+        File file = new File(userDataFolder, "schedule.csv");
+        if (!file.exists()) {
+            file.mkdirs();
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                Log.d("Creating file", "failed");
+                e.printStackTrace();
+            }
+        }
+        if (!file.exists())
+            Log.d("csvSchedule", "doesn't exist");
+        else
+            Log.d("csvSchedule", "exists here: " + file.getPath());
+        CSVManager.WriteNewCSVdata(file, scheduleString);
+    }
 }

@@ -16,13 +16,11 @@
 
 package com.iss.android.wearable.datalayer;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,7 +49,6 @@ import com.google.android.gms.wearable.Wearable;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 
-import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -231,9 +228,18 @@ public class MainActivity extends FragmentActivity implements
             case R.id.registerUserMenu:
                 onRegisterUser();
                 return true;
+            case R.id.setSchedule:
+                onsetSchedule();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void onsetSchedule() {
+
+        final Intent registerUser = new Intent(this, SetScheduleActivity.class);
+        startActivity(registerUser);
     }
 
     private DataUpdateReceiver dataUpdateReceiver;
@@ -283,7 +289,6 @@ public class MainActivity extends FragmentActivity implements
             date.add(Calendar.DATE, -29 + mNum);
             Log.d("date", String.valueOf(-29 + mNum));
             // Fill the GraphView with data for the current date
-            // currently sample data to see if it's working dynamically.
             DailyCooldown cooldown = new DailyCooldown(date.getTime());
             GraphView graph = (GraphView) v.findViewById(R.id.graphtoday);
             TextView text = (TextView) v.findViewById(R.id.textV1);

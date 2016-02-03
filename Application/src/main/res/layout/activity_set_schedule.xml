@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/setScheduleLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.iss.android.wearable.datalayer.SetScheduleActivity">
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/scheduleTable"
+        android:stretchColumns="1">
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/DayOne"
+                android:text="@string/PlaceholderText"
+                android:padding="3dip" />
+
+            <Spinner
+                android:id="@+id/SpinnerOne"
+                android:layout_width="wrap_content"
+                android:gravity="end"
+                android:layout_height="wrap_content"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/DayTwo"
+                android:text="@string/PlaceholderText"
+                android:padding="3dip" />
+
+            <Spinner
+                android:id="@+id/SpinnerTwo"
+                android:layout_width="wrap_content"
+                android:gravity="end"
+                android:layout_height="wrap_content"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/DayThree"
+                android:text="@string/PlaceholderText"
+                android:padding="3dip" />
+
+            <Spinner
+                android:id="@+id/SpinnerThree"
+                android:layout_width="wrap_content"
+                android:gravity="end"
+                android:layout_height="wrap_content"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/DayFour"
+                android:text="@string/PlaceholderText"
+                android:padding="3dip" />
+
+            <Spinner
+                android:id="@+id/SpinnerFour"
+                android:layout_width="wrap_content"
+                android:gravity="end"
+                android:layout_height="wrap_content"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/DayFive"
+                android:text="@string/PlaceholderText"
+                android:padding="3dip" />
+
+            <Spinner
+                android:id="@+id/SpinnerFive"
+                android:layout_width="wrap_content"
+                android:gravity="end"
+                android:layout_height="wrap_content"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/DaySix"
+                android:text="@string/PlaceholderText"
+                android:padding="3dip" />
+
+            <Spinner
+                android:id="@+id/SpinnerSix"
+                android:layout_width="wrap_content"
+                android:gravity="end"
+                android:layout_height="wrap_content"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/DaySeven"
+                android:text="@string/PlaceholderText"
+                android:padding="3dip" />
+
+            <Spinner
+                android:id="@+id/SpinnerSeven"
+                android:layout_width="wrap_content"
+                android:gravity="end"
+                android:layout_height="wrap_content"
+                android:padding="3dip" />
+        </TableRow>
+    </TableLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/saveSchedule"
+        android:id="@+id/saveSchedule"
+        android:layout_below="@+id/scheduleTable"
+        android:layout_toStartOf="@+id/cancelSchedule"
+        android:onClick="onClick"
+        android:backgroundTint="#3b5998"
+        android:textColor="#ffffff" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cancelSchedule"
+        android:id="@+id/cancelSchedule"
+        android:layout_below="@+id/scheduleTable"
+        android:layout_alignParentEnd="true"
+        android:onClick="onClick" />
+
+</RelativeLayout>
