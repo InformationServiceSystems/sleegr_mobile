@@ -2,11 +2,11 @@ package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -62,7 +62,6 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
         int j = 0;
         for (int i : SpinnerIds) {
             Spinner spinner = (Spinner) findViewById(i);
-            Log.d("id", spinner.toString());
             // Create an ArrayAdapter using the string array and a default spinner layout
             ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                     R.array.RPE_Difficulties, android.R.layout.simple_spinner_item);
@@ -117,6 +116,8 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
             case R.id.saveSchedule:
                 commit(RPE_array);
                 finish(); // added this to close the activity when the rpe's are inserted.
+                Toast toast = Toast.makeText(this, "Schedule has successfully been saved", Toast.LENGTH_SHORT);
+                toast.show();
                 break;
         }
     }
@@ -128,7 +129,6 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
         for (int i = 0; i <= array.length - 1; i++) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
             String dateString = sdf.format(date);
-            Log.d(dateString, String.valueOf(array[i]));
             cal.add(Calendar.DAY_OF_MONTH, 1);
             date = cal.getTime();
             String scheduleString = dateString + "," + String.valueOf(array[i]) + "\n";

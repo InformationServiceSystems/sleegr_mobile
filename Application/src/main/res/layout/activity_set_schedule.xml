@@ -16,7 +16,7 @@
         android:id="@+id/scheduleTable"
         android:stretchColumns="1">
 
-        <TableRow>
+        <TableRow android:padding="2dp">
 
             <TextView
                 android:id="@+id/DayOne"
@@ -31,7 +31,7 @@
                 android:padding="3dip" />
         </TableRow>
 
-        <TableRow>
+        <TableRow android:padding="2dp">
 
             <TextView
                 android:id="@+id/DayTwo"
@@ -46,7 +46,7 @@
                 android:padding="3dip" />
         </TableRow>
 
-        <TableRow>
+        <TableRow android:padding="2dp">
 
             <TextView
                 android:id="@+id/DayThree"
@@ -61,7 +61,7 @@
                 android:padding="3dip" />
         </TableRow>
 
-        <TableRow>
+        <TableRow android:padding="2dp">
 
             <TextView
                 android:id="@+id/DayFour"
@@ -76,7 +76,7 @@
                 android:padding="3dip" />
         </TableRow>
 
-        <TableRow>
+        <TableRow android:padding="2dp">
 
             <TextView
                 android:id="@+id/DayFive"
@@ -91,7 +91,7 @@
                 android:padding="3dip" />
         </TableRow>
 
-        <TableRow>
+        <TableRow android:padding="2dp">
 
             <TextView
                 android:id="@+id/DaySix"
@@ -106,7 +106,7 @@
                 android:padding="3dip" />
         </TableRow>
 
-        <TableRow>
+        <TableRow android:padding="2dp">
 
             <TextView
                 android:id="@+id/DaySeven"
