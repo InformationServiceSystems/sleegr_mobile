@@ -19,20 +19,47 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
                     R.id.SpinnerSix, R.id.SpinnerSeven};
     private int[] RPE_array = new int[7];
     Date start = new Date();
+    Date end = new Date();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_schedule);
-        prepareSpinners();
 
         Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
         this.start = cal.getTime();
+        cal.add(Calendar.DAY_OF_MONTH, 6);
+        this.end = cal.getTime();
+
+        int[] dupes = checkForDupes();
+        prepareSpinners(dupes);
     }
 
-    private void prepareSpinners() {
+    private int[] checkForDupes() {
+        TimeSeries series = DataStorageManager.readUserSchedule();
+        series = series.inTimeRange(start, end);
+        int[] dupes = new int[7];
+        if (series != null) {
+            if (series.Values.size() > 7) {
+                for (int i = (series.Values.size() - 1); i > (series.Values.size() - 8); i--) {
+                    dupes[(i) - series.Values.size() + 7] = series.Values.get(i).y.intValue();
+                }
+            } else {
+                for (int i = 0; i < series.Values.size(); i++) {
+                    dupes[i] = series.Values.get(i).y.intValue();
+                }
+            }
+        }
+        return dupes;
+    }
+
+    private void prepareSpinners(int[] dupes) {
+        int j = 0;
         for (int i : SpinnerIds) {
             Spinner spinner = (Spinner) findViewById(i);
             Log.d("id", spinner.toString());
@@ -44,6 +71,8 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
             // Apply the adapter to the spinner
             spinner.setAdapter(adapter);
             spinner.setOnItemSelectedListener(this);
+            spinner.setSelection(dupes[j]);
+            j++;
         }
     }
 
@@ -84,9 +113,11 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
         switch (view.getId()) {
             case R.id.cancelSchedule:
                 this.finish();
+                break;
             case R.id.saveSchedule:
                 commit(RPE_array);
                 finish(); // added this to close the activity when the rpe's are inserted.
+                break;
         }
     }
 

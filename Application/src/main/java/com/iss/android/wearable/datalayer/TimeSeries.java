@@ -1,5 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
+import android.util.Log;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -102,6 +104,8 @@ public class TimeSeries implements Serializable {
 
         for (int i = 0; i < this.Values.size(); i ++){
             Date time = this.Values.get(i).x;
+            Log.d("Start", startDate.toString());
+            Log.d("Zeit", time.toString());
             if ( (startDate.getTime() <= time.getTime()) && (endDate.getTime() >= time.getTime()) ){
                 result.Values.add(this.Values.get(i));
             }
