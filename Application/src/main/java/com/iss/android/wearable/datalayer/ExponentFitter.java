@@ -90,6 +90,11 @@ public class ExponentFitter {
 
     public static double [] fitLowerExpGD(ArrayList<Double> X, ArrayList<Double> Y){
 
+
+        if (X.size() == 0){
+            return new double[]{1000.0,0.0,0.0};
+        }
+
         double [] result = new double [] {1000, maxval(Y) - minval(Y), minval(Y) };
         double [] grdscl = new double [] {1, 1, 1 };
 

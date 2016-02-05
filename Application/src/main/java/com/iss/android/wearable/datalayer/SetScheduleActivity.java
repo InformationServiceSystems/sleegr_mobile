@@ -115,9 +115,9 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
                 break;
             case R.id.saveSchedule:
                 commit(RPE_array);
-                finish(); // added this to close the activity when the rpe's are inserted.
                 Toast toast = Toast.makeText(this, "Schedule has successfully been saved", Toast.LENGTH_SHORT);
                 toast.show();
+                finish(); // added this to close the activity when the rpe's are inserted.
                 break;
         }
     }
