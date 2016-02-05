@@ -330,8 +330,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     int timerTime = 0;
     String currentState = "Idle";
     int timerTimeout = 60 * 60 * 24;
-    int COOLING_MEASUREMENT_TIME = 60 * 60; // cooling is measured for 60 minutes
-    int RESTING_MEASUREMENT_TIME = 60 * 5; // measure heart rate for 5 min
+    int COOLING_MEASUREMENT_TIME = 60 * 60 * 24; // cooling is measured for 60 minutes
+    int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 5 min
     int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
     int COOLING_RPE_TIME = 60 * 15;
 
@@ -357,7 +357,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             boolean startRecovery = currentState.equals("Cooldown");
 
             if (sleepMode){
-                BringIntoState("Resting");
+                BringIntoState("Idle");
                 startSleeping();
             } else if(startRecovery){
                 BringIntoState("Recovery");
@@ -386,7 +386,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     static boolean isNowASleepingHour(){
 
         Calendar clnd = Calendar.getInstance();
-        return (clnd.get(Calendar.HOUR_OF_DAY) >= 12) || (clnd.get(Calendar.HOUR_OF_DAY) < 5);
+        clnd.add(Calendar.HOUR_OF_DAY, -3 );
+        return (clnd.get(Calendar.HOUR_OF_DAY) >= 13 - 3);
     }
 
 
