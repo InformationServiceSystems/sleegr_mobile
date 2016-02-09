@@ -20,7 +20,7 @@
 
             <TextView
                 android:id="@+id/DayOne"
-                android:text="@string/PlaceholderText"
+                android:text="Monday"
                 android:padding="3dip" />
 
             <Spinner
@@ -35,7 +35,7 @@
 
             <TextView
                 android:id="@+id/DayTwo"
-                android:text="@string/PlaceholderText"
+                android:text="Tuesday"
                 android:padding="3dip" />
 
             <Spinner
@@ -50,7 +50,7 @@
 
             <TextView
                 android:id="@+id/DayThree"
-                android:text="@string/PlaceholderText"
+                android:text="Wednesday"
                 android:padding="3dip" />
 
             <Spinner
@@ -65,7 +65,7 @@
 
             <TextView
                 android:id="@+id/DayFour"
-                android:text="@string/PlaceholderText"
+                android:text="Thursday"
                 android:padding="3dip" />
 
             <Spinner
@@ -80,7 +80,7 @@
 
             <TextView
                 android:id="@+id/DayFive"
-                android:text="@string/PlaceholderText"
+                android:text="Friday"
                 android:padding="3dip" />
 
             <Spinner
@@ -95,7 +95,7 @@
 
             <TextView
                 android:id="@+id/DaySix"
-                android:text="@string/PlaceholderText"
+                android:text="Saturday"
                 android:padding="3dip" />
 
             <Spinner
@@ -110,7 +110,7 @@
 
             <TextView
                 android:id="@+id/DaySeven"
-                android:text="@string/PlaceholderText"
+                android:text="Sunday"
                 android:padding="3dip" />
 
             <Spinner

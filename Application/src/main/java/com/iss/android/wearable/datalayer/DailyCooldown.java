@@ -93,6 +93,27 @@ public class DailyCooldown {
         controlledData.addAll(cooldown);
         controlledData.addAll(eveningHRdata);
 
+        /*if (eveningHRdata.size() == 0 && cooldown.size() > 0){
+
+            Calendar clnd = Calendar.getInstance();
+            clnd.setTime(cooldown.get(0).getTimestamp());
+            clnd.set(Calendar.HOUR_OF_DAY, 23);
+            clnd.set(Calendar.MINUTE, 0);
+
+            ISSRecordData restDataImpute = cooldown.get(0);
+
+            for (int i = 0; i < 60 * 3; i += 3){
+
+                clnd.add(Calendar.SECOND, 3);
+
+                ISSRecordData rec = new ISSRecordData(0, ISSRecordData.MEASUREMENT_HR, ISSRecordData.sdf.format(clnd.getTime()), "Resting", 50.0f,0,0);
+
+                eveningHRdata.add(rec);
+
+            }
+
+
+        }*/
 
         cooldownSeries = ConvertToTS(allData, "Raw data");
         subplot.Add(cooldownSeries, Color.BLUE);

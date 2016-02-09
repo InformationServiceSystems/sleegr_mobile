@@ -79,7 +79,7 @@ public class ExponentFitter {
         double mx = Y.get(0);
 
         for (int i = 0; i < Y.size(); i++) {
-            if (mx > Y.get(i)) {
+            if (mx < Y.get(i)) {
                 mx = Y.get(i);
             }
         }
@@ -88,14 +88,46 @@ public class ExponentFitter {
 
     }
 
-    public static double [] fitLowerExpGD(ArrayList<Double> X, ArrayList<Double> Y){
+
+    public static double [] fitLowerExpGD(ArrayList<Double> Xr, ArrayList<Double> Yr){
 
 
+        if (Xr.size() == 0){
+            return new double[]{1000.0,0.0,0.0};
+        }
+
+        // start with the maximum value in the data; this allows to reduce initial HR "heating" artifact
+
+
+
+        double maxY = maxval(Yr);
+
+        boolean afterMax = false;
+
+        ArrayList<Double> X = new ArrayList<>();
+        ArrayList<Double> Y = new ArrayList<>();
+
+        for (int i = 0 ; i < Xr.size(); i++){
+
+            if (Yr.get(i) == maxY)
+                afterMax = true;
+
+            if (i > 30)
+                afterMax = true; // we assume that heating up takes around two minutes
+
+            if (afterMax){
+                X.add(Xr.get(i));
+                Y.add(Yr.get(i));
+            }
+
+        }
+
+        // check if there is nothing but noise ....
         if (X.size() == 0){
             return new double[]{1000.0,0.0,0.0};
         }
 
-        double [] result = new double [] {1000, maxval(Y) - minval(Y), minval(Y) };
+        double [] result = new double [] {1000, 100, 50 };
         double [] grdscl = new double [] {1, 1, 1 };
 
         double norm = 100;
