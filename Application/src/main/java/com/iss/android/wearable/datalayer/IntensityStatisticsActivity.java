@@ -1,5 +1,6 @@
 package com.iss.android.wearable.datalayer;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -8,7 +9,6 @@ import android.widget.TextView;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -24,7 +24,9 @@ public class IntensityStatisticsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intensity_statistics);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = this.getActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         try {
 
@@ -139,6 +141,8 @@ public class IntensityStatisticsActivity extends Activity {
         else if (id == R.id.home_week){
             week = 0;
             VisualizeWeek(week);
+        } else if (id == android.R.id.home) {
+            onBackPressed();
         }
 
         return true;
