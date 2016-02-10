@@ -14,14 +14,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/scheduleTable"
-        android:stretchColumns="1">
+        android:stretchColumns="0,1,2,4"
+        android:paddingTop="10dp">
 
         <TableRow android:padding="2dp">
+
+            <TextView />
 
             <TextView
                 android:id="@+id/DayOne"
                 android:text="Monday"
                 android:padding="3dip" />
+
+            <TextView />
 
             <Spinner
                 android:id="@+id/SpinnerOne"
@@ -29,14 +34,20 @@
                 android:gravity="end"
                 android:layout_height="wrap_content"
                 android:padding="3dip" />
+
+            <TextView />
         </TableRow>
 
         <TableRow android:padding="2dp">
+
+            <TextView />
 
             <TextView
                 android:id="@+id/DayTwo"
                 android:text="Tuesday"
                 android:padding="3dip" />
+
+            <TextView />
 
             <Spinner
                 android:id="@+id/SpinnerTwo"
@@ -44,14 +55,20 @@
                 android:gravity="end"
                 android:layout_height="wrap_content"
                 android:padding="3dip" />
+
+            <TextView />
         </TableRow>
 
         <TableRow android:padding="2dp">
+
+            <TextView />
 
             <TextView
                 android:id="@+id/DayThree"
                 android:text="Wednesday"
                 android:padding="3dip" />
+
+            <TextView />
 
             <Spinner
                 android:id="@+id/SpinnerThree"
@@ -59,14 +76,20 @@
                 android:gravity="end"
                 android:layout_height="wrap_content"
                 android:padding="3dip" />
+
+            <TextView />
         </TableRow>
 
         <TableRow android:padding="2dp">
+
+            <TextView />
 
             <TextView
                 android:id="@+id/DayFour"
                 android:text="Thursday"
                 android:padding="3dip" />
+
+            <TextView />
 
             <Spinner
                 android:id="@+id/SpinnerFour"
@@ -74,14 +97,20 @@
                 android:gravity="end"
                 android:layout_height="wrap_content"
                 android:padding="3dip" />
+
+            <TextView />
         </TableRow>
 
         <TableRow android:padding="2dp">
+
+            <TextView />
 
             <TextView
                 android:id="@+id/DayFive"
                 android:text="Friday"
                 android:padding="3dip" />
+
+            <TextView />
 
             <Spinner
                 android:id="@+id/SpinnerFive"
@@ -89,14 +118,20 @@
                 android:gravity="end"
                 android:layout_height="wrap_content"
                 android:padding="3dip" />
+
+            <TextView />
         </TableRow>
 
         <TableRow android:padding="2dp">
+
+            <TextView />
 
             <TextView
                 android:id="@+id/DaySix"
                 android:text="Saturday"
                 android:padding="3dip" />
+
+            <TextView />
 
             <Spinner
                 android:id="@+id/SpinnerSix"
@@ -104,14 +139,20 @@
                 android:gravity="end"
                 android:layout_height="wrap_content"
                 android:padding="3dip" />
+
+            <TextView />
         </TableRow>
 
         <TableRow android:padding="2dp">
+
+            <TextView />
 
             <TextView
                 android:id="@+id/DaySeven"
                 android:text="Sunday"
                 android:padding="3dip" />
+
+            <TextView />
 
             <Spinner
                 android:id="@+id/SpinnerSeven"
@@ -119,27 +160,35 @@
                 android:gravity="end"
                 android:layout_height="wrap_content"
                 android:padding="3dip" />
+
+            <TextView />
         </TableRow>
     </TableLayout>
 
-    <Button
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/saveSchedule"
-        android:id="@+id/saveSchedule"
         android:layout_below="@+id/scheduleTable"
-        android:layout_toStartOf="@+id/cancelSchedule"
-        android:onClick="onClick"
-        android:backgroundTint="#3b5998"
-        android:textColor="#ffffff" />
+        android:gravity="center_horizontal">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/cancelSchedule"
-        android:id="@+id/cancelSchedule"
-        android:layout_below="@+id/scheduleTable"
-        android:layout_alignParentEnd="true"
-        android:onClick="onClick" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/saveSchedule"
+            android:id="@+id/saveSchedule"
+            android:layout_toStartOf="@+id/cancelSchedule"
+            android:onClick="onClick"
+            android:backgroundTint="#3b5998"
+            android:textColor="#ffffff" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancelSchedule"
+            android:id="@+id/cancelSchedule"
+            android:layout_alignParentEnd="true"
+            android:onClick="onClick" />
+
+    </RelativeLayout>
 
 </RelativeLayout>

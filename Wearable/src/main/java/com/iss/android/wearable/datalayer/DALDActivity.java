@@ -3,6 +3,7 @@ package com.iss.android.wearable.datalayer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,30 +14,22 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 public class DALDActivity extends Activity {
-    String[] rpeValues = new String[]{
-            "0 Rest",
-            "1 Very easy",
-            "2 Easy",
-            "3 Moderate",
-            "4 Somewhat hard",
-            "5 Hard",
-            "6 Harder",
-            "7 Very hard",
-            "8 Very very hard",
-            "9 Very very very hard",
-            "10 Maximal"
-    };
-
-    String [] daldaItems = new String[] {"Sport training","Sleep","Health","Muscle pain", "Tiredness", "Recovery time"};
+    String[] daldaItems;
+    String time;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dald);
 
-        createRPEradioButtons(rpeValues);
+        Intent myIntent = getIntent();
+
+        String[] rpeValues = myIntent.getStringArrayExtra("rpeValues");
+        time = myIntent.getStringExtra("time");
+        daldaItems = myIntent.getStringArrayExtra("daldaItems");
+        if (time.equals("evening")) {
+            createRPEradioButtons(rpeValues);
+        }
         createDALDAradioButtons(daldaItems);
         createSubmitButton();
 
@@ -71,7 +64,9 @@ public class DALDActivity extends Activity {
 
                 }
 
-                SensorsDataService.itself.AddTrainingScore(SelectedIndex(rpe), "RPE");
+                if (time.equals("evening")) {
+                    SensorsDataService.itself.AddTrainingScore(SelectedIndex(rpe), "RPE");
+                }
 
                 for (int i = 0; i < rgs.length; i++) {
                     SensorsDataService.itself.AddTrainingScore(SelectedIndex(rgs[i])-1, daldaItems[i]);
@@ -90,9 +85,10 @@ public class DALDActivity extends Activity {
 
     public boolean CheckDataFilled(){
 
-        if(SelectedIndex(rpe) < 0)
-            return false;
-
+        if (time.equals("evening")) {
+            if (SelectedIndex(rpe) < 0)
+                return false;
+        }
         for (int i = 0; i < rgs.length; i++){
             if (SelectedIndex(rgs[i]) < 0)
                 return false;
@@ -141,7 +137,7 @@ public class DALDActivity extends Activity {
 
     RadioGroup [] rgs = null;
 
-    void createDALDAradioButtons(String [] rpeValues){
+    void createDALDAradioButtons(String[] daldaItems) {
 
 
         LinearLayout layout = (LinearLayout) findViewById(R.id.linearLayout);
@@ -151,10 +147,10 @@ public class DALDActivity extends Activity {
         view.setText("For different aspects of your life, please select if it is a) worse than usual b) as normal c) better than usual:");
         layout.addView(view);
 
-        rgs = new RadioGroup[rpeValues.length];
+        rgs = new RadioGroup[daldaItems.length];
         String [] answrs = new String[] {"a", "b", "c"};
 
-        for (int r = 0; r < rpeValues.length; r++){
+        for (int r = 0; r < daldaItems.length; r++) {
 
             RadioButton[] rbg = new RadioButton[3];
 
@@ -168,7 +164,7 @@ public class DALDActivity extends Activity {
             }
 
             view = new TextView(this);
-            view.setText(rpeValues[r]);
+            view.setText(daldaItems[r]);
             layout.addView(view);
             layout.addView(rgs[r]);
         }

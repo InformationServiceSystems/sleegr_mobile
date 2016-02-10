@@ -386,14 +386,42 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     static boolean isNowASleepingHour(){
 
         Calendar clnd = Calendar.getInstance();
-        clnd.add(Calendar.HOUR_OF_DAY, -3 );
+        clnd.add(Calendar.HOUR_OF_DAY, -3);
         return (clnd.get(Calendar.HOUR_OF_DAY) >= 13 - 3);
     }
 
+    String[] rpeValues = new String[]{
+            "0 Rest",
+            "1 Very easy",
+            "2 Easy",
+            "3 Moderate",
+            "4 Somewhat hard",
+            "5 Hard",
+            "6 Harder",
+            "7 Very hard",
+            "8 Very very hard",
+            "9 Very very very hard",
+            "10 Maximal"
+    };
 
-    private void AskUserForFeedback() {
+
+    private void AskUserForFeedback(String time) {
 
         Intent myIntent = new Intent(this, DALDActivity.class);
+        String[] daldaItems;
+        if (time.equals("evening")) {
+            daldaItems = new String[]{"Sport training", "Health", "Muscle pain", "Tiredness", "Recovery time"};
+            myIntent.putExtra("time", "evening");
+        } else if (time.equals("morning")) {
+            daldaItems = new String[]{"Sleep"};
+            myIntent.putExtra("time", "morning");
+        } else {
+            daldaItems = new String[]{};
+        }
+
+
+        myIntent.putExtra("rpeValues", rpeValues);
+        myIntent.putExtra("daldaItems", daldaItems);
         myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(myIntent);
 
@@ -707,7 +735,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             timerTimeout = RESTING_MEASUREMENT_TIME;
 
             if (isNowASleepingHour()){
-                AskUserForFeedback();
+                AskUserForFeedback("evening");
+            }
+            if (!isNowASleepingHour()) {
+                AskUserForFeedback("morning");
             }
 
         }else if (state.contains("Cooldown")) {

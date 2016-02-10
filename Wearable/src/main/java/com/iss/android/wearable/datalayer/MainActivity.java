@@ -32,7 +32,6 @@
 package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -253,7 +252,7 @@ public class MainActivity extends Activity {
         ImageButton continueCooldown = (ImageButton) findViewById(R.id.continueCooldown);
         ImageButton eveningHR = (ImageButton) findViewById(R.id.eveningHR);
 
-        morningHR.setBackgroundColor( recordedActivities.containsKey("Resting:false") ? Color.GREEN : Color.GRAY);
+        morningHR.setBackgroundColor(recordedActivities.containsKey("Resting:false") ? Color.GREEN : Color.GRAY);
         startCooldown.setBackgroundColor(recordedActivities.containsKey("Cooldown") ? Color.GREEN : Color.GRAY);
         continueCooldown.setBackgroundColor(recordedActivities.containsKey("Recovery") ? Color.GREEN : Color.GRAY);
         eveningHR.setBackgroundColor(recordedActivities.containsKey("Resting:true") ? Color.GREEN : Color.GRAY);
@@ -294,7 +293,7 @@ public class MainActivity extends Activity {
         // Intent that kills the app after a certain amount of time after the app has crashed
         murderousIntent = new Intent(this, SensorsDataService.class);
         // start handler which starts pending-intent after Application Crash
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+        /*Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
                 Log.d("Killer", "kills");
@@ -311,7 +310,7 @@ public class MainActivity extends Activity {
                 System.exit(2);
 
             }
-        });
+        });/**/
 
     }
 
