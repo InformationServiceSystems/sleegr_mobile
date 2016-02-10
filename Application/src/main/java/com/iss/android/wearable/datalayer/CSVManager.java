@@ -3,9 +3,11 @@ package com.iss.android.wearable.datalayer;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +18,7 @@ import java.util.List;
  */
 public class CSVManager {
 
-    public static StringBuilder RecordsToCSV(List<ISSRecordData> exampleData ){
+    public static StringBuilder RecordsToCSV(List<ISSRecordData> exampleData) {
 
         StringBuilder bld = new StringBuilder();
 
@@ -33,13 +35,52 @@ public class CSVManager {
 
     }
 
-    public static void WriteNewCSVdata(File file, String data){
-
+    public static void WriteNewCSVdata(File file, String data) {
+        boolean edited = false;
+        String current_date = data.substring(0, 10);
         try {
-            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
-            out.print(data);
+            // Open the file that is the first argument
+            FileInputStream fstream = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+            String strLine;
+            StringBuilder fileContent = new StringBuilder();
+            //Read File Line By Line
+            while ((strLine = br.readLine()) != null) {
+                // Print the content on the console
+                String tokens[] = strLine.split(",");
+                if (tokens.length > 0) {
+                    // Here, tokens[0] will have the value of the current date
+                    if (tokens[0].equals(current_date)) {
+                        tokens[1] = data.substring(11, 12);
+                        String newLine = tokens[0] + "," + tokens[1];
+                        fileContent.append(newLine);
+                        fileContent.append("\n");
+                        edited = true;
+                    } else {
+                        // update content as it is
+                        fileContent.append(strLine);
+                        fileContent.append("\n");
+                    }
+                }
+            }
+            // Now fileContent will have updated content , which you can override into file
+            //Close the input stream
+            fstream.close();
+            FileWriter fstreamWrite = new FileWriter(file);
+            BufferedWriter out = new BufferedWriter(fstreamWrite);
+            out.write(fileContent.toString());
+            out.flush();
+            if (!edited) {
+                PrintWriter outpw = new PrintWriter(out);
+                outpw.print(data);
+                outpw.close();
+            }
             out.close();
-        } catch (IOException e) {
+        } catch (
+                IOException e
+                )
+
+        {
             //exception handling left as an exercise for the reader
 
             System.out.print(e.toString());
@@ -48,11 +89,11 @@ public class CSVManager {
 
     }
 
-    public static HashMap<String, Double> ReadSleepData(){
+    public static HashMap<String, Double> ReadSleepData() {
 
         HashMap<String, Double> result = new HashMap<>();
 
-        if (!DataStorageManager.sleepData.exists()){
+        if (!DataStorageManager.sleepData.exists()) {
             return result;
         }
 
@@ -74,9 +115,9 @@ public class CSVManager {
 
                 String[] split = line.split("\",\"");
 
-                String date = split[3].substring(0,12);
+                String date = split[3].substring(0, 12);
                 String[] date_split = date.split(". ");
-                date = date_split[2] + "-" + date_split[1] + "-" + date_split[0] ;
+                date = date_split[2] + "-" + date_split[1] + "-" + date_split[0];
                 Double value = Double.parseDouble(split[12]);
 
                 result.put(date, value);
@@ -94,15 +135,15 @@ public class CSVManager {
 
     }
 
-    public static boolean UserActivityExists(String date, String userID,  String activity){
+    public static boolean UserActivityExists(String date, String userID, String activity) {
 
-        File file = new File(DataStorageManager.userDataFolder, date  + File.separator + userID + "-" + date + "_" + activity + ".csv");
+        File file = new File(DataStorageManager.userDataFolder, date + File.separator + userID + "-" + date + "_" + activity + ".csv");
 
-        if (!file.exists()){
-            file = new File(DataStorageManager.userDataFolder, date  + File.separator + userID + "_" + date + "_" + activity + ".csv");
+        if (!file.exists()) {
+            file = new File(DataStorageManager.userDataFolder, date + File.separator + userID + "_" + date + "_" + activity + ".csv");
         }
 
-        if (!file.exists()){
+        if (!file.exists()) {
             return false;
         }
 
@@ -111,22 +152,22 @@ public class CSVManager {
     }
 
 
-    public static List<ISSRecordData> ReadCSVdata(String date, String userID,  String activity){
+    public static List<ISSRecordData> ReadCSVdata(String date, String userID, String activity) {
 
 
         //iaroslogos_at_gmail.com-2016-01-06_Running.csv
 
         userID = DataStorageManager.getProperUserID(userID);
 
-        List<ISSRecordData>  result = new ArrayList<ISSRecordData>();
+        List<ISSRecordData> result = new ArrayList<ISSRecordData>();
 
-        File file = new File(DataStorageManager.userDataFolder, date  + File.separator + userID + "-" + date + "_" + activity + ".csv");
+        File file = new File(DataStorageManager.userDataFolder, date + File.separator + userID + "-" + date + "_" + activity + ".csv");
 
-        if (!file.exists()){
-            file = new File(DataStorageManager.userDataFolder, date  + File.separator + userID + "_" + date + "_" + activity + ".csv");
+        if (!file.exists()) {
+            file = new File(DataStorageManager.userDataFolder, date + File.separator + userID + "_" + date + "_" + activity + ".csv");
         }
 
-        if (!file.exists()){
+        if (!file.exists()) {
             return null;
         }
 
@@ -138,7 +179,7 @@ public class CSVManager {
 
                 ISSRecordData recordData = ISSRecordData.fromString(line);
 
-                if (recordData == null){
+                if (recordData == null) {
                     continue;
                 }
 
@@ -152,15 +193,15 @@ public class CSVManager {
 
         }
 
-        if (result.size() == 0){
-            return  null;
+        if (result.size() == 0) {
+            return null;
         }
 
         return result;
 
     }
 
-    public static ArrayList<List<ISSRecordData>> ReadSplitCSVdata(String date, String userID,  String activity){
+    public static ArrayList<List<ISSRecordData>> ReadSplitCSVdata(String date, String userID, String activity) {
 
 
         ArrayList<List<ISSRecordData>> result = new ArrayList<List<ISSRecordData>>();
@@ -196,7 +237,6 @@ public class CSVManager {
         return result;
 
     }
-
 
 
 }

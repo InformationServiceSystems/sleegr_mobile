@@ -16,7 +16,6 @@
 
 package com.iss.android.wearable.datalayer;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -96,8 +95,6 @@ public class MainActivity extends FragmentActivity implements
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
         setupViews();
-        //Necessary, terminating the choose register service activity
-        //ChooseRegisterServiceActivity.instance.finish();
         // Stores DataItems received by the local broadcaster or from the paired watch.
         mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
         mDataItemList.setAdapter(mDataItemListAdapter);
@@ -140,7 +137,7 @@ public class MainActivity extends FragmentActivity implements
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
         // start handler which starts pending-intent after Application-Crash
         // That stuff may be cool for end users, but for developers it's nasty
-       Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+       /*Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
 

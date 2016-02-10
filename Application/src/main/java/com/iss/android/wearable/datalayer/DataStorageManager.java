@@ -224,7 +224,6 @@ public class DataStorageManager {
     public static void storeScheduleLine(String scheduleString) {
         File file = new File(userDataFolder, "schedule.csv");
         if (!file.exists()) {
-            //file.mkdirs();
             try {
                 file.createNewFile();
             } catch (IOException e) {
@@ -232,10 +231,6 @@ public class DataStorageManager {
                 e.printStackTrace();
             }
         }
-        if (!file.exists())
-            Log.d("csvSchedule", "doesn't exist");
-        else
-            Log.d("csvSchedule", "exists here: " + file.getPath());
         CSVManager.WriteNewCSVdata(file, scheduleString);
     }
 }
