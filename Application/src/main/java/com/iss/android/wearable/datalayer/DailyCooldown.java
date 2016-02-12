@@ -142,7 +142,7 @@ public class DailyCooldown {
 
         ///////////////// here is where the caching is done /////////////////////
 
-        long totalCSVsSize = LoadPrecalculatedValues(daystr, userID);
+        //long totalCSVsSize = LoadPrecalculatedValues(daystr, userID);
 
         ///////////////// here is where the caching is done /////////////////////
 
@@ -226,7 +226,7 @@ public class DailyCooldown {
 
         if (cooldown.size()>0){
             paramsControlled = ComputeExponentFit(paramsControlled, controlledData, allData, subplot, "Controlled data", Color.RED);
-            if (paramsNoisy != null)
+            if (paramsControlled != null)
                 alpha2min = paramsControlled[0];
         }
         paramsNoisy = ComputeExponentFit(paramsNoisy, allData, allData, subplot, "All data", Color.GREEN);
@@ -269,10 +269,20 @@ public class DailyCooldown {
             DeepSleep = sleepData.get(daystr);
         }
 
-        if (totalCSVsSize < 0)
-            return;
 
         ///////////////// here is where the caching is done /////////////////////
+
+        /*if (totalCSVsSize < 0)
+            return;
+
+        File folder = new File(DataStorageManager.userDataFolder , daystr);
+        File csvSize = new File(folder, "csvsizes.sync");
+        try {
+            Serializer.SerializeToFile(totalCSVsSize, csvSize);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
 
         File summaryFile = CSVManager.GetCSVfilename(daystr, userID, "Summary");
         String timeStamp = ISSRecordData.sdf.format(day);
@@ -300,13 +310,7 @@ public class DailyCooldown {
        DataStorageManager.SaveNewDataToFile((ArrayList<ISSRecordData>) minedParameters, userID);
 
 
-        File folder = new File(DataStorageManager.userDataFolder , daystr);
-        File csvSize = new File(folder, "csvsizes.sync");
-        try {
-            Serializer.SerializeToFile(totalCSVsSize, csvSize);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
 
         ///////////////// here is where the caching is done /////////////////////
 
