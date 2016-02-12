@@ -156,7 +156,7 @@ public class DataStorageManager {
             //DataSyncService.itself.OutputEvent("create folder: " + result);
         }
 
-        CSVManager.WriteNewCSVdata(
+        CSVManager.AppendStringToFile(
                 new File(dayFolder, getProperUserID(UserID) + "_" + folderName + "_" + activityType + ".csv"),
                 CSVManager.RecordsToCSV(accumulator).toString()
         );
@@ -200,21 +200,30 @@ public class DataStorageManager {
 
     }
 
-    public static ArrayList<File> GetAllFilesToUpload(String UserID, int timeSpan){
+    public static ArrayList<ArrayList<File>> GetAllFilesToUpload(String UserID, int timeSpan){
 
-        ArrayList<File> result = new  ArrayList<File>();
-        result.add(sleepData);
+        ArrayList<ArrayList<File>> result = new  ArrayList<>();
+        //result.add(sleepData);
 
         for (int i = 0; i < timeSpan; i++){
 
             File dayFolder = new File( userDataFolder, getDayFromToday(i));
             File[] files = dayFolder.listFiles();
 
+            ArrayList<File> day = new ArrayList<>();
+
             if (files != null){
                 for (File file : files) {
-                    result.add(file);
+
+                    if (!file.getName().contains(".csv")){
+                        continue;
+                    }
+
+                    day.add(file);
                 }
             }
+
+            result.add(day);
 
         }
 

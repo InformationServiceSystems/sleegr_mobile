@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,6 +34,19 @@ public class CSVManager {
         }
 
         return bld;
+
+    }
+
+    public static void AppendStringToFile(File file, String data){
+
+        try {
+            PrintWriter out = new PrintWriter(new FileOutputStream(file), true);
+            out.print(data);
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -151,15 +166,11 @@ public class CSVManager {
 
     }
 
+    public static File GetCSVfilename(String date, String userID, String activity){
+        return new File(DataStorageManager.userDataFolder, date + File.separator + userID + "_" + date + "_" + activity + ".csv");
+    }
 
-    public static List<ISSRecordData> ReadCSVdata(String date, String userID, String activity) {
-
-
-        //iaroslogos_at_gmail.com-2016-01-06_Running.csv
-
-        userID = DataStorageManager.getProperUserID(userID);
-
-        List<ISSRecordData> result = new ArrayList<ISSRecordData>();
+    public static File GetCSVfile(String date, String userID, String activity){
 
         File file = new File(DataStorageManager.userDataFolder, date + File.separator + userID + "-" + date + "_" + activity + ".csv");
 
@@ -171,19 +182,32 @@ public class CSVManager {
             return null;
         }
 
+        return file;
+
+    }
+
+    public static List<ISSRecordData> ReadCSVdata(File file) {
+
+        List<ISSRecordData> result = new ArrayList<ISSRecordData>();
+
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 
             String line;
 
             while ((line = br.readLine()) != null) {
 
-                ISSRecordData recordData = ISSRecordData.fromString(line);
+                try {
+                    ISSRecordData recordData = ISSRecordData.fromString(line);
 
-                if (recordData == null) {
-                    continue;
+                    if (recordData == null) {
+                        continue;
+                    }
+
+                    result.add(recordData);
+                }catch (Exception ex){
+
+                    System.out.print(ex.toString());
                 }
-
-                result.add(recordData);
 
             }
 
@@ -198,6 +222,18 @@ public class CSVManager {
         }
 
         return result;
+
+    }
+
+    public static List<ISSRecordData> ReadCSVdata(String date, String userID, String activity) {
+
+        userID = DataStorageManager.getProperUserID(userID);
+        File file = GetCSVfile(date, userID, activity);
+
+        if (file == null)
+            return null;
+
+        return ReadCSVdata(file);
 
     }
 

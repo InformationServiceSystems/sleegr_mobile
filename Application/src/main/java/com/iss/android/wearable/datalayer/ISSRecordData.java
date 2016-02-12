@@ -17,6 +17,14 @@ public class ISSRecordData implements Serializable {
     static final int MEASUREMENT_HR = 21,
             MEASUREMENT_ACCELEROMETER = 1,
             MEASUREMENT_GPS = 512,
+            MEASUREMENT_ALPHA_NOISY = 31,
+            MEASUREMENT_ALPHA = 32,
+            MEASUREMENT_HR_MORNING = 33,
+            MEASUREMENT_HR_EVENING = 34,
+            MEASUREMENT_RPE = 35,
+            MEASUREMENT_DALDA = 36,
+            MEASUREMENT_DEEP_SLEEP = 37,
+            MEASUREMENT_SLEEP_LENGTH = 38,
             MEASUREMENT_TRAINING_END = 13;
 
     public int UserID;

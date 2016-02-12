@@ -330,7 +330,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     int timerTime = 0;
     String currentState = "Idle";
     int timerTimeout = 60 * 60 * 24;
-    int COOLING_MEASUREMENT_TIME = 60 * 60 * 24; // cooling is measured for 60 minutes
+    int COOLING_MEASUREMENT_TIME = 60 * 60 * 1; // cooling is measured for 60 minutes
     int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 5 min
     int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
     int COOLING_RPE_TIME = 60 * 15;
@@ -708,15 +708,21 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    void outputVibration(){
+
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        long length = 200;
+        v.vibrate( new long[]{length,length,  length,length,  length,length,  length,length}, -1 );
+
+    }
+
     private void BringIntoState(String state) {
 
         currentState = state;
 
         StopMeasuring();
 
-        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        // Vibrate for 500 milliseconds
-        v.vibrate(500);
+        outputVibration();
 
         try {
             Serializer.SerializeToFile(state, mutexFile);

@@ -16,6 +16,7 @@
 
 package com.iss.android.wearable.datalayer;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -137,16 +138,18 @@ public class MainActivity extends FragmentActivity implements
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
         // start handler which starts pending-intent after Application-Crash
         // That stuff may be cool for end users, but for developers it's nasty
+        // Iaroslav: sorry, I uncomment sometimes this (and forget to comment it back) to check what exception crashed the app.
        /*Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+           @Override
+           public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
 
-                AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 2000, pendingInt);
-                System.exit(2);
 
-            }
-        }); /**/
+               AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+               mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 2000, pendingInt);
+               System.exit(2);
+
+           }
+       }); */
 
     }
 
@@ -695,56 +698,7 @@ public class MainActivity extends FragmentActivity implements
             public void run() {
                 try {
 
-                    /*int days = 21;
-                    //String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
-                    String UserID = DataStorageManager.getProperUserID(DataSyncService.itself.UserID);
-
-                    ArrayList<TimeSeries> allData = null;
-
-
-
-                    allData = DataProcessingManager.GetDailyRecoveryParameters(days, UserID);
-
-                    int pred_days = 7;
-                    TimeSeries rpeReq = randomRPEReq(days, pred_days);
-
-                    // this class will be used for plotting the data
-                    Visualizations visualizations = new Visualizations();
-
-                    // add requirement graph
-                    Visualizations.Subplot subplot = visualizations.AddGraph("RPE requirements");
-                    subplot.Add(allData.get(0), Color.RED);
-                    subplot.Add(rpeReq, Color.GREEN);
-
-                    TimeSeries avgDeviationsRPE = ComputeCompliences(rpeReq, allData.get(0), 3);
-                    subplot.Add(avgDeviationsRPE, Color.GRAY);
-
-                    // add prediction graphs
-                    for (int i = 1; i < allData.size(); i++) {
-
-                        int offset = 0;
-
-                        TimeSeries prediction = predictTimeSeries(rpeReq, allData.get(0), allData.get(i), offset);
-
-                        subplot = visualizations.AddGraph(prediction.name);
-                        subplot.Add(allData.get(i), Color.RED);
-                        subplot.Add(prediction, Color.BLUE);
-
-                    }
-
-                    Intent i = new Intent(MainActivity.this, IntensityStatisticsActivity.class);
-                    i.putExtra("visualizations", Serializer.SerializeToBytes(visualizations));
-                    startActivity(i);*/
-
                     Visualizations vis = null;
-
-                    /*File file  = new File( DataStorageManager.userDataFolder, "data2.bin");
-                    if (file.exists()){
-                        vis = (Visualizations) Serializer.DeserializeFromFile(file);}
-                    else {
-                        vis = (new UserParameters(14)).visualizations;
-                        Serializer.SerializeToFile(vis, file);
-                    }*/
 
                     vis = (new UserParameters(30)).visualizations;
 
@@ -757,6 +711,30 @@ public class MainActivity extends FragmentActivity implements
                 }
             }
         }).start();
+    }
+
+    public void onSyncClick(View view){
+        RecomputeSyncronize();
+    }
+
+    private void RecomputeSyncronize() {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    // recompute the params for last 60 days
+                    new UserParameters(30);
+
+                    DataSyncService.itself.ShareDataWithServer();
+
+                } catch (Exception ex) {
+                    OutputEvent(ex.toString());
+                }
+            }
+        }).start();
+
     }
 
     private TimeSeries ComputeCompliences(TimeSeries requirements, TimeSeries values, int timewindow) {

@@ -24,7 +24,15 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Data summary"
+        android:text="Synchronize with server"
+        android:onClick="onSyncClick"
+        android:id="@+id/button"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show data summary"
         android:onClick="onAnalysisClick"
         android:id="@+id/buttonAnalysis" />
 

@@ -2,6 +2,11 @@ package com.iss.android.wearable.datalayer;
 
 import android.graphics.Color;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,6 +20,8 @@ import java.util.List;
  */
 public class DailyCooldown {
 
+    private double[] paramsNoisy = null;
+    private double[] paramsControlled = null;
     List<ISSRecordData> recoveryCD = new ArrayList<>();
     List<ISSRecordData> cooldown = new ArrayList<>();
     List<ISSRecordData> morningHRdata = new ArrayList<>();
@@ -34,12 +41,110 @@ public class DailyCooldown {
 
     Visualizations visualizations = new Visualizations();
 
+    public long FileSize(File file){
+        long result = 0;
+        try {
+            URL url = file.toURI().toURL();
+            InputStream stream = url.openStream();
+            result = stream.available();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public long LoadPrecalculatedValues(String daystr, String userID){
+
+        // read all files in folder ending with .csv
+        File folder = new File(DataStorageManager.userDataFolder , daystr);
+        File csvSize = new File(folder, "csvsizes.sync");
+
+        long totalCSVsSize = 0;
+
+        if (folder.listFiles() == null){
+            return totalCSVsSize;
+        }
+
+        for(File file: folder.listFiles()){
+
+            if (!file.getName().endsWith(".csv"))
+                continue;
+
+            if (file.getName().endsWith("Summary.csv"))
+                continue;
+
+            totalCSVsSize += FileSize(file);
+        }
+
+        boolean recalculate_cooldown = true;
+
+        try {
+            long previous_size = (long)Serializer.DeserializeFromFile(csvSize);
+            recalculate_cooldown = previous_size != totalCSVsSize;
+        } catch (Exception e) {
+
+        }
+
+        if (!recalculate_cooldown){
+
+            List<ISSRecordData> minedParameters = CSVManager.ReadCSVdata(daystr, userID, "Summary");
+
+            if (minedParameters == null)
+                return totalCSVsSize;
+
+            for (ISSRecordData record: minedParameters){
+
+                if (record.MeasurementType == ISSRecordData.MEASUREMENT_ALPHA){
+                    alpha2min = Double.valueOf(record.Value1);
+                    paramsControlled = new double[] {record.Value1, record.Value2, record.Value3};
+                }
+
+                if (record.MeasurementType == ISSRecordData.MEASUREMENT_ALPHA_NOISY){
+                    alphaAllData = Double.valueOf(record.Value1);
+                    paramsNoisy = new double[] {record.Value1, record.Value2, record.Value3};
+                }
+
+                if (record.MeasurementType == ISSRecordData.MEASUREMENT_DALDA){
+                    DALDA = Double.valueOf(record.Value1);
+                }
+
+                if (record.MeasurementType == ISSRecordData.MEASUREMENT_DEEP_SLEEP){
+                    DeepSleep = Double.valueOf(record.Value1);
+                }
+
+                if (record.MeasurementType == ISSRecordData.MEASUREMENT_HR_MORNING){
+                    morningHR = Double.valueOf(record.Value1);
+                }
+
+                if (record.MeasurementType == ISSRecordData.MEASUREMENT_HR_EVENING){
+                    eveningHR = Double.valueOf(record.Value1);
+                }
+
+                if (record.MeasurementType == ISSRecordData.MEASUREMENT_RPE){
+                    RPE = Double.valueOf(record.Value1);
+                }
+
+            }
+
+            return -1;
+        }
+
+        return totalCSVsSize;
+
+    }
+
     public DailyCooldown(Date day){
 
         // read necessary data
         String userID = DataSyncService.getUserID();
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         String daystr = df.format(day);
+
+        ///////////////// here is where the caching is done /////////////////////
+
+        long totalCSVsSize = LoadPrecalculatedValues(daystr, userID);
+
+        ///////////////// here is where the caching is done /////////////////////
 
         recoveryCD = CSVManager.ReadCSVdata(daystr, userID, "Recovery");
         cooldown = CSVManager.ReadCSVdata(daystr, userID, "Cooldown");
@@ -119,9 +224,14 @@ public class DailyCooldown {
         subplot.Add(cooldownSeries, Color.BLUE);
 
 
-        if (cooldown.size()>0)
-            alpha2min = ComputeExponentFit(controlledData, allData, subplot, "Controlled data", Color.RED);
-        alphaAllData = ComputeExponentFit(allData, allData, subplot, "All data", Color.GREEN);
+        if (cooldown.size()>0){
+            paramsControlled = ComputeExponentFit(paramsControlled, controlledData, allData, subplot, "Controlled data", Color.RED);
+            if (paramsNoisy != null)
+                alpha2min = paramsControlled[0];
+        }
+        paramsNoisy = ComputeExponentFit(paramsNoisy, allData, allData, subplot, "All data", Color.GREEN);
+        if (paramsNoisy != null)
+            alphaAllData = paramsNoisy[0];
 
 
         // get morning / evening hrs. Could use the loaded data, but using existing function is easier
@@ -159,46 +269,95 @@ public class DailyCooldown {
             DeepSleep = sleepData.get(daystr);
         }
 
+        if (totalCSVsSize < 0)
+            return;
+
+        ///////////////// here is where the caching is done /////////////////////
+
+        File summaryFile = CSVManager.GetCSVfilename(daystr, userID, "Summary");
+        String timeStamp = ISSRecordData.sdf.format(day);
+
+        if (summaryFile.exists())
+            summaryFile.delete();
+
+        List<ISSRecordData> minedParameters = new ArrayList<>();
+
+        if (alpha2min != null)
+            minedParameters.add(new ISSRecordData(0, ISSRecordData.MEASUREMENT_ALPHA, timeStamp, "Summary", (float)((double) paramsControlled[0]),(float)((double) paramsControlled[1]),(float)((double) paramsControlled[2])));
+        if (alphaAllData != null)
+            minedParameters.add(new ISSRecordData(0, ISSRecordData.MEASUREMENT_ALPHA_NOISY, timeStamp, "Summary", (float)((double) paramsNoisy[0]),(float)((double) paramsNoisy[1]),(float)((double) paramsNoisy[2])));
+        if (DALDA != null)
+            minedParameters.add(new ISSRecordData(0, ISSRecordData.MEASUREMENT_DALDA, timeStamp, "Summary", (float)((double)DALDA),0,0));
+        if (DeepSleep != null)
+            minedParameters.add(new ISSRecordData(0, ISSRecordData.MEASUREMENT_DEEP_SLEEP, timeStamp, "Summary", (float)((double)DeepSleep),0,0));
+        if (morningHR != null)
+            minedParameters.add(new ISSRecordData(0, ISSRecordData.MEASUREMENT_HR_MORNING, timeStamp, "Summary", (float)((double)morningHR),0,0));
+        if (eveningHR != null)
+            minedParameters.add(new ISSRecordData(0, ISSRecordData.MEASUREMENT_HR_EVENING, timeStamp, "Summary", (float)((double)eveningHR),0,0));
+        if (RPE != null)
+            minedParameters.add(new ISSRecordData(0, ISSRecordData.MEASUREMENT_RPE, timeStamp, "Summary", (float)((double)RPE),0,0));
+
+       DataStorageManager.SaveNewDataToFile((ArrayList<ISSRecordData>) minedParameters, userID);
+
+
+        File folder = new File(DataStorageManager.userDataFolder , daystr);
+        File csvSize = new File(folder, "csvsizes.sync");
+        try {
+            Serializer.SerializeToFile(totalCSVsSize, csvSize);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ///////////////// here is where the caching is done /////////////////////
+
     }
 
 
-    Double ComputeExponentFit(ArrayList<ISSRecordData> data,ArrayList<ISSRecordData> allData, Visualizations.Subplot subplot, String label, int color){
+    double [] ComputeExponentFit(double[] loadedParams, ArrayList<ISSRecordData> data, ArrayList<ISSRecordData> allData, Visualizations.Subplot subplot, String label, int color){
 
         if (data.size() == 0){
             return null;
         }
 
+        double[] parameters = null;
 
         // check if timeshift might be needed (if the data was collected right after the exercise)
 
-        Double timeshift = 0.0;
+        if (loadedParams == null) {
 
-        for (ISSRecordData record: data){
-            if (record.MeasurementType == ISSRecordData.MEASUREMENT_TRAINING_END){
-                ISSRecordData first = data.get(0);
-                Date timestamp = first.getTimestamp();
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(timestamp);
-                long firstTime = cal.getTime().getTime();
-                cal.set(Calendar.HOUR_OF_DAY, (int) record.Value1);
-                cal.set(Calendar.MINUTE, (int) record.Value2);
-                long endTime = cal.getTime().getTime();
+            Double timeshift = 0.0;
 
-                timeshift = Double.valueOf(firstTime - endTime) / 1000.0;
+            for (ISSRecordData record : data) {
+                if (record.MeasurementType == ISSRecordData.MEASUREMENT_TRAINING_END) {
+                    ISSRecordData first = data.get(0);
+                    Date timestamp = first.getTimestamp();
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(timestamp);
+                    long firstTime = cal.getTime().getTime();
+                    cal.set(Calendar.HOUR_OF_DAY, (int) record.Value1);
+                    cal.set(Calendar.MINUTE, (int) record.Value2);
+                    long endTime = cal.getTime().getTime();
+
+                    timeshift = Double.valueOf(firstTime - endTime) / 1000.0;
+                }
             }
+
+
+            parameters = DataProcessingManager.getCooldownParameters((ArrayList<ISSRecordData>) data, timeshift);
+
+        }
+        else{
+            parameters = loadedParams;
         }
 
-
-        double[] cooldownParameters = DataProcessingManager.getCooldownParameters((ArrayList<ISSRecordData>) data, timeshift);
-
-        Double alpha = cooldownParameters[0];
+        Double alpha = parameters[0];
 
         cooldownSeries = ConvertToTS((ArrayList<ISSRecordData>) allData, label);
-        expAllData = DataProcessingManager.ComputeExponent(cooldownParameters, cooldownSeries);
+        expAllData = DataProcessingManager.ComputeExponent(parameters, cooldownSeries);
 
         subplot.Add(expAllData, color);
 
-        return alpha;
+        return parameters;
 
     }
 

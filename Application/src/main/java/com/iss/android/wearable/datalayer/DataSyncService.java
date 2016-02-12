@@ -48,6 +48,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -434,9 +435,54 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     public void ShareDataWithServer() {
 
-        ArrayList<File> files = DataStorageManager.GetAllFilesToUpload(UserID, 7);
-        for (File file : files) {
-            UploadingManager.UploadUserFileToServer(file, uploadUrl, UserID);
+        ArrayList<ArrayList<File>> arrayLists = DataStorageManager.GetAllFilesToUpload(UserID, 7);
+
+        for (ArrayList<File> day : arrayLists) {
+
+            // get all data
+
+            ArrayList<ISSRecordData> alldata = new ArrayList<>();
+
+            for(File file: day){
+                List<ISSRecordData> records = CSVManager.ReadCSVdata(file);
+                alldata.addAll(records);
+            }
+
+            // sort data in chronological order?
+
+            // separate channels, convert to string, upload to server
+
+            if (alldata.size() == 0)
+                continue;
+
+            // the day component of file name
+            String dateName = TimeSeries.dictionary_format.format(alldata.get(0).getTimestamp());
+
+            // determine all measurement types
+            HashMap< Integer, ArrayList<ISSRecordData> > map = new HashMap<>();
+
+            for (ISSRecordData record: alldata)
+            {
+                if (!map.containsKey(record.MeasurementType))
+                    map.put(record.MeasurementType, new ArrayList<ISSRecordData>());
+
+                map.get(record.MeasurementType).add(record);
+
+            }
+
+            // upload data separately for each measurement type
+
+            for (Integer measurementType: map.keySet()){
+                String uploadingName = dateName + "-" + measurementType + ".csv";
+
+                ArrayList<ISSRecordData> measurementData = map.get(measurementType);
+
+                StringBuilder stringBuilder = CSVManager.RecordsToCSV(measurementData);
+                String contents = stringBuilder.toString();
+
+                UploadingManager.UploadUserFileToServer(contents.getBytes(), uploadingName, uploadUrl, UserID);
+            }
+
         }
 
         OutputEvent("Sent data files to server");

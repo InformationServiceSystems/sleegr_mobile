@@ -16,19 +16,16 @@ public class UploadingManager {
 
 
     // a simple wrapper around UploadFileToServer
-    public static void UploadUserFileToServer(File file, String uploadUrl, String UserID){
+    public static void UploadUserFileToServer(byte[] content, String name, String uploadUrl, String UserID){
         String completeUrl = uploadUrl + UserID;
-        UploadFileToServer(file, completeUrl);
+        UploadFileToServer(content, name, completeUrl);
     }
 
     // Returns String which is a server response
-    public static void UploadFileToServer(File fileToUpload, String uploadUrl) {
+    public static void UploadFileToServer(byte[] content, String name, String uploadUrl) {
 
-        if (!fileToUpload.exists()){
-            return;
-        }
-
-        final File file = fileToUpload;
+        final byte [] filecontents = content;
+        final String attachmentFileName = name;
         final String serverurl = uploadUrl;
 
         /*StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -43,7 +40,6 @@ public class UploadingManager {
                     // Static stuff:
 
                     String attachmentName = "file";
-                    String attachmentFileName = file.getName();
                     String crlf = "\r\n";
                     String twoHyphens = "--";
                     String boundary = "*****";
@@ -74,10 +70,6 @@ public class UploadingManager {
                     request.writeBytes(crlf);
 
                     // read all file bytes
-
-                    byte[] filecontents = DataStorageManager.FileToBytes(file);
-
-                    // end content wrapper
 
                     request.write(filecontents);
 
