@@ -22,6 +22,21 @@
             <TextView />
 
             <TextView
+                android:text=""
+                android:padding="3dip" />
+
+            <TextView />
+
+            <TextView android:text="Planned Intensity" />
+
+            <TextView />
+        </TableRow>
+
+        <TableRow android:padding="2dp">
+
+            <TextView />
+
+            <TextView
                 android:id="@+id/DayOne"
                 android:text="Monday"
                 android:padding="3dip" />

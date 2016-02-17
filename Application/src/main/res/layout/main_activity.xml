@@ -20,21 +20,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Synchronize with server"
-        android:onClick="onSyncClick"
-        android:id="@+id/button"
-        android:layout_gravity="center_horizontal" />
+        <ImageButton
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:onClick="onSyncClick"
+            android:id="@+id/button"
+            android:background="@drawable/syncbutton"
+            android:layout_toStartOf="@+id/buttonAnalysis" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Show data summary"
-        android:onClick="onAnalysisClick"
-        android:id="@+id/buttonAnalysis" />
+        <ImageButton
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:onClick="onAnalysisClick"
+            android:id="@+id/buttonAnalysis"
+            android:background="@drawable/statbutton"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+
 
     <TextView
         android:layout_width="match_parent"
