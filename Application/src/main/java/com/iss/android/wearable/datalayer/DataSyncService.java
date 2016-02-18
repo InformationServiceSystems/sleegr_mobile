@@ -1,19 +1,12 @@
 package com.iss.android.wearable.datalayer;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ServiceInfo;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -30,24 +23,13 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -69,12 +51,11 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
 
-
     String uploadUrl = "http://46.101.214.58:5001/upload2/";
 
-    public static void OutputEventSq(String str){
+    public static void OutputEventSq(String str) {
 
-        if (DataSyncService.itself != null){
+        if (DataSyncService.itself != null) {
             DataSyncService.itself.OutputEvent(str);
         }
 
@@ -125,12 +106,12 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         alarm.SetAlarm(this);
 
-        String android_id = Settings.Secure.getString(this.getContentResolver(),Settings.Secure.ANDROID_ID);
+        String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         OutputEvent(android_id);
 
         Log.d("ISS", "Adroid ID: " + android_id);
 
-        switch (android_id){
+        switch (android_id) {
             case "144682d5efc12dcb":
                 UserID = "1";
                 break;
@@ -188,13 +169,12 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    public void StopSleepTracking(){
-        try{
+    public void StopSleepTracking() {
+        try {
             Intent intent = new Intent("com.urbandroid.sleep.alarmclock.STOP_SLEEP_TRACK");
             sendBroadcast(intent);
             ConfirmSleepTrackingStopped();
-        }
-        catch(Exception ex){
+        } catch (Exception ex) {
             System.out.println(ex.toString());
         }
     }
@@ -203,10 +183,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     public void onMessageReceived(final MessageEvent messageEvent) {
 
 
-        if(messageEvent.getPath().equals("Stop sleep tracking")){
+        if (messageEvent.getPath().equals("Stop sleep tracking")) {
             StopSleepTracking();
-        }
-        else{
+        } else {
             SendHRtoServer(messageEvent.getPath());
         }
 
@@ -228,7 +207,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    public void SendHRtoServer(String HR){
+    public void SendHRtoServer(String HR) {
 
         try {
             URL obj = new URL("http://46.101.214.58:5100/realtime?hrm=" + HR);
@@ -254,8 +233,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             } else {
                 OutputEvent("GET request not worked");
             }
-        }
-        catch (Exception ex){
+        } catch (Exception ex) {
 
             OutputEvent(ex.toString());
 
@@ -281,7 +259,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                     }).start();
 
 
-                }catch(Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
@@ -316,7 +294,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             byte[] data = Serializer.InputStreamToByte(assetInputStream);
 
             ArrayList<ISSRecordData> receivedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data);
-            OutputEvent("Read data from the watch of size " + receivedData.size());
+            OutputEvent("Recieved " + receivedData.size() + " of data");
             DataStorageManager.SaveNewDataToFile(receivedData, UserID);
             ClearWatchData();
 
@@ -334,7 +312,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         sendBroadcast(intent);
 
     }
-
 
 
     // interation with the watch procecdures
@@ -409,7 +386,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     }
 
 
-
     // Magic that is supposed to keep the process running on the Android v 4.4 even
     // after the app is swiped away; seems to be a bug of this android version. GJ Google
     // http://stackoverflow.com/questions/20677781/in-android-4-4-swiping-app-out-of-recent-tasks-permanently-kills-application-wi
@@ -432,7 +408,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     }*/
 
 
-
     public void ShareDataWithServer() {
 
         ArrayList<ArrayList<File>> arrayLists = DataStorageManager.GetAllFilesToUpload(UserID, 7);
@@ -443,7 +418,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             ArrayList<ISSRecordData> alldata = new ArrayList<>();
 
-            for(File file: day){
+            for (File file : day) {
                 List<ISSRecordData> records = CSVManager.ReadCSVdata(file);
                 alldata.addAll(records);
             }
@@ -459,10 +434,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             String dateName = TimeSeries.dictionary_format.format(alldata.get(0).getTimestamp());
 
             // determine all measurement types
-            HashMap< Integer, ArrayList<ISSRecordData> > map = new HashMap<>();
+            HashMap<Integer, ArrayList<ISSRecordData>> map = new HashMap<>();
 
-            for (ISSRecordData record: alldata)
-            {
+            for (ISSRecordData record : alldata) {
                 if (!map.containsKey(record.MeasurementType))
                     map.put(record.MeasurementType, new ArrayList<ISSRecordData>());
 
@@ -472,7 +446,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             // upload data separately for each measurement type
 
-            for (Integer measurementType: map.keySet()){
+            for (Integer measurementType : map.keySet()) {
                 String uploadingName = dateName + "-" + measurementType + ".csv";
 
                 ArrayList<ISSRecordData> measurementData = map.get(measurementType);
@@ -521,7 +495,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             Log.d(tag, message);
         }
     }
-
 
 
 }

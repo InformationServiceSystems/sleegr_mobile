@@ -16,7 +16,6 @@
 
 package com.iss.android.wearable.datalayer;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -71,6 +70,8 @@ import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToda
 public class MainActivity extends FragmentActivity implements
         ManageDateFragment.OnFragmentInteractionListener {
 
+    public static android.content.Context itself;
+
     private static final String TAG = "MainActivity";
 
     private GoogleApiClient mGoogleApiClient;
@@ -94,6 +95,7 @@ public class MainActivity extends FragmentActivity implements
     public void onCreate(Bundle b) {
         super.onCreate(b);
         mHandler = new Handler();
+        itself = this;
         setContentView(R.layout.main_activity);
         setupViews();
         // Stores DataItems received by the local broadcaster or from the paired watch.
@@ -248,6 +250,10 @@ public class MainActivity extends FragmentActivity implements
     @Override
     public void changeDisplayDate(Calendar calendar) {
 
+    }
+
+    public void onServerClick(View view) {
+        RecomputeSynchronize();
     }
 
     // this is used to communicate with Service
@@ -714,10 +720,10 @@ public class MainActivity extends FragmentActivity implements
     }
 
     public void onSyncClick(View view){
-        RecomputeSyncronize();
+        onWatchSync();
     }
 
-    private void RecomputeSyncronize() {
+    private void RecomputeSynchronize() {
 
         new Thread(new Runnable() {
             @Override
