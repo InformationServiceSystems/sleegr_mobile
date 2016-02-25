@@ -204,31 +204,42 @@ public class DailyCooldown {
             clnd.setTime(cooldown.get(0).getTimestamp());
             clnd.set(Calendar.HOUR_OF_DAY, 23);
             clnd.set(Calendar.MINUTE, 0);
-
             ISSRecordData restDataImpute = cooldown.get(0);
-
             for (int i = 0; i < 60 * 3; i += 3){
-
                 clnd.add(Calendar.SECOND, 3);
-
                 ISSRecordData rec = new ISSRecordData(0, ISSRecordData.MEASUREMENT_HR, ISSRecordData.sdf.format(clnd.getTime()), "Resting", 50.0f,0,0);
-
                 eveningHRdata.add(rec);
-
             }
-
-
         }*/
 
         cooldownSeries = ConvertToTS(allData, "Raw data");
         subplot.Add(cooldownSeries, Color.BLUE);
 
-
+        /*
         if (cooldown.size()>0){
             paramsControlled = ComputeExponentFit(paramsControlled, controlledData, allData, subplot, "Controlled data", Color.RED);
             if (paramsControlled != null)
                 alpha2min = paramsControlled[0];
+        }*/
+
+        // impute cooldown artificially if not measured (which is the expected scenario)
+        if (cooldown.size() < 0){
+            Date endTraining = extractStartOfExercise(allData);
+            if (endTraining != null){
+                // read the cooldown profile, if exists
+                cooldown = CSVManager.ReadUserHRProfile();
+                if(cooldown != null){
+                    // set up the timestamps for imputation for the cooldown
+                    for (ISSRecordData record: cooldown){
+                        Calendar stamp = Calendar.getInstance();
+                        stamp.setTime(endTraining);
+                        stamp.add(Calendar.SECOND, (int) record.Value2);
+                        record.Timestamp = ISSRecordData.sdf.format(stamp.getTime());
+                    }
+                }
+            }
         }
+
         paramsNoisy = ComputeExponentFit(paramsNoisy, allData, allData, subplot, "All data", Color.GREEN);
         if (paramsNoisy != null)
             alphaAllData = paramsNoisy[0];
@@ -316,6 +327,26 @@ public class DailyCooldown {
 
     }
 
+    Date extractStartOfExercise(ArrayList<ISSRecordData> data){
+
+        Date result = null;
+
+        for (ISSRecordData record : data) {
+            if (record.MeasurementType == ISSRecordData.MEASUREMENT_TRAINING_END) {
+                ISSRecordData first = data.get(0);
+                Date timestamp = first.getTimestamp();
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(timestamp);
+                long firstTime = cal.getTime().getTime();
+                cal.set(Calendar.HOUR_OF_DAY, (int) record.Value1);
+                cal.set(Calendar.MINUTE, (int) record.Value2);
+                result = cal.getTime();
+            }
+        }
+
+        return result;
+
+    }
 
     double [] ComputeExponentFit(double[] loadedParams, ArrayList<ISSRecordData> data, ArrayList<ISSRecordData> allData, Visualizations.Subplot subplot, String label, int color){
 
@@ -346,13 +377,15 @@ public class DailyCooldown {
                 }
             }
 
-
             parameters = DataProcessingManager.getCooldownParameters((ArrayList<ISSRecordData>) data, timeshift);
 
         }
         else{
             parameters = loadedParams;
         }
+
+        if (parameters == null)
+            return null;
 
         Double alpha = parameters[0];
 

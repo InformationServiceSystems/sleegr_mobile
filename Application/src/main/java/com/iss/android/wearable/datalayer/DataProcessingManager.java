@@ -76,6 +76,9 @@ public class DataProcessingManager {
 
         }
 
+        if (heartRates.size() == 0)
+            return null;
+
         //double[] params = fitExponent(times, heartRates);
         double[] params = ExponentFitter.fitLowerExpGD(times, heartRates);
 

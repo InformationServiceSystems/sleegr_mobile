@@ -749,6 +749,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         }else if (state.contains("Cooldown")) {
             timerTimeout = RESTING_MEASUREMENT_TIME; // needed to recover the state of the app properly
+
+            // this ugly copy paste from below is sposed to make user input the end of the training for cooling / recovery
+            if (!getRecordedActivities().containsKey("Cooldown")){
+                Intent myIntent = new Intent(this, TrainingStartTimeActivity.class);
+                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(myIntent);
+            }
+
             //StopGPS();
         }else if (state.contains("Recovery")) {
             timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly

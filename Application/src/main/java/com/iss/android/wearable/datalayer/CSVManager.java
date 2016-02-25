@@ -150,6 +150,23 @@ public class CSVManager {
 
     }
 
+    // this function gets the typical athlete hr profile after the training
+    // first value is time after the end of the training,
+    // second value in
+    public static List<ISSRecordData> ReadUserHRProfile(){
+
+        File profile = new File(DataStorageManager.userDataFolder,"profile.csv");
+
+        if (!profile.exists())
+            return null;
+
+
+        List<ISSRecordData> issRecordDatas = CSVManager.ReadCSVdata(profile);
+
+        return issRecordDatas;
+
+    }
+
     public static boolean UserActivityExists(String date, String userID, String activity) {
 
         File file = new File(DataStorageManager.userDataFolder, date + File.separator + userID + "-" + date + "_" + activity + ".csv");
