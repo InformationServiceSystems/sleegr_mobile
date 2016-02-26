@@ -307,7 +307,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     public void OutputEvent(String str) {
 
-        Intent intent = new Intent(this.NEW_MESSAGE_AVAILABLE);
+        Intent intent = new Intent(NEW_MESSAGE_AVAILABLE);
         intent.putExtra("message", str);
         sendBroadcast(intent);
 

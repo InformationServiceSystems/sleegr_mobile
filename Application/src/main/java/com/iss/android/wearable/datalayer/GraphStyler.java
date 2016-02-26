@@ -7,6 +7,6 @@ import com.jjoe64.graphview.GraphView;
  */
 public interface GraphStyler {
 
-    public void styleGraph(GraphView graphView, Visualizations.Subplot subplot);
+    void styleGraph(GraphView graphView, Visualizations.Subplot subplot);
 
 }

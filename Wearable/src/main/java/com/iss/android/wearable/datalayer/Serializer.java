@@ -42,7 +42,7 @@ public class Serializer {
 
     }
 
-    public static Object DeserializeFromFile(File file) throws FileNotFoundException, IOException, ClassNotFoundException {
+    public static Object DeserializeFromFile(File file) throws IOException, ClassNotFoundException {
 
         FileInputStream fileIn;
 

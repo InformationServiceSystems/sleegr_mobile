@@ -3,9 +3,7 @@ package com.iss.android.wearable.datalayer;
 import android.graphics.Color;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -38,6 +36,7 @@ public class DailyCooldown {
     public Double RPE = null;
     public Double DALDA = null;
     public Double DeepSleep = null;
+    public Double Steps = null;
 
     Visualizations visualizations = new Visualizations();
 
@@ -122,6 +121,10 @@ public class DailyCooldown {
 
                 if (record.MeasurementType == ISSRecordData.MEASUREMENT_RPE){
                     RPE = Double.valueOf(record.Value1);
+                }
+
+                if (record.MeasurementType == ISSRecordData.MEASUREMENT_STEPS) {
+                    Steps = Double.valueOf(record.Value1);
                 }
 
             }
@@ -317,6 +320,8 @@ public class DailyCooldown {
             minedParameters.add(new ISSRecordData(0, ISSRecordData.MEASUREMENT_HR_EVENING, timeStamp, "Summary", (float)((double)eveningHR),0,0));
         if (RPE != null)
             minedParameters.add(new ISSRecordData(0, ISSRecordData.MEASUREMENT_RPE, timeStamp, "Summary", (float)((double)RPE),0,0));
+        if (Steps != null)
+            minedParameters.add(new ISSRecordData(0, ISSRecordData.MEASUREMENT_STEPS, timeStamp, "Summary", (float) ((double) RPE), 0, 0));
 
        DataStorageManager.SaveNewDataToFile((ArrayList<ISSRecordData>) minedParameters, userID);
 
@@ -377,7 +382,7 @@ public class DailyCooldown {
                 }
             }
 
-            parameters = DataProcessingManager.getCooldownParameters((ArrayList<ISSRecordData>) data, timeshift);
+            parameters = DataProcessingManager.getCooldownParameters(data, timeshift);
 
         }
         else{
@@ -389,7 +394,7 @@ public class DailyCooldown {
 
         Double alpha = parameters[0];
 
-        cooldownSeries = ConvertToTS((ArrayList<ISSRecordData>) allData, label);
+        cooldownSeries = ConvertToTS(allData, label);
         expAllData = DataProcessingManager.ComputeExponent(parameters, cooldownSeries);
 
         subplot.Add(expAllData, color);

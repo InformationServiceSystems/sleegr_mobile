@@ -39,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -70,26 +71,47 @@ import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToda
 public class MainActivity extends FragmentActivity implements
         ManageDateFragment.OnFragmentInteractionListener {
 
-    public static android.content.Context itself;
-
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int NUM_ITEMS = 30;
     private static final String TAG = "MainActivity";
-
+    public static android.content.Context itself;
+    MyAdapter mAdapter;
+    ViewPager mPager;
+    int mCurrentTabPosition = 30;
+    PendingIntent pendingInt = null;
     private GoogleApiClient mGoogleApiClient;
-
     private Button watchSyncButton;
     private ListView mDataItemList;
     private DataItemAdapter mDataItemListAdapter;
     private Handler mHandler;
     private Calendar date = new GregorianCalendar();
+    private final ViewPager.SimpleOnPageChangeListener mPageChangeListener = new ViewPager.SimpleOnPageChangeListener() {
 
+        @Override
+        public void onPageSelected(final int position) {
+            onTabChanged(mPager.getAdapter(), mCurrentTabPosition, position);
+            mCurrentTabPosition = position;
+            checkPositon(position);
+        }
+    };
+    private DataUpdateReceiver dataUpdateReceiver;
 
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    static final int NUM_ITEMS = 30;
+    static String formatDouble(Double value) {
+        if (value == null)
+            return "not measured";
 
-    MyAdapter mAdapter;
+        NumberFormat formatter = new DecimalFormat("#0.00");
+        return formatter.format(value);
+    }
 
-    ViewPager mPager;
-
+    /**
+     * As simple wrapper around Log.d
+     */
+    private static void LOGD(final String tag, String message) {
+        if (Log.isLoggable(tag, Log.DEBUG)) {
+            Log.d(tag, message);
+        }
+    }
 
     @Override
     public void onCreate(Bundle b) {
@@ -107,6 +129,7 @@ public class MainActivity extends FragmentActivity implements
         mPager = (ViewPager) findViewById(R.id.pager);
         mPager.setAdapter(mAdapter);
         mPager.setCurrentItem(30);
+        checkPositon(29);
         mPager.setOnPageChangeListener(mPageChangeListener);
 
         TextView text = (TextView) findViewById(R.id.text);
@@ -119,13 +142,13 @@ public class MainActivity extends FragmentActivity implements
         year.setText(datestring);
 
         // Watch for button clicks.
-        Button button = (Button) findViewById(R.id.left);
+        ImageButton button = (ImageButton) findViewById(R.id.left);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 mPager.setCurrentItem(mPager.getCurrentItem() - 1);
             }
         });
-        button = (Button) findViewById(R.id.right);
+        button = (ImageButton) findViewById(R.id.right);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 mPager.setCurrentItem(mPager.getCurrentItem() + 1);
@@ -155,16 +178,20 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    int mCurrentTabPosition = 30;
-
-    private final ViewPager.SimpleOnPageChangeListener mPageChangeListener = new ViewPager.SimpleOnPageChangeListener() {
-
-        @Override
-        public void onPageSelected(final int position) {
-            onTabChanged(mPager.getAdapter(), mCurrentTabPosition, position);
-            mCurrentTabPosition = position;
+    private void checkPositon(int currentItem) {
+        if (currentItem >= 29) {
+            ImageButton button = (ImageButton) findViewById(R.id.right);
+            button.setVisibility(View.INVISIBLE);
+        } else if (currentItem == 0) {
+            ImageButton button = (ImageButton) findViewById(R.id.left);
+            button.setVisibility(View.INVISIBLE);
+        } else {
+            ImageButton lbutton = (ImageButton) findViewById(R.id.left);
+            ImageButton rbutton = (ImageButton) findViewById(R.id.right);
+            lbutton.setVisibility(View.VISIBLE);
+            rbutton.setVisibility(View.VISIBLE);
         }
-    };
+    }
 
     protected void onTabChanged(final PagerAdapter adapter, final int oldPosition, final int newPosition) {
         //Calc if swipe was left to right, or right to left
@@ -191,8 +218,6 @@ public class MainActivity extends FragmentActivity implements
         }
 
     }
-
-    PendingIntent pendingInt = null;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -245,8 +270,6 @@ public class MainActivity extends FragmentActivity implements
         startActivity(registerUser);
     }
 
-    private DataUpdateReceiver dataUpdateReceiver;
-
     @Override
     public void changeDisplayDate(Calendar calendar) {
 
@@ -254,160 +277,6 @@ public class MainActivity extends FragmentActivity implements
 
     public void onServerClick(View view) {
         RecomputeSynchronize();
-    }
-
-    // this is used to communicate with Service
-    private class DataUpdateReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(DataSyncService.NEW_MESSAGE_AVAILABLE)) {
-                OutputEvent(intent.getExtras().getString("message"));
-            }
-        }
-    }
-
-    public static class SessionsFragment extends Fragment {
-        int mNum;
-
-        static SessionsFragment newInstance(int num) {
-            SessionsFragment f = new SessionsFragment();
-
-            // Supply num input as an argument.
-            Bundle args = new Bundle();
-            args.putInt("num", num);
-            f.setArguments(args);
-
-            return f;
-        }
-
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            // Inflate the layout for this fragment
-            View v = inflater.inflate(R.layout.fragment_pager_list, container, false);
-            Calendar date = new GregorianCalendar();
-            date.add(Calendar.DATE, -29 + mNum);
-            Log.d("date", String.valueOf(-29 + mNum));
-            // Fill the GraphView with data for the current date
-            DailyCooldown cooldown = new DailyCooldown(date.getTime());
-            GraphView graph = (GraphView) v.findViewById(R.id.graphtoday);
-            TextView text = (TextView) v.findViewById(R.id.textV1);
-            new PlotGraphsTask(graph, text, v.getContext()).execute(cooldown);
-            // I'll think about a solution with ASyncTask that will plot the graphs point for point.
-            // Currently ultralaggy.
-            GraphView[] graphs = {graph};
-            TextView[] labels = new TextView[]{text};
-
-            // I create specific formatter inline. This is more general and java-ish :)
-            VisualizationsPlotter.Plot(cooldown.visualizations, graphs, labels, new GraphStyler() {
-                @Override
-                public void styleGraph(GraphView graphView, Visualizations.Subplot subplot) {
-
-                    // set label formatting
-                    graphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
-                        @Override
-                        public String formatLabel(double value, boolean isValueX) {
-                            if (isValueX) {
-                                // show normal x values
-
-                                Calendar mCalendar = Calendar.getInstance();
-                                mCalendar.setTimeInMillis((long) value);
-                                String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
-
-                                return time;
-                            } else {
-                                // show currency for y values
-                                return super.formatLabel(value, isValueX);
-                            }
-                        }
-                    });
-
-                    // set number of labels on the horiz axis
-                    graphView.getGridLabelRenderer().setNumHorizontalLabels(5);
-
-                    graphView.getViewport().setYAxisBoundsManual(true);
-                    graphView.getViewport().setMinY(30);
-                    graphView.getViewport().setMaxY(200);
-
-                    subplot.setBounds(subplot.min_max_x());
-
-                }
-            });
-
-            // Fill the TextViews below with the appropriate data
-            TextView intctr = (TextView) v.findViewById(R.id.intensityCtr);
-            intctr.setText("Intensity ctr.: " + formatDouble(cooldown.alpha2min));
-            TextView intensity = (TextView) v.findViewById(R.id.intensity);
-            intensity.setText("Intensity: " + formatDouble(cooldown.alphaAllData));
-
-            TextView meHR = (TextView) v.findViewById(R.id.morningEveningHR);
-            meHR.setText("HR: " + formatDouble(cooldown.morningHR) + " / " + formatDouble(cooldown.eveningHR));
-
-            TextView dalda = (TextView) v.findViewById(R.id.dalda);
-            dalda.setText("DALDA scale: " + formatDouble(cooldown.DALDA));
-            TextView rpe = (TextView) v.findViewById(R.id.rpe);
-            rpe.setText("RPE scale: " + formatDouble(cooldown.RPE));
-            TextView sleep = (TextView) v.findViewById(R.id.sleep);
-            sleep.setText("Deep Sleep Cycles: " + formatDouble(cooldown.DeepSleep));
-            return v;
-        }
-
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-        }
-
-    }
-
-    static String formatDouble(Double value){
-        if (value == null)
-            return "not measured";
-
-        NumberFormat formatter = new DecimalFormat("#0.00");
-        return formatter.format(value);
-    }
-
-    private static class PlotGraphsTask extends AsyncTask<DailyCooldown, Void, Void> {
-        public GraphView graph;
-        public TextView text;
-        public Context context;
-
-        public PlotGraphsTask(GraphView arggraph, TextView argtext, Context argcontext) {
-            this.graph = arggraph;
-            this.text = argtext;
-            this.context = argcontext;
-        }
-
-        protected Void doInBackground(DailyCooldown... cooldown) {
-            /*GraphView[] graphs = {graph};
-            TextView[] labels = new TextView[]{text};
-            VisualizationsPlotter.Plot(cooldown[0].visualizations, graphs, labels, context, "day");*/
-            return null;
-        }
-    }
-
-
-    public static class MyAdapter extends FragmentPagerAdapter {
-        public MyAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public int getCount() {
-            return NUM_ITEMS;
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return SessionsFragment.newInstance(position);
-        }
     }
 
     @Override
@@ -431,7 +300,6 @@ public class MainActivity extends FragmentActivity implements
         super.onStop();
     }
 
-
     public void OutputEvent(final String content) {
         final String cont = content;
         mHandler.post(new Runnable() {
@@ -442,64 +310,6 @@ public class MainActivity extends FragmentActivity implements
             }
         });
 
-    }
-
-    /**
-     * A View Adapter for presenting the Event objects in a list
-     */
-    private static class DataItemAdapter extends ArrayAdapter<Event> {
-
-        private final Context mContext;
-
-        public DataItemAdapter(Context context, int unusedResource) {
-            super(context, unusedResource);
-            mContext = context;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                holder = new ViewHolder();
-                LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                        Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(android.R.layout.two_line_list_item, null);
-                convertView.setTag(holder);
-                holder.text1 = (TextView) convertView.findViewById(android.R.id.text1);
-                holder.text2 = (TextView) convertView.findViewById(android.R.id.text2);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-            Event event = getItem(position);
-            holder.text1.setText(event.title);
-            holder.text2.setText(event.text);
-            return convertView;
-        }
-
-        private class ViewHolder {
-
-            TextView text1;
-            TextView text2;
-        }
-    }
-
-    private class Event {
-
-        String title;
-        String text;
-
-        public Event(String title, String text) {
-            this.title = GetTimeNow();
-            this.text = text;
-        }
-
-        public String GetTimeNow() {
-
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HH:mm:ss");
-            String currentDateandTime = sdf.format(new Date());
-            return currentDateandTime;
-
-        }
     }
 
     private Collection<String> getNodes() {
@@ -529,15 +339,6 @@ public class MainActivity extends FragmentActivity implements
         //mStartActivityBtn = findViewById(R.id.start_wearable_activity);
     }
 
-    /**
-     * As simple wrapper around Log.d
-     */
-    private static void LOGD(final String tag, String message) {
-        if (Log.isLoggable(tag, Log.DEBUG)) {
-            Log.d(tag, message);
-        }
-    }
-
     public void onServerSync() {
 
         if (DataSyncService.itself != null) {
@@ -553,7 +354,6 @@ public class MainActivity extends FragmentActivity implements
         }
 
     }
-
 
     public TimeSeries randomRPEReq(int past, int future) {
 
@@ -814,6 +614,208 @@ public class MainActivity extends FragmentActivity implements
 
         UserParameters params = new UserParameters(30);
 
+    }
+
+    public static class SessionsFragment extends Fragment {
+        int mNum;
+
+        static SessionsFragment newInstance(int num) {
+            SessionsFragment f = new SessionsFragment();
+
+            // Supply num input as an argument.
+            Bundle args = new Bundle();
+            args.putInt("num", num);
+            f.setArguments(args);
+
+            return f;
+        }
+
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            // Inflate the layout for this fragment
+            View v = inflater.inflate(R.layout.fragment_pager_list, container, false);
+            Calendar date = new GregorianCalendar();
+            date.add(Calendar.DATE, -29 + mNum);
+            // Fill the GraphView with data for the current date
+            DailyCooldown cooldown = new DailyCooldown(date.getTime());
+            GraphView graph = (GraphView) v.findViewById(R.id.graphtoday);
+            TextView text = (TextView) v.findViewById(R.id.textV1);
+            new PlotGraphsTask(graph, text, v.getContext()).execute(cooldown);
+            // I'll think about a solution with ASyncTask that will plot the graphs point for point.
+            // Currently ultralaggy.
+            GraphView[] graphs = {graph};
+            TextView[] labels = new TextView[]{text};
+
+            // I create specific formatter inline. This is more general and java-ish :)
+            VisualizationsPlotter.Plot(cooldown.visualizations, graphs, labels, new GraphStyler() {
+                @Override
+                public void styleGraph(GraphView graphView, Visualizations.Subplot subplot) {
+
+                    // set label formatting
+                    graphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                        @Override
+                        public String formatLabel(double value, boolean isValueX) {
+                            if (isValueX) {
+                                // show normal x values
+
+                                Calendar mCalendar = Calendar.getInstance();
+                                mCalendar.setTimeInMillis((long) value);
+                                String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
+
+                                return time;
+                            } else {
+                                // show currency for y values
+                                return super.formatLabel(value, isValueX);
+                            }
+                        }
+                    });
+
+                    // set number of labels on the horiz axis
+                    graphView.getGridLabelRenderer().setNumHorizontalLabels(5);
+
+                    graphView.getViewport().setYAxisBoundsManual(true);
+                    graphView.getViewport().setMinY(30);
+                    graphView.getViewport().setMaxY(200);
+
+                    subplot.setBounds(subplot.min_max_x());
+
+                }
+            });
+
+            // Fill the TextViews below with the appropriate data
+            TextView intctr = (TextView) v.findViewById(R.id.intensityCtr);
+            intctr.setText("Intensity ctr.: " + formatDouble(cooldown.alpha2min));
+            TextView intensity = (TextView) v.findViewById(R.id.intensity);
+            intensity.setText("Intensity: " + formatDouble(cooldown.alphaAllData));
+
+            TextView meHR = (TextView) v.findViewById(R.id.morningEveningHR);
+            meHR.setText("HR: " + formatDouble(cooldown.morningHR) + " / " + formatDouble(cooldown.eveningHR));
+
+            TextView dalda = (TextView) v.findViewById(R.id.dalda);
+            dalda.setText("DALDA scale: " + formatDouble(cooldown.DALDA));
+            TextView rpe = (TextView) v.findViewById(R.id.rpe);
+            rpe.setText("RPE scale: " + formatDouble(cooldown.RPE));
+            TextView sleep = (TextView) v.findViewById(R.id.sleep);
+            sleep.setText("Deep Sleep Cycles: " + formatDouble(cooldown.DeepSleep));
+            return v;
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+        }
+
+    }
+
+    private static class PlotGraphsTask extends AsyncTask<DailyCooldown, Void, Void> {
+        public GraphView graph;
+        public TextView text;
+        public Context context;
+
+        public PlotGraphsTask(GraphView arggraph, TextView argtext, Context argcontext) {
+            this.graph = arggraph;
+            this.text = argtext;
+            this.context = argcontext;
+        }
+
+        protected Void doInBackground(DailyCooldown... cooldown) {
+            /*GraphView[] graphs = {graph};
+            TextView[] labels = new TextView[]{text};
+            VisualizationsPlotter.Plot(cooldown[0].visualizations, graphs, labels, context, "day");*/
+            return null;
+        }
+    }
+
+    public static class MyAdapter extends FragmentPagerAdapter {
+        public MyAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public int getCount() {
+            return NUM_ITEMS;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return SessionsFragment.newInstance(position);
+        }
+    }
+
+    /**
+     * A View Adapter for presenting the Event objects in a list
+     */
+    private static class DataItemAdapter extends ArrayAdapter<Event> {
+
+        private final Context mContext;
+
+        public DataItemAdapter(Context context, int unusedResource) {
+            super(context, unusedResource);
+            mContext = context;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                holder = new ViewHolder();
+                LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                        Context.LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(android.R.layout.two_line_list_item, null);
+                convertView.setTag(holder);
+                holder.text1 = (TextView) convertView.findViewById(android.R.id.text1);
+                holder.text2 = (TextView) convertView.findViewById(android.R.id.text2);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            Event event = getItem(position);
+            holder.text1.setText(event.title);
+            holder.text2.setText(event.text);
+            return convertView;
+        }
+
+        private class ViewHolder {
+
+            TextView text1;
+            TextView text2;
+        }
+    }
+
+    // this is used to communicate with Service
+    private class DataUpdateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(DataSyncService.NEW_MESSAGE_AVAILABLE)) {
+                OutputEvent(intent.getExtras().getString("message"));
+            }
+        }
+    }
+
+    private class Event {
+
+        String title;
+        String text;
+
+        public Event(String title, String text) {
+            this.title = GetTimeNow();
+            this.text = text;
+        }
+
+        public String GetTimeNow() {
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HH:mm:ss");
+            String currentDateandTime = sdf.format(new Date());
+            return currentDateandTime;
+
+        }
     }
 
 }

@@ -175,11 +175,7 @@ public class CSVManager {
             file = new File(DataStorageManager.userDataFolder, date + File.separator + userID + "_" + date + "_" + activity + ".csv");
         }
 
-        if (!file.exists()) {
-            return false;
-        }
-
-        return true;
+        return file.exists();
 
     }
 

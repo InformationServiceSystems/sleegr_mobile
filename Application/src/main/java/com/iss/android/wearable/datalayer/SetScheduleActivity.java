@@ -14,12 +14,12 @@ import java.util.Date;
 
 public class SetScheduleActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
+    Date start = new Date();
+    Date end = new Date();
     private int[] SpinnerIds = new int[]
             {R.id.SpinnerOne, R.id.SpinnerTwo, R.id.SpinnerThree, R.id.SpinnerFour, R.id.SpinnerFive,
                     R.id.SpinnerSix, R.id.SpinnerSeven};
     private int[] RPE_array = new int[7];
-    Date start = new Date();
-    Date end = new Date();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

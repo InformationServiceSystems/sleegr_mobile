@@ -63,6 +63,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 
 /**
@@ -269,7 +270,7 @@ public class MainActivity extends Activity {
 
         if (SensorsDataService.itself.currentState.equals("Resting") ){
 
-            if (SensorsDataService.itself.isNowASleepingHour()){
+            if (SensorsDataService.isNowASleepingHour()) {
                 eveningHR.setBackgroundColor(inProgressColor);
             }
             else
@@ -384,6 +385,7 @@ public class MainActivity extends Activity {
         final TextView SWBatteryStatus = (TextView) findViewById(R.id.SWbatteryLabel);
         final Handler h = new Handler();
         final int delay = 20000; //milliseconds
+        final boolean[] warned_evening = {false};
 
         // Timer's fine for Java, but kills android apps.
 
@@ -397,9 +399,38 @@ public class MainActivity extends Activity {
 
                 int batteryPct = (int) (level / (float) scale * 100);
                 SWBatteryStatus.setText("SW: " + batteryPct + "%");
+                Calendar clnd = Calendar.getInstance();
+                if (clnd.get(Calendar.HOUR_OF_DAY) >= 20) {
+                    if (batteryPct < 50 && !warned_evening[0]) {
+                        warned_evening[0] = true;
+                        displaySWBatteryWarning();
+                    } else if (batteryPct >= 50 && warned_evening[0]) {
+                        warned_evening[0] = false;
+                    }
+                }
                 h.postDelayed(this, delay);
             }
         }, 0);
+    }
+
+    private void displaySWBatteryWarning() {
+        // Display a cancelable warning that the HRM battery is running low.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        String warning = "The Smartwatch battery charge is below 50%. Please charge it to ensure it lasts the night.";
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(100);
+        builder.setMessage(warning)
+                .setTitle(R.string.battery_warning_title)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
 
@@ -411,7 +442,6 @@ public class MainActivity extends Activity {
         switch (warned) {
             case 1:
                 warning = "HRM Battery Level at 15%";
-
                 break;
             case 2:
                 warning = "HRM Battery Level at 10%";
@@ -479,7 +509,7 @@ public class MainActivity extends Activity {
 
                 if (SensorsDataService.itself != null) {
 
-                    if (!SensorsDataService.itself.isNowASleepingHour())
+                    if (!SensorsDataService.isNowASleepingHour())
                         SensorsDataService.itself.SwitchSportsAction("Resting");
                 }
 
@@ -503,7 +533,7 @@ public class MainActivity extends Activity {
             case R.id.eveningHR:
 
                 if (SensorsDataService.itself != null) {
-                    if (SensorsDataService.itself.isNowASleepingHour())
+                    if (SensorsDataService.isNowASleepingHour())
                         SensorsDataService.itself.SwitchSportsAction("Resting");
                 }
 

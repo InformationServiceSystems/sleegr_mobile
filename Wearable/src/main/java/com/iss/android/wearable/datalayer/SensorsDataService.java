@@ -89,7 +89,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     private final BluetoothGattCallback mGattCallback;
     public ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
 
-    int[] sensorIDs = new int[]{Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE};//,
+    int[] sensorIDs = new int[]{Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE, Sensor.TYPE_STEP_COUNTER};//,
     PowerManager.WakeLock wakeLock = null;
     // this wakes CPU for sensor measuring
     Alarm alarm = new Alarm();
@@ -121,14 +121,20 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-
-            if (!recordedSensorTypes.containsKey(event.sensor.getType())) {
-                return;
+            // Don't unregister the Step Counter Sensor or it will lose all information.
+            if (event.sensor.getType() != Sensor.TYPE_STEP_COUNTER) {
+                if (!recordedSensorTypes.containsKey(event.sensor.getType())) {
+                    return;
+                }
+                recordedSensorTypes.remove(event.sensor.getType());
+                mSensorManager.unregisterListener(sensorEventListener, event.sensor);
             }
-            recordedSensorTypes.remove(event.sensor.getType());
-            mSensorManager.unregisterListener(sensorEventListener, event.sensor);
 
-            AddNewData(UserID, event.sensor.getType(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2]);
+            if (event.values.length == 1) {
+                AddNewData(UserID, event.sensor.getType(), GetTimeNow(), currentState, event.values[0], 0, 0);
+            } else {
+                AddNewData(UserID, event.sensor.getType(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2]);
+            }
 
             if (recordedSensorTypes.isEmpty()) {
                 if (wakeLock.isHeld()) {
@@ -443,7 +449,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     public void SendTimerTime(int minutes, int seconds) {
 
-        Intent intent = new Intent(this.UPDATE_TIMER_VALUE);
+        Intent intent = new Intent(UPDATE_TIMER_VALUE);
         intent.putExtra("minutes", minutes);
         intent.putExtra("seconds", seconds);
         sendBroadcast(intent);
@@ -462,33 +468,39 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
 
         for (int sensorID : sensorIDs) {
-            androidSensor = mSensorManager.getDefaultSensor(sensorID);
-            mSensorManager.unregisterListener(sensorEventListener, androidSensor);
+            // If we unregister the Step Counter, it stops tracking steps.
+            // This type of sensor counts all steps since the last reboot.
+            // Thus, the difference between the latest value for a day
+            // and the day before is the daily steps.
+            if (sensorID != Sensor.TYPE_STEP_COUNTER) {
+                androidSensor = mSensorManager.getDefaultSensor(sensorID);
+                mSensorManager.unregisterListener(sensorEventListener, androidSensor);
 
-            if (androidSensor.getFifoReservedEventCount() > 0) {
-                //mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL, 120);
-                // there was some crashing going on, just in case I try the app without batching to see if bug persists
-                mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL);
-            } else {
-                mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL);
-            }
-        }
+                if (androidSensor.getFifoReservedEventCount() > 0) {
+                    //mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL, 120);
+                    // there was some crashing going on, just in case I try the app without batching to see if bug persists
+                    mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                } else {
+                    mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                }
 
             /*if (mBluetoothGatt != null ){
                 mBluetoothGatt.connect();
             }*/
 
-        recordedSensorTypes.clear();
+                recordedSensorTypes.clear();
 
-        for (int sensor : sensorIDs) {
-            recordedSensorTypes.put(sensor, 1);
+                for (int sensor : sensorIDs) {
+                    recordedSensorTypes.put(sensor, 1);
+                }
+            }
+
+            recordedSensorTypes.put(Sensor.TYPE_STEP_COUNTER, 1);
+            recordedSensorTypes.put(Sensor.TYPE_HEART_RATE, 1);
+
+
+            StopSleepTracking();
         }
-
-
-        recordedSensorTypes.put(Sensor.TYPE_HEART_RATE, 1);
-
-
-        StopSleepTracking();
 
     }
 
@@ -675,7 +687,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 return;
 
             if (state.equals("Resting")){
-                state = state + ":" + itself.isNowASleepingHour();
+                state = state + ":" + isNowASleepingHour();
             }
 
             dictionary.put(state, true);
@@ -919,7 +931,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     public void OutputEvent(String str) {
         // Send a Broadcast with the message
-        Intent intent = new Intent(this.NEW_MESSAGE_AVAILABLE);
+        Intent intent = new Intent(NEW_MESSAGE_AVAILABLE);
         intent.putExtra("message", str);
         sendBroadcast(intent);
     }

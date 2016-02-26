@@ -1,7 +1,6 @@
 package com.iss.android.wearable.datalayer;
 
 import java.io.Serializable;
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -25,7 +24,8 @@ public class ISSRecordData implements Serializable {
             MEASUREMENT_DALDA = 36,
             MEASUREMENT_DEEP_SLEEP = 37,
             MEASUREMENT_SLEEP_LENGTH = 38,
-            MEASUREMENT_TRAINING_END = 13;
+            MEASUREMENT_TRAINING_END = 13,
+            MEASUREMENT_STEPS = 39;
 
     public int UserID;
     public int MeasurementType;

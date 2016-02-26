@@ -3,6 +3,7 @@ package com.iss.android.wearable.datalayer;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -108,7 +109,7 @@ public class IntensityStatisticsActivity extends Activity {
 
         Date end = cal.getTime();
         android.text.format.DateFormat df = new android.text.format.DateFormat();
-        weekView.setText("Displaying week: " + df.format("MM/dd/yyyy", start) + " - " + df.format("MM/dd/yyyy", end));
+        weekView.setText("Displaying week: " + DateFormat.format("MM/dd/yyyy", start) + " - " + DateFormat.format("MM/dd/yyyy", end));
 
     }
 
