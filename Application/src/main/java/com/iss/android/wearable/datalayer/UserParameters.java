@@ -89,7 +89,7 @@ public class UserParameters {
     }
 
 
-
+    // Deletes values in bins where counts is <=0
     public void smoothenBins(double [] bins, double [] counts){
 
         double cv = 0;
@@ -110,6 +110,7 @@ public class UserParameters {
 
     }
 
+    // Another method which only computes the date given a certain date and an offset.
     public Date offsetDate(Date input, int offset){
 
         Calendar clnd = Calendar.getInstance();
@@ -119,6 +120,7 @@ public class UserParameters {
 
     }
 
+    // Produces a predictive TimeSeries given actual timeseries.
     public TimeSeries predictTimeSeries(TimeSeries xReq, TimeSeries xActual, TimeSeries yActual, int offset){
 
         TimeSeries result = new TimeSeries(yActual.name+", pred.");
@@ -165,6 +167,7 @@ public class UserParameters {
 
     }
 
+    // Predicts the recovery rate from history values.
     public double predictRecovery(ArrayList<Double> pastX, ArrayList<Double> pastY, Double futureX){
 
 
@@ -205,6 +208,7 @@ public class UserParameters {
 
     }
 
+    // Computes regulatory conformity of values to the requirements in a given timewindow
     private TimeSeries ComputeCompliences(TimeSeries requirements, TimeSeries values, int timewindow) {
 
         TimeSeries result = new TimeSeries(values.name + ", avg. divergence");

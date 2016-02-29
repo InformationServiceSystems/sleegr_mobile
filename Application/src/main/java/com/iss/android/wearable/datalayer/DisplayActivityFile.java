@@ -40,6 +40,7 @@ public class DisplayActivityFile extends Activity {
 
     }
 
+    // A method displaying the activity of a session (determined by an integer, not cool) as a graph.
     private void DisplaySession(int session) {
 
         ArrayList<ISSRecordData> data = (ArrayList<ISSRecordData>) sessions.get(session);
@@ -87,8 +88,7 @@ public class DisplayActivityFile extends Activity {
 
     }
 
-
-
+    // A method that constructs a Visualizations object which contains subplots which can be plotted.
     private Visualizations processData(ArrayList<ISSRecordData> data) {
 
         Visualizations vis = new Visualizations();
@@ -128,6 +128,7 @@ public class DisplayActivityFile extends Activity {
 
     }
 
+    // A method which converts a list of ISSRecordData to a TimeSeries
     private TimeSeries ConvertToTS(ArrayList<ISSRecordData> firstTraining, String name) {
 
         TimeSeries series = new TimeSeries(name);

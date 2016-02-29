@@ -1,19 +1,14 @@
 package com.iss.android.wearable.datalayer;
 
-import android.content.Context;
 import android.widget.TextView;
 
-import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.LabelFormatter;
 import com.jjoe64.graphview.LegendRenderer;
-import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.BaseSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -60,6 +55,7 @@ public class VisualizationsPlotter {
 
     }
 
+    // Plots TimeSeries as a graph
     public static void PutTimeSeriesToGraph(GraphView graph,  TimeSeries series){
 
         BaseSeries<DataPoint> data_values= null;

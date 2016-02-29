@@ -43,6 +43,7 @@ public class IntensityStatisticsActivity extends Activity {
 
     }
 
+    // A method which renders the subplots inside a visualizations object. Very specific.
     public void visualizeData(Visualizations vis){
 
         GraphView [] graphs = new GraphView[]{
@@ -88,9 +89,7 @@ public class IntensityStatisticsActivity extends Activity {
 
     }
 
-
-
-
+    // A method which visualizes all data from an entire week. Superspecific.
     public void VisualizeWeek(int week){
 
         Visualizations vis = visualizations.subsetForWeek(week);

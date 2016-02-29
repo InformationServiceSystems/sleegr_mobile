@@ -37,7 +37,7 @@
         <ImageButton
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:onClick="onServerClick"
+            android:onClick="onServerSync"
             android:id="@+id/buttonServer"
             android:background="@drawable/serverbutton"
             android:layout_toStartOf="@+id/buttonAnalysis"

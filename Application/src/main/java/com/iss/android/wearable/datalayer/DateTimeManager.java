@@ -11,6 +11,7 @@ import java.util.Date;
 public class DateTimeManager
 {
 
+    // A method that determines the date as a string given a certain offset from today.
     public static String getDayFromToday(int dayoffset){
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -22,6 +23,7 @@ public class DateTimeManager
 
     }
 
+    // A method retrieving the exact second a day has started.
     private static Date getDateWithOutTime(Date targetDate) {
         Calendar newDate = Calendar.getInstance();
         newDate.setLenient(false);
@@ -35,6 +37,7 @@ public class DateTimeManager
 
     }
 
+    // A method that retrieves the date from today +- a certain offset.
     public static Date getDateFromToday(int dayoffset){
 
         Calendar cl = Calendar.getInstance();

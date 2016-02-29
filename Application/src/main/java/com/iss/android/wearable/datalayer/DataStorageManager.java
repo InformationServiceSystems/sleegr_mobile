@@ -24,6 +24,7 @@ import static com.iss.android.wearable.datalayer.DateTimeManager.getDayFromToday
 public class DataStorageManager {
 
 
+    // a method responsible for creating the folders to write into
     public  static void InitializeTriathlonFolder(){
 
         if(!userDataFolder.exists()){
@@ -32,6 +33,7 @@ public class DataStorageManager {
 
     }
 
+    // A method reading the schedule.csv file and parsing it to TimeSeries
     public static TimeSeries readUserSchedule(){
 
         TimeSeries result = new TimeSeries("RPE required");
@@ -73,6 +75,7 @@ public class DataStorageManager {
     static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
     static File userDataFolder = new File(dataFolder, "triathlon");
 
+    // A method that converts a file into a bytearray
     public static byte[] FileToBytes(File file) {
 
         int size = (int) file.length();
@@ -93,6 +96,7 @@ public class DataStorageManager {
         return bytes;
     }
 
+    // A method that transcribes the UserID. Currently replaces "@" with "_at_"
     public static String getProperUserID(String UserID){
 
         return UserID.replace("@", "_at_");
@@ -106,6 +110,7 @@ public class DataStorageManager {
 
     }
 
+    // sub-method of getKey
     public static String getStateKey(String mark){
 
         int idx = mark.indexOf(":");
@@ -118,6 +123,7 @@ public class DataStorageManager {
 
     }
 
+    // A method that, together with getStateKey, returns the state, e.g. "resting", "idle" or "cooldown"
     public static String getKey(ISSRecordData record){
 
         String mark = record.ExtraData;
@@ -130,6 +136,7 @@ public class DataStorageManager {
 
     }
 
+    // A method that stores a list of ISSRecordData belonging to the same type in a file.
     public static void SaveBinnedData(ArrayList<ISSRecordData> accumulator, String UserID, String activityType){
 
         // get date of first record
@@ -163,6 +170,7 @@ public class DataStorageManager {
 
     }
 
+    // A method that divides a list of ISSRecordData by type and makes them be stored seperately in SaveBinnedData
     public static void SaveNewDataToFile(ArrayList<ISSRecordData> data, String UserID) {
 
         try {
@@ -200,6 +208,7 @@ public class DataStorageManager {
 
     }
 
+    // A method that determines all the *.csv Files in a given timespan.
     public static ArrayList<ArrayList<File>> GetAllFilesToUpload(String UserID, int timeSpan){
 
         ArrayList<ArrayList<File>> result = new  ArrayList<>();
@@ -230,6 +239,7 @@ public class DataStorageManager {
         return result;
     }
 
+    // A method responsible for creating a file in which the scheduled RPE values will be saved (in CSVManager.WriteNewCSVdata)
     public static void storeScheduleLine(String scheduleString) {
         File file = new File(userDataFolder, "schedule.csv");
         if (!file.exists()) {

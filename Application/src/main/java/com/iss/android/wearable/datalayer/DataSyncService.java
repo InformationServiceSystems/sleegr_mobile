@@ -53,6 +53,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     String uploadUrl = "http://46.101.214.58:5001/upload2/";
 
+    // A method broadcasting a String.
     public static void OutputEventSq(String str) {
 
         if (DataSyncService.itself != null) {
@@ -61,6 +62,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
+    // A method responsible for getting the UserID.
     public static String getUserID() {
 
         return DataStorageManager.getProperUserID(itself.UserID);
@@ -101,6 +103,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     public String UserID = "userID";
 
+    // a method called after the service is started, that is responsible for the service not shutting down.
+    // It also tries to get the UserID and welcomes the user.
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -109,7 +113,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         OutputEvent(android_id);
 
-        Log.d("ISS", "Adroid ID: " + android_id);
+        Log.d("ISS", "Android ID: " + android_id);
 
         switch (android_id) {
             case "144682d5efc12dcb":
@@ -169,6 +173,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
+    // A method that stops sleep tracking (used when this app is woken up)
     public void StopSleepTracking() {
         try {
             Intent intent = new Intent("com.urbandroid.sleep.alarmclock.STOP_SLEEP_TRACK");
@@ -179,6 +184,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }
     }
 
+    // A method that receives messages and handles them.
     @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
 
@@ -207,6 +213,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
+    // A method that sends a string containing the heart rate to the server and checks if the server got the message.
     public void SendHRtoServer(String HR) {
 
         try {
@@ -241,7 +248,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-
+    // A method that is triggered if sensor data has changed and then saves the data from the sensor (I guess?)
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
 
@@ -267,6 +274,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }
     }
 
+    // A method that transforms the data from an Asset byte array to the ISSRecordData
+    // it has been generated from and then stores the ISSRecordData, handing it DataStorageManager,
+    // then clearing the data on the watch.
     public void SaveDataFromAsset(Asset asset) {
 
         if (asset == null) {
@@ -305,6 +315,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
+    // A method broadcasting a String, generally updates about the state of the app.
     public void OutputEvent(String str) {
 
         Intent intent = new Intent(NEW_MESSAGE_AVAILABLE);
@@ -314,8 +325,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     }
 
 
-    // interation with the watch procecdures
-
+    // A method that connects to the Smartwatch and asks it to send data it has stored.
     public void RequestDataFromWatch() {
 
         OutputEvent("Requested data from the watch ... ");
@@ -339,6 +349,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
+    // A method that handles deletion of data that has successfully been send to the phone.
     public void ClearWatchData() {
 
         OutputEvent("Data saved. Clearing data on the watch");
@@ -362,6 +373,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }).start();
     }
 
+    // A method that is called after sleep tracking has been stopped. It sends this information to the Smartwatch
     public void ConfirmSleepTrackingStopped() {
 
         OutputEvent("Stopped the sleep tracking");
@@ -408,6 +420,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     }*/
 
 
+    // A method that collects all files of the last week (see GetAllFilestoUpload),
+    // converts them to an ISSRecordData list, seperates them by measurement type
+    // and sends them to the server using the UploadingManager class.
     public void ShareDataWithServer() {
 
         ArrayList<ArrayList<File>> arrayLists = DataStorageManager.GetAllFilesToUpload(UserID, 7);

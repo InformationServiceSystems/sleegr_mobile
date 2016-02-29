@@ -40,6 +40,7 @@ public class DailyCooldown {
 
     Visualizations visualizations = new Visualizations();
 
+    // A method calculating the file size of a given file.
     public long FileSize(File file){
         long result = 0;
         try {
@@ -332,6 +333,7 @@ public class DailyCooldown {
 
     }
 
+    // A method determining the exact time at which an exercise (list of ISSRecordData) started
     Date extractStartOfExercise(ArrayList<ISSRecordData> data){
 
         Date result = null;
@@ -353,6 +355,7 @@ public class DailyCooldown {
 
     }
 
+    // No idea what exactly this does, maybe you can fill this out, Iaroslav?
     double [] ComputeExponentFit(double[] loadedParams, ArrayList<ISSRecordData> data, ArrayList<ISSRecordData> allData, Visualizations.Subplot subplot, String label, int color){
 
         if (data.size() == 0){
@@ -403,6 +406,7 @@ public class DailyCooldown {
 
     }
 
+    // A method transforming measured heart rates into TimeSeries so it can be plotted
     private TimeSeries ConvertToTS(ArrayList<ISSRecordData> firstTraining, String name) {
 
         TimeSeries series = new TimeSeries(name);

@@ -96,6 +96,7 @@ public class MainActivity extends FragmentActivity implements
     };
     private DataUpdateReceiver dataUpdateReceiver;
 
+    // A method which returns a double value as a formatted String in the form d.dd
     static String formatDouble(Double value) {
         if (value == null)
             return "not measured";
@@ -178,6 +179,8 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
+    // A method which determines the current position of the ViewPager.
+    // Depending on the position the button to move left or right is made invisible.
     private void checkPositon(int currentItem) {
         if (currentItem >= 29) {
             ImageButton button = (ImageButton) findViewById(R.id.right);
@@ -193,6 +196,7 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
+    // If the lower fragment was swiped, change the content of the upper fragment accordingly
     protected void onTabChanged(final PagerAdapter adapter, final int oldPosition, final int newPosition) {
         //Calc if swipe was left to right, or right to left
         if (oldPosition > newPosition) {
@@ -264,10 +268,11 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
+    // A method which starts the SetScheduleActivity
     private void onsetSchedule() {
 
-        final Intent registerUser = new Intent(this, SetScheduleActivity.class);
-        startActivity(registerUser);
+        final Intent setSchedule = new Intent(this, SetScheduleActivity.class);
+        startActivity(setSchedule);
     }
 
     @Override
@@ -275,7 +280,13 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    public void onServerClick(View view) {
+    // A method handling the click on the Server Sync button.
+    public void onServerSync(View view) {
+        RecomputeSynchronize();
+    }
+
+    // A method handling the click on the server sync button.
+    public void onServerSync() {
         RecomputeSynchronize();
     }
 
@@ -300,6 +311,7 @@ public class MainActivity extends FragmentActivity implements
         super.onStop();
     }
 
+    // puts a String to the system message textview
     public void OutputEvent(final String content) {
         final String cont = content;
         mHandler.post(new Runnable() {
@@ -324,6 +336,7 @@ public class MainActivity extends FragmentActivity implements
         return results;
     }
 
+    // A method starting the RegisterUserActivity if no view is supplied.
     public void onRegisterUser() {
 
         final Intent registerUser = new Intent(this, RegisterUserActivity.class);
@@ -339,14 +352,7 @@ public class MainActivity extends FragmentActivity implements
         //mStartActivityBtn = findViewById(R.id.start_wearable_activity);
     }
 
-    public void onServerSync() {
-
-        if (DataSyncService.itself != null) {
-            DataSyncService.itself.ShareDataWithServer();
-        }
-
-    }
-
+    // A method that starts the quest to retrieve data from the watch if the button is clicked
     public void onWatchSync() {
 
         if (DataSyncService.itself != null) {
@@ -375,6 +381,7 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
+    // A method that predicts the recovery based on history data
     public double predictRecovery(ArrayList<Double> pastX, ArrayList<Double> pastY, Double futureX) {
 
 
@@ -415,6 +422,7 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
+    // A method that smoothens a double array to remove noise
     public void smoothenBins(double[] bins, double[] counts) {
 
         double cv = 0;
@@ -435,6 +443,7 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
+    // A method that computes a date given a certain date and an offset in days
     public Date offsetDate(Date input, int offset) {
 
         Calendar clnd = Calendar.getInstance();
@@ -494,11 +503,12 @@ public class MainActivity extends FragmentActivity implements
         StartAnalysis();
     }
 
-    public void onAnalysisClick(View view){
+    public void onAnalysisClick(View view) {
         StartAnalysis();
     }
 
-    public void StartAnalysis(){
+    // computes the visualizations objects for the last 30 days
+    public void StartAnalysis() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -519,10 +529,11 @@ public class MainActivity extends FragmentActivity implements
         }).start();
     }
 
-    public void onSyncClick(View view){
+    public void onSyncClick(View view) {
         onWatchSync();
     }
 
+    // Sends data of the last 30 days to the server
     private void RecomputeSynchronize() {
 
         new Thread(new Runnable() {
@@ -595,6 +606,7 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
+    // Computes the normalised difference between to vectors.
     private double ComplienceMeasure(ArrayList<Double> seq1, ArrayList<Double> seq2) {
 
         double result = 0;
@@ -616,6 +628,7 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
+    // Constructs the lower fragment which is responsible for showing the data of the selected day
     public static class SessionsFragment extends Fragment {
         int mNum;
 
@@ -734,6 +747,7 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
+    // Adapter for the Fragments
     public static class MyAdapter extends FragmentPagerAdapter {
         public MyAdapter(FragmentManager fm) {
             super(fm);

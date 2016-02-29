@@ -99,6 +99,7 @@ public class ChooseRegisterServiceActivity extends Activity {
                 });
     }
 
+    // If the user opts to use his E-Mail for registration purposes, this happens
     public void onClicked(View view) {
         switch (view.getId()) {
             case R.id.EMail:
@@ -107,6 +108,8 @@ public class ChooseRegisterServiceActivity extends Activity {
         }
     }
 
+    // If the user opts to use his facebook account, this method retrieves the name, gender and
+    // email from his FB account and stores them.
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.i("onactivityResult", "CALLED");
@@ -141,6 +144,8 @@ public class ChooseRegisterServiceActivity extends Activity {
         request.executeAsync();
     }
 
+    // A method that, if the Facebook registration activity fails, stops tracking the accessToken,
+    // so we can generate a new one and track that.
     @Override
     public void onDestroy() {
         super.onDestroy();

@@ -24,6 +24,7 @@ public class Visualizations implements Serializable {
             data.add(series);
         }
 
+        // Gives min and max dates of a visualizations object.
         public Date [] min_max_x(){
 
             if (data.size() == 0)
@@ -65,6 +66,7 @@ public class Visualizations implements Serializable {
         }
     }
 
+    // Gives the subset of visualizations for a certain week
     public Visualizations subsetForWeek(int week) {
 
 
@@ -109,6 +111,7 @@ public class Visualizations implements Serializable {
 
     }
 
+    // Adds a subplot to a visualizations object
     private Subplot AddGraph(Subplot subplot) {
 
         Subplot result = new Subplot();
@@ -119,7 +122,7 @@ public class Visualizations implements Serializable {
     }
 
 
-
+    // Adds a string as a subplot (?) to a visualizations object
     public Subplot AddGraph(String name){
 
         Subplot result = new Subplot();

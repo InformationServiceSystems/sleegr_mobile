@@ -40,6 +40,7 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
         prepareSpinners(dupes);
     }
 
+    // checks if the values for a given date have already been saved
     private int[] checkForDupes() {
         TimeSeries series = DataStorageManager.readUserSchedule();
         series = series.inTimeRange(start, end);
@@ -58,6 +59,7 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
         return dupes;
     }
 
+    // Initializes the spinners and sets them to the values that have been saved.
     private void prepareSpinners(int[] dupes) {
         int j = 0;
         for (int i : SpinnerIds) {
@@ -122,6 +124,7 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
         }
     }
 
+    // Starts the avalanche of methods needed to store the input schedule values
     private boolean commit(int[] array) {
         Date date = this.start;
         Calendar cal = Calendar.getInstance();

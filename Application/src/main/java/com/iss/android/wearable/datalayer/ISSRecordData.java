@@ -55,6 +55,7 @@ public class ISSRecordData implements Serializable {
 
     }
 
+    // Converts the ISSRecordData to a String, the way it is stored in a *.csv
     public String toString(){
 
         String sep = ",";
@@ -76,6 +77,7 @@ public class ISSRecordData implements Serializable {
 
     public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
 
+    // A method that returns the date of the given ISSRecordData
     public Date getTimestamp(){
 
         Calendar time = Calendar.getInstance();

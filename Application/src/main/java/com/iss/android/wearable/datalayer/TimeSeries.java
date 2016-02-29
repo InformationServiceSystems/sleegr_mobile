@@ -35,6 +35,7 @@ public class TimeSeries implements Serializable {
 
     public int color = 0;
 
+    // Gets the first and the last timestamp of a TimeSeries
     public Date [] min_max(){
 
         if (Values.size() == 0)
@@ -60,6 +61,7 @@ public class TimeSeries implements Serializable {
 
     }
 
+    // Adds a value to a TimeSeries
     public void AddValue(Date x, double y){
         Values.add(new Tuple<>(x,y));
     }
@@ -74,10 +76,12 @@ public class TimeSeries implements Serializable {
         this.LineType = series.LineType;
     }
 
+    // Adds a value as the first value of a TimeSeries
     public void AddFirstValue(Date x, double y) {
         Values.add(0,new Tuple<>(x,y));
     }
 
+    // Returns a Timeseries made of the values before a given date in the current TimeSeries
     public TimeSeries beforeDate(Date date){
 
         TimeSeries result = new TimeSeries(this);
@@ -98,6 +102,7 @@ public class TimeSeries implements Serializable {
 
     }
 
+    // Returns a timeSeries made of the values inbetween the given dates
     public TimeSeries inTimeRange(Date startDate, Date endDate){
 
         TimeSeries result = new TimeSeries(this);

@@ -22,6 +22,7 @@ public class RegisterUserActivity extends Activity {
         setContentView(R.layout.activity_register_user);
     }
 
+    // Handles the input information once the confirm button is hit
     public void onUserConfirm(View view){
 
         EditText editText = (EditText) findViewById(R.id.editText);

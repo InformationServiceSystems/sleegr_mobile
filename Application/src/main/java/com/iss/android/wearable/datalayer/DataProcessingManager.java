@@ -1,9 +1,5 @@
 package com.iss.android.wearable.datalayer;
 
-import android.provider.ContactsContract;
-
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,10 +29,12 @@ public class DataProcessingManager {
 
     }
 
+    // Wrapper for when there is no timeshift
     public static double[] getCooldownParameters(ArrayList<ISSRecordData> data) {
         return  getCooldownParameters(data, 0);
     }
 
+    // A method returning parameters describing a curve fitting the measured cooldown heart rates
     public static double[] getCooldownParameters(ArrayList<ISSRecordData> data, double timeShift) {
 
         Calendar startTime = Calendar.getInstance();
@@ -86,6 +84,7 @@ public class DataProcessingManager {
 
     }
 
+    // A method calculating the sum of double values in a list
     public static double sum(ArrayList<Double> v){
 
         double result = 0;
@@ -98,6 +97,7 @@ public class DataProcessingManager {
 
     }
 
+    // A method calculating the dot product of two vectors.
     public static double dot(ArrayList<Double> a, ArrayList<Double> b){
 
         double result = 0;
@@ -204,10 +204,13 @@ public class DataProcessingManager {
 
     }
 
+    // A method checking if a given matrix' diagonal is zero.
     public static  boolean TestZerosDiag(double[][] A) {
         return A[0][0] == 0 || A[1][1] == 0;
     }
 
+    // A method normalising the rows of a given matrix
+    // (or I'd guess so from the name, although I memorise normalising differently)
     public static  void NormalizeRows(double[][] A, double[] b) {
 
         A[0][1]=A[0][1]/A[0][0];
@@ -220,14 +223,15 @@ public class DataProcessingManager {
 
     }
 
+    // Maybe it's better you describe these methods
     public static  void TurnToIdentity(double[][] A, double[] b) {
         A[0][0] = A[0][0] - A[1][0] * A[0][1];
         A[0][1] = 0;
-        b[0] = b[0] - b[1] * A[0][1];
+        b[0] = b[0] - b[1] * A[0][1]; //Isn't this multiplication superfluous since it's always 0?
 
         A[1][0] = 0;
-        A[1][1] = A[1][1] - A[0][1] * A[1][0];
-        b[1] = b[1] - b[0] * A[1][0];
+        A[1][1] = A[1][1] - A[0][1] * A[1][0]; // 0 times 0?
+        b[1] = b[1] - b[0] * A[1][0]; //dito
     }
 
     public static  double [] Solve2d(double[][] A, double[] b) {

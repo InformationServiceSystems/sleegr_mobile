@@ -20,6 +20,7 @@ import java.util.List;
  */
 public class CSVManager {
 
+    // A method constructing a stringbuilder that transforms a list of ISSRecordData into a large String.
     public static StringBuilder RecordsToCSV(List<ISSRecordData> exampleData) {
 
         StringBuilder bld = new StringBuilder();
@@ -37,7 +38,8 @@ public class CSVManager {
 
     }
 
-    public static void AppendStringToFile(File file, String data){
+    // A method appending a String to a file.
+    public static void AppendStringToFile(File file, String data) {
 
         try {
             PrintWriter out = new PrintWriter(new FileOutputStream(file), true);
@@ -50,6 +52,7 @@ public class CSVManager {
 
     }
 
+    // A method that writes a String to a file, iff it not already is stored in given file.
     public static void WriteNewCSVdata(File file, String data) {
         boolean edited = false;
         String current_date = data.substring(0, 10);
@@ -79,7 +82,7 @@ public class CSVManager {
                 }
             }
             // Now fileContent will have updated content , which you can override into file
-            //Close the input stream
+            // Close the input stream
             fstream.close();
             FileWriter fstreamWrite = new FileWriter(file);
             BufferedWriter out = new BufferedWriter(fstreamWrite);
@@ -91,19 +94,14 @@ public class CSVManager {
                 outpw.close();
             }
             out.close();
-        } catch (
-                IOException e
-                )
-
-        {
-            //exception handling left as an exercise for the reader
-
+        } catch (IOException e) {
             System.out.print(e.toString());
-
         }
 
     }
 
+    // A method that reads sleepData from the file defined in DataStorageManager
+    // and transcribes it into a HashMap
     public static HashMap<String, Double> ReadSleepData() {
 
         HashMap<String, Double> result = new HashMap<>();
@@ -126,7 +124,7 @@ public class CSVManager {
                 if (skip)
                     continue;
 
-                // split thee line
+                // split the line
 
                 String[] split = line.split("\",\"");
 
@@ -153,9 +151,9 @@ public class CSVManager {
     // this function gets the typical athlete hr profile after the training
     // first value is time after the end of the training,
     // second value in
-    public static List<ISSRecordData> ReadUserHRProfile(){
+    public static List<ISSRecordData> ReadUserHRProfile() {
 
-        File profile = new File(DataStorageManager.userDataFolder,"profile.csv");
+        File profile = new File(DataStorageManager.userDataFolder, "profile.csv");
 
         if (!profile.exists())
             return null;
@@ -179,11 +177,13 @@ public class CSVManager {
 
     }
 
-    public static File GetCSVfilename(String date, String userID, String activity){
+    // A method returning the file name for a given date, user and activity type
+    public static File GetCSVfilename(String date, String userID, String activity) {
         return new File(DataStorageManager.userDataFolder, date + File.separator + userID + "_" + date + "_" + activity + ".csv");
     }
 
-    public static File GetCSVfile(String date, String userID, String activity){
+    // A method returning the file itself for a given date, user and activity type
+    public static File GetCSVfile(String date, String userID, String activity) {
 
         File file = new File(DataStorageManager.userDataFolder, date + File.separator + userID + "-" + date + "_" + activity + ".csv");
 
@@ -199,6 +199,7 @@ public class CSVManager {
 
     }
 
+    // A method translating the *.csv data in the given file into a list of ISSRecordData
     public static List<ISSRecordData> ReadCSVdata(File file) {
 
         List<ISSRecordData> result = new ArrayList<ISSRecordData>();
@@ -217,7 +218,7 @@ public class CSVManager {
                     }
 
                     result.add(recordData);
-                }catch (Exception ex){
+                } catch (Exception ex) {
 
                     System.out.print(ex.toString());
                 }
@@ -238,6 +239,8 @@ public class CSVManager {
 
     }
 
+    // A method translating the *.csv data in the file determined by date, user and activity type
+    // into a list of ISSRecordData
     public static List<ISSRecordData> ReadCSVdata(String date, String userID, String activity) {
 
         userID = DataStorageManager.getProperUserID(userID);
@@ -250,6 +253,8 @@ public class CSVManager {
 
     }
 
+    // A method used to split the data from the *.csv file determined by date, user and activity type
+    // into sessions (lists of ISSRecordData, all belonging together)
     public static ArrayList<List<ISSRecordData>> ReadSplitCSVdata(String date, String userID, String activity) {
 
 

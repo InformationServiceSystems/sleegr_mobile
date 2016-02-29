@@ -34,6 +34,7 @@ public class SyncAlarm extends BroadcastReceiver
 
     }
 
+    // Wakes up the system every now and then. Costs battery
     public void SetAlarm(Context context)
     {
         AlarmManager am =( AlarmManager)context.getSystemService(Context.ALARM_SERVICE);

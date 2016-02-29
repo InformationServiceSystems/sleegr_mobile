@@ -43,8 +43,8 @@ public class Serializer {
 
     }
 
+    // Creates an object deseriealized from a file
     public static Object DeserializeFromFile(File file) throws IOException, ClassNotFoundException {
-
         FileInputStream fileIn;
 
         fileIn = new FileInputStream(file);
@@ -54,6 +54,7 @@ public class Serializer {
         return DeserializeFromBytes(data);
     }
 
+    // Serializes an object to a byte array
     public static byte[] SerializeToBytes(Object object) throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              ObjectOutput out = new ObjectOutputStream(bos)) {
@@ -62,6 +63,7 @@ public class Serializer {
         }
     }
 
+    // Creates an object from a bytearray
     public static Object DeserializeFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
              ObjectInput in = new ObjectInputStream(bis)) {
@@ -69,6 +71,7 @@ public class Serializer {
         }
     }
 
+    // Creates a byte array from an inputstream
     public static byte [] InputStreamToByte(InputStream is) throws IOException {
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -86,6 +89,7 @@ public class Serializer {
 
     }
 
+    // Serializes a file to a byte array
     public byte[] FileToBytes(File file) {
 
         int size = (int) file.length();
