@@ -239,6 +239,7 @@ public class MainActivity extends Activity {
 
     }
 
+    // Updates the app state shown through the interface
     private void showCurrentAppState() {
 
         if (SensorsDataService.itself == null) {
@@ -282,12 +283,14 @@ public class MainActivity extends Activity {
 
     }
 
+    // Keeps the screen on
     private void initializeScreenOn() {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     }
 
+    // If the app crashes, restart it. Currently disabled so we can bugfix
     private void initializeSelfRestarting() {
 
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
@@ -315,6 +318,7 @@ public class MainActivity extends Activity {
 
     }
 
+    // Initialises the graph that shows the heart rate
     private void initializeGraph() {
 
         GraphView graph = (GraphView) findViewById(R.id.heartRateGraph);
@@ -366,6 +370,7 @@ public class MainActivity extends Activity {
 
     }*/
 
+    // Handles received broadcasted intents
     private void RegisterBroadcastsReceiver() {
 
 
@@ -381,6 +386,7 @@ public class MainActivity extends Activity {
 
     }
 
+    // initialises a battery checker for the smartwatch
     private void initializeSWBatteryChecker() {
         final TextView SWBatteryStatus = (TextView) findViewById(R.id.SWbatteryLabel);
         final Handler h = new Handler();
@@ -401,7 +407,7 @@ public class MainActivity extends Activity {
                 SWBatteryStatus.setText("SW: " + batteryPct + "%");
                 Calendar clnd = Calendar.getInstance();
                 if (clnd.get(Calendar.HOUR_OF_DAY) >= 20) {
-                    if (batteryPct < 50 && !warned_evening[0]) {
+                    if (batteryPct < 75 && !warned_evening[0]) {
                         warned_evening[0] = true;
                         displaySWBatteryWarning();
                     } else if (batteryPct >= 50 && warned_evening[0]) {
@@ -413,11 +419,12 @@ public class MainActivity extends Activity {
         }, 0);
     }
 
+    // Displays a battery warning if it is to be assumed the battery won't last until dawn
     private void displaySWBatteryWarning() {
         // Display a cancelable warning that the HRM battery is running low.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        String warning = "The Smartwatch battery charge is below 50%. Please charge it to ensure it lasts the night.";
+        String warning = "The Smartwatch battery charge is below 75%. Please charge it to ensure it lasts the night.";
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(100);
         builder.setMessage(warning)
@@ -433,7 +440,7 @@ public class MainActivity extends Activity {
         dialog.show();
     }
 
-
+    // displays a battery warning if the battery is low
     private void displayBatteryWarning(int warned) {
         // Display a cancelable warning that the HRM battery is running low.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

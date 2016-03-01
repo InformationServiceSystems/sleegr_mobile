@@ -16,6 +16,7 @@ import java.util.List;
 public class CSVManager {
 
 
+    // Transcribes a list of ISSRecordData to a StringBuilder
     public static StringBuilder RecordsToCSV(List<ISSRecordData> exampleData ){
 
         StringBuilder bld = new StringBuilder();
@@ -33,6 +34,7 @@ public class CSVManager {
 
     }
 
+    // Writes a string to a *.csv file
     public static void WriteNewCSVdata(File file, String data){
 
         try {
@@ -45,6 +47,7 @@ public class CSVManager {
 
     }
 
+    // Reads a *.csv and writes it into a list of ISSRecordData
     public static List<ISSRecordData> ReadCSVdata(File file){
 
         List<ISSRecordData>  result = new ArrayList<ISSRecordData>();
@@ -83,6 +86,7 @@ public class CSVManager {
 
     }
 
+    // Finds the file given a date, user and activity type and reads it to a list of ISSRecordData
     public static List<ISSRecordData> ReadCSVdata(String date, String userID,  String activity){
 
 

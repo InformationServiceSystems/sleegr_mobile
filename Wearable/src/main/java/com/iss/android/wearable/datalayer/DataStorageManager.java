@@ -35,6 +35,7 @@ public class DataStorageManager {
     static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
     static File userDataFolder = new File(dataFolder, "triathlon");
 
+    // reads a file into a byte array
     public static byte[] FileToBytes(File file) {
 
         int size = (int) file.length();
@@ -55,6 +56,7 @@ public class DataStorageManager {
         return bytes;
     }
 
+    // Computes the date given today and an offset
     public static String getDayFromToday(int dayoffset){
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -67,6 +69,7 @@ public class DataStorageManager {
 
     }
 
+    // Reformats the UserID (currently replaces only the "@" with "_at_"
     public static String getProperUserID(String UserID){
 
         return UserID.replace("@", "_at_");
@@ -80,6 +83,7 @@ public class DataStorageManager {
 
     }
 
+    // Submethod of getKey
     public static String getStateKey(String mark){
 
         int idx = mark.indexOf(":");
@@ -92,6 +96,7 @@ public class DataStorageManager {
 
     }
 
+    // Returns the type of the activity, e.g. resting, idle
     public static String getKey(ISSRecordData record){
 
         String mark = record.ExtraData;
@@ -104,6 +109,7 @@ public class DataStorageManager {
 
     }
 
+    // Stores all data accumalted in a *.csv file belonging to the user, given a certain activity type
     public static void SaveBinnedData(ArrayList<ISSRecordData> accumulator, String UserID, String activityType){
 
         // get date of first record
@@ -137,6 +143,8 @@ public class DataStorageManager {
 
     }
 
+    // Saves a list of ISSRecordData to the corresponding files using the UserID,
+    // the dates within the RecordData and the activity type
     public static void SaveNewDataToFile(ArrayList<ISSRecordData> data, String UserID) {
 
         try {
@@ -174,6 +182,7 @@ public class DataStorageManager {
 
     }
 
+    // Collectsall files within a given timespan to upload to the phone
     public static ArrayList<File> GetAllFilesToUpload(String UserID, int timeSpan){
 
         ArrayList<File> result = new  ArrayList<File>();

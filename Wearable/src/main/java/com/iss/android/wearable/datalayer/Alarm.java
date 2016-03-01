@@ -22,6 +22,7 @@ public class Alarm extends BroadcastReceiver {
         }
     }
 
+    // Wakes the app every 30 seconds to collect some sensor data
     public void SetAlarm(Context context) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, Alarm.class);

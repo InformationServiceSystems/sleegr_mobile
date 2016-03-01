@@ -25,7 +25,7 @@ import java.io.ObjectOutputStream;
  */
 public class Serializer {
 
-
+    // Serialises an object to a file
     public static void SerializeToFile(Object obj, File file) throws IOException {
 
         FileOutputStream fileOut;
@@ -42,6 +42,7 @@ public class Serializer {
 
     }
 
+    // Reads a file and constructs an object containing the contents of the file
     public static Object DeserializeFromFile(File file) throws IOException, ClassNotFoundException {
 
         FileInputStream fileIn;
@@ -53,6 +54,7 @@ public class Serializer {
         return DeserializeFromBytes(data);
     }
 
+    // Serialises an object to a byte array
     public static byte[] SerializeToBytes(Object object) throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              ObjectOutput out = new ObjectOutputStream(bos)) {
@@ -61,6 +63,7 @@ public class Serializer {
         }
     }
 
+    // deserialises an object from a byte array
     public static Object DeserializeFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
              ObjectInput in = new ObjectInputStream(bis)) {
@@ -68,6 +71,7 @@ public class Serializer {
         }
     }
 
+    // transforms an inputstream to a byte array
     public static byte[] InputStreamToByte(InputStream is) throws IOException {
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();

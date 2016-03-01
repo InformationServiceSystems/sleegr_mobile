@@ -35,6 +35,7 @@ public class DALDActivity extends Activity {
 
     }
 
+    // Creates a button responsible for storing the information in the above choices if hit
     void createSubmitButton(){
 
         Button button = new Button(this);
@@ -83,6 +84,7 @@ public class DALDActivity extends Activity {
 
     }
 
+    // Checks if for all radio buttons an answer has been selected
     public boolean CheckDataFilled(){
 
         if (time.equals("evening")) {
@@ -98,6 +100,7 @@ public class DALDActivity extends Activity {
 
     }
 
+    // Returns the selected radio button in a group of radio buttons
     public int SelectedIndex(RadioGroup radioButtonGroup){
 
         int radioButtonID = radioButtonGroup.getCheckedRadioButtonId();
@@ -137,6 +140,7 @@ public class DALDActivity extends Activity {
 
     RadioGroup [] rgs = null;
 
+    // Creates a linear layout containing all radio buttons and questions
     void createDALDAradioButtons(String[] daldaItems) {
 
 

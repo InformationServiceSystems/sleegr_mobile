@@ -341,6 +341,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
     int COOLING_RPE_TIME = 60 * 15;
 
+    // Checks if 5 minutes have passed since pressing the cooldown button.
     public void TimerEvent() {
 
         timerTime = timerTime + 1;
@@ -410,7 +411,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             "10 Maximal"
     };
 
-
+    // Opens the feedback dialog asking the user about the training in form of some radio buttons
     private void AskUserForFeedback(String time) {
 
         Intent myIntent = new Intent(this, DALDActivity.class);
@@ -447,6 +448,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // broadcasts the time elapsed via intent
     public void SendTimerTime(int minutes, int seconds) {
 
         Intent intent = new Intent(UPDATE_TIMER_VALUE);
@@ -456,6 +458,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Unregisters and registers sensors.
     public void ResetSensors() {
 
 
@@ -504,6 +507,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Adds new data to a file somewhere to be stored
     public void AddNewData(int uid, int sensortype, String timenow, String extras, float v0, float v1, float v2) {
 
         // data format: UserID, MeasurementType, Timestamp, ExtraData, MeasurementValue
@@ -527,6 +531,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // returns the current time in string form
     public String GetTimeNow() {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
@@ -545,6 +550,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         //int resultData = ReadHeartRateData(heartRateCharacteristic);
     }
 
+    // broadcasts the heart rate via intent
     private void sendHR(int result) {
         // Send a broadcast with the current HR
         Intent hrintent = new Intent(ACTION_HR);
@@ -552,6 +558,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         sendBroadcast(hrintent);
     }
 
+    // broadcasts the battery status via intent
     private void sendBatteryStatus(int Status) {
         // Send a broadcast with the battery status of the HRM
         Intent batteryintent = new Intent(ACTION_BATTERY_STATUS);
@@ -588,6 +595,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // reads the heart rate from the bluetooth sensor's value
     public int ReadHeartRateData(BluetoothGattCharacteristic characteristic) {
         int flag = characteristic.getProperties();
         int format = -1;
@@ -609,6 +617,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Checks if the activity type is one that requires no cooldown
     public boolean nonCoolable(String action){
 
         return action.equals("Resting") ||
@@ -619,6 +628,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Switches the sports action to the new activity type
     public void SwitchSportsAction(String action) {
 
         String newState = "";
@@ -649,6 +659,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         BringIntoState(newState);
     }
 
+    // starts sleep tracking
     private void startSleeping(){
         Intent intent = new Intent(this, SensorsDataService.class);
         stopService(intent);
@@ -662,6 +673,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         return;
     }
 
+    // returns the file where something is stored (?)
     static File getRecordedActivitiesFile(){
 
         String daystr = DataStorageManager.getDayFromToday(0);
@@ -670,6 +682,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // save and write to file that a certain activity type has been measured
     public static void RecordActivityMeasured(String state){
 
 
@@ -701,6 +714,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Retrieves which activity types have been recorded
     public static HashMap<String, Boolean> getRecordedActivities(){
 
         File file = getRecordedActivitiesFile();
@@ -720,6 +734,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // vibrates for 0.2 seconds, 0.2 seconds silence, 4 times.
     void outputVibration(){
 
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -728,6 +743,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Changes the state of the app so as to realise what is being measured at the moment
     private void BringIntoState(String state) {
 
         currentState = state;
@@ -794,6 +810,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Starts measuring the heart rate and, during that time, holds wakelock
     void StartMeasuring() {
 
         GetHRMid();
@@ -828,6 +845,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Stops measuring the heart rate
     void StopMeasuring() {
 
         if (wakeLock.isHeld()) {
@@ -859,6 +877,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Sends the collected data to the smartphone
     public void SendCollectedData() {
 
         new Thread(new Runnable() {
@@ -929,6 +948,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Broadcasts a string, generally an update about the state of the app
     public void OutputEvent(String str) {
         // Send a Broadcast with the message
         Intent intent = new Intent(NEW_MESSAGE_AVAILABLE);
@@ -1147,6 +1167,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // stops sleep tracking
     public void StopSleep() {
 
         new Thread(new Runnable() {
@@ -1193,6 +1214,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // Adds feedback about the difficulty of the exercise just performed.
     public void AddTrainingScore(float position, String typeof) {
         AddNewData(0, 1024, GetTimeNow(), "Feedback:" + typeof, position, 0, 0);
         needToShowRPE = false;
@@ -1206,6 +1228,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     Location locPrev = null;
     double totalDistance = 0;
 
+    // Adds a record showing that the training has ended
     public void TrainingEnd(float hour, float minute) {
 
         AddNewData(0, 13, GetTimeNow(), currentState, hour, minute, 0.0f);

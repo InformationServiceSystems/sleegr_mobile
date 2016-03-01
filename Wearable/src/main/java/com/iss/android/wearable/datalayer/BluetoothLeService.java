@@ -114,11 +114,13 @@ public class BluetoothLeService extends Service {
         }
     };
 
+    // Broadcasts strings as intents
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
         sendBroadcast(intent);
     }
 
+    // Broadcasts a string and heartrate via intent
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);

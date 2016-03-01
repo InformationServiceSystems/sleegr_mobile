@@ -160,6 +160,7 @@ public class DeviceScanActivity extends ListActivity {
         Log.d("MainActivity", "has been called");
     }
 
+    // Scans for bluetooth devices
     private void scanLeDevice(final boolean enable) {
         if (enable) {
             // Stops scanning after a pre-defined scan period.

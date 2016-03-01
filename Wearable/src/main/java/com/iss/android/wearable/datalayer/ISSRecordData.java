@@ -40,6 +40,7 @@ public class ISSRecordData implements Serializable {
 
     }
 
+    // Converts an ISSRecordData object to a string like how it is represented in the *.csv
     public String toString() {
 
         String sep = ",";
