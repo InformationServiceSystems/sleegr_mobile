@@ -108,48 +108,58 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        alarm.SetAlarm(this);
+        try {
 
-        String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-        OutputEvent(android_id);
+            alarm.SetAlarm(this);
 
-        Log.d("ISS", "Android ID: " + android_id);
+            String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+            OutputEvent(android_id);
 
-        switch (android_id) {
-            case "144682d5efc12dcb":
-                UserID = "1";
-                break;
-            case "4b251c5e4f524b05":
-                UserID = "2";
-                break;
-            case "3622852bee38de73":
-                UserID = "3";
-                break;
-            case "7b1d96be4726dd22":
-                UserID = "4";
-                break;
-            case "847222e512faa744":
-                UserID = "5";
-                break;
-            case "867ee27023b1f8b7":
-                UserID = "256";
-                break;
-            case "65e9172b7bb0638d":
-                UserID = "1024";
-                break;
-            case "3032a1d80ae293bd ":
-                UserID = "257";
-                break;
-            default:
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-                UserID = pref.getString("user_email", "unknown");
-                OutputEvent("Welcome user " + UserID + "!");
-                break;
+            Log.d("ISS", "Android ID: " + android_id);
+
+            switch (android_id) {
+                case "144682d5efc12dcb":
+                    UserID = "1";
+                    break;
+                case "4b251c5e4f524b05":
+                    UserID = "2";
+                    break;
+                case "3622852bee38de73":
+                    UserID = "3";
+                    break;
+                case "7b1d96be4726dd22":
+                    UserID = "4";
+                    break;
+                case "847222e512faa744":
+                    UserID = "5";
+                    break;
+                case "867ee27023b1f8b7":
+                    UserID = "256";
+                    break;
+                case "65e9172b7bb0638d":
+                    UserID = "1024";
+                    break;
+                case "3032a1d80ae293bd ":
+                    UserID = "257";
+                    break;
+                default:
+                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+                    UserID = pref.getString("user_email", "unknown");
+                    OutputEvent("Welcome user " + UserID + "!");
+                    break;
+            }
+
+            DataStorageManager.InitializeTriathlonFolder();
+
+        }catch (Exception ex){
+
+
+
         }
 
-        DataStorageManager.InitializeTriathlonFolder();
-
         return START_STICKY;
+
+
 
     }
 
@@ -474,6 +484,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         }
 
+        // finally, upload sleep data
+        UploadingManager.UploadUserFileToServer( Serializer.FileToBytes(DataStorageManager.sleepData), "sleep-export.csv", uploadUrl, UserID);
         OutputEvent("Sent data files to server");
 
     }

@@ -90,7 +90,7 @@ public class Serializer {
     }
 
     // Serializes a file to a byte array
-    public byte[] FileToBytes(File file) {
+    public static byte[] FileToBytes(File file) {
 
         int size = (int) file.length();
         byte[] bytes = new byte[size];

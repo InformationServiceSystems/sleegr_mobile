@@ -17,8 +17,8 @@
 <!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iss.android.wearable.datalayer"
-    android:versionCode="23"
-    android:versionName="Regulus 23" >
+    android:versionCode="24"
+    android:versionName="Regulus 24" >
 
     <uses-sdk
         android:minSdkVersion="21"

@@ -337,7 +337,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     String currentState = "Idle";
     int timerTimeout = 60 * 60 * 24;
     int COOLING_MEASUREMENT_TIME = 60 * 60 * 1; // cooling is measured for 60 minutes
-    int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 5 min
+    int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 3 min
     int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
     int COOLING_RPE_TIME = 60 * 15;
 
@@ -393,8 +393,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     static boolean isNowASleepingHour(){
 
         Calendar clnd = Calendar.getInstance();
-        clnd.add(Calendar.HOUR_OF_DAY, -3);
-        return (clnd.get(Calendar.HOUR_OF_DAY) >= 13 - 3);
+        return (clnd.get(Calendar.HOUR_OF_DAY) >= 13);
     }
 
     String[] rpeValues = new String[]{
@@ -669,8 +668,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         startActivity(launchSleepIntent);
 
         // finally, kill the app in order to save the battery
-        android.os.Process.killProcess(android.os.Process.myPid());
-        return;
+        System.exit(1);
     }
 
     // returns the file where something is stored (?)

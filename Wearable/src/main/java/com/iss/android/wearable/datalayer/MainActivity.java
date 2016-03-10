@@ -540,7 +540,6 @@ public class MainActivity extends Activity {
             case R.id.eveningHR:
 
                 if (SensorsDataService.itself != null) {
-                    if (SensorsDataService.isNowASleepingHour())
                         SensorsDataService.itself.SwitchSportsAction("Resting");
                 }
 

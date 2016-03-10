@@ -40,6 +40,15 @@ public class DailyCooldown {
 
     Visualizations visualizations = new Visualizations();
 
+    public DailyCooldown(Date day){
+
+        // make sure that error in computations does not break the whole system
+        try {
+            InitializeCooldown(day);
+        }catch (Exception ex){
+        }
+    }
+
     // A method calculating the file size of a given file.
     public long FileSize(File file){
         long result = 0;
@@ -137,7 +146,9 @@ public class DailyCooldown {
 
     }
 
-    public DailyCooldown(Date day){
+
+
+    public void InitializeCooldown(Date day){
 
         // read necessary data
         String userID = DataSyncService.getUserID();
