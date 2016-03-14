@@ -1,5 +1,8 @@
 package com.iss.android.wearable.datalayer;
 
+import android.content.ContentValues;
+import android.net.Uri;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,7 +41,7 @@ public class CSVManager {
 
     }
 
-    // A method appending a String to a file.
+    // A method appending a String to a file. Relevant for ISSRecordData.
     public static void AppendStringToFile(File file, String data) {
 
         try {
@@ -52,7 +55,25 @@ public class CSVManager {
 
     }
 
-    // A method that writes a String to a file, iff it not already is stored in given file.
+    public static void storeString(String data) {
+        ContentValues values = new ContentValues();
+        String[] valuesAsString = data.split(",");
+
+        values.put(ISSContentProvider.USERID,
+                (Integer.valueOf(valuesAsString[0])));
+        values.put(ISSContentProvider.MEASUREMENT,
+                (Integer.valueOf(valuesAsString[1])));
+        values.put(ISSContentProvider.TIMESTAMP, valuesAsString[2]);
+        values.put(ISSContentProvider.EXTRA, valuesAsString[3]);
+        values.put(ISSContentProvider.VALUE1, valuesAsString[4]);
+        values.put(ISSContentProvider.VALUE2, valuesAsString[5]);
+        values.put(ISSContentProvider.VALUE3, valuesAsString[6]);
+
+        Uri uri = MainActivity.getContext().getContentResolver().insert(
+                ISSContentProvider.CONTENT_URI, values);
+    }
+
+    // A method that writes a String to a file, iff it not already is stored in given file. Only relevant for the RPE schedule.
     public static void WriteNewCSVdata(File file, String data) {
         boolean edited = false;
         String current_date = data.substring(0, 10);

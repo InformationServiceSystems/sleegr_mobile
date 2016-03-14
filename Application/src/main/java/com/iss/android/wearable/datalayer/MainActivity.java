@@ -114,6 +114,10 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
+    public static Context getContext() {
+        return getContext();
+    }
+
     @Override
     public void onCreate(Bundle b) {
         super.onCreate(b);

@@ -57,8 +57,8 @@ public class ISSContentProvider extends ContentProvider {
     static final String CREATE_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME +
                     " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    " UserID TEXT NOT NULL, " +
-                    " Measurement TEXT NOT NULL, " +
+                    " UserID INTEGER NOT NULL, " +
+                    " Measurement INTEGER NOT NULL, " +
                     " timestamp TEXT NOT NULL, " +
                     " extra TEXT NOT NULL);" +
                     " value1 TEXT NOT NULL, " +
