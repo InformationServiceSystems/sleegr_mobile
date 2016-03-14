@@ -34,6 +34,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
+    <uses-permission android:name="android.permission.WRITE_USER_DICTIONARY" />
 
     <!-- for some reason reading internal storage permission breaks installation on Google play ... -->
     <!--
@@ -134,6 +136,11 @@
             android:name=".TrainingStartTimeActivity"
             android:label="@string/title_activity_training_start_time" >
         </activity>
+
+        <provider
+            android:name="com.iss.android.wearable.datalayer.ISSContentProvider"
+            android:multiprocess="true"
+            android:authorities="com.iss.android.wearable.datalayer.provider"></provider>
     </application>
 
 </manifest>
