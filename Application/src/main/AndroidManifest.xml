@@ -152,6 +152,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+
+        <provider
+            android:name="com.iss.android.wearable.datalayer.ISSContentProvider"
+            android:multiprocess="true"
+            android:authorities="com.iss.android.wearable.datalayer.provider" />
     </application>
 
 </manifest>

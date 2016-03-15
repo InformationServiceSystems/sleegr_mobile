@@ -816,14 +816,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
         mBluetoothAdapter.startLeScan(mLeScanCallback);
 
-        /*mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                //OutputEvent("HRM search stop.");
-            }
-        }, 10000);*/
-
         OutputEvent("Searching HRM ... ");
         timerTask = new TimerTask() {
             public void run() {
@@ -831,9 +823,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             }
         };
 
-        timer = new Timer();
-        //TrainingStart = System.currentTimeMillis() / 1000; // in seconds
         timerTime = 0;
+        timer = new Timer();
 
         if (!wakeLock.isHeld()) {
             wakeLock.acquire();

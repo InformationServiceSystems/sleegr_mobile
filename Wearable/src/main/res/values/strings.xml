@@ -14,7 +14,7 @@
 -->
 
 <resources>
-    <string name="app_name">Triathlon</string>
+    <string name="app_name">SleeGR</string>
     <string name="intro">Waiting for data to arrive\u2026</string>
     <string name="capability_2_notification">Capability 2</string>
     <string name="capabilities_1_and_2_notification">Capabilities 1 and 2</string>
