@@ -22,7 +22,9 @@
     </style>
 
     <style name="CustomTheme" parent="android:Theme.Material.Light">
-        <item name="android:colorBackground">@color/background_material_light</item>
+        <item name="android:windowBackground">@color/custom_theme_color</item>
+        <item name="android:colorBackground">@color/custom_theme_color</item>
+
     </style>
 
 
