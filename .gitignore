@@ -3,3 +3,6 @@ build
 .idea
 Application/build
 Wearable/build
+*.apk
+*.iml
+*.properties
