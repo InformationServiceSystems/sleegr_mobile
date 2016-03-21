@@ -367,7 +367,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 BringIntoState("Idle");
                 startSleeping();
             } else if(startRecovery){
-                BringIntoState("Recovery");
+                //BringIntoState("Recovery");
             }
             else{
                 BringIntoState("Idle");
