@@ -167,12 +167,16 @@ public class MainActivity extends FragmentActivity implements
 
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
 
-        AsyncTask.execute(new Runnable() {
+        // This is a method to fill in the database to test the IntelXDK app.
+
+        /*AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 Databasetestclass.fillWithData();
             }
-        });
+        });*/
+
+
         // start handler which starts pending-intent after Application-Crash
         // That stuff may be cool for end users, but for developers it's nasty
         // Iaroslav: sorry, I uncomment sometimes this (and forget to comment it back) to check what exception crashed the app.
