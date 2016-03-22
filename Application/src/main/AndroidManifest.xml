@@ -157,7 +157,9 @@
         <provider
             android:name="com.iss.android.wearable.datalayer.ISSContentProvider"
             android:multiprocess="true"
-            android:authorities="com.iss.android.wearable.datalayer.provider" />
+            android:authorities="com.iss.android.wearable.datalayer.provider"
+            android:permission="READ_TRIATHLON"
+            android:exported="true" />
     </application>
 
 </manifest>
