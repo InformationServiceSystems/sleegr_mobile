@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -21,7 +22,7 @@ import java.util.HashMap;
  */
 public class ISSContentProvider extends ContentProvider {
 
-    static final String PROVIDER_NAME = "com.example.provider.College";
+    static final String PROVIDER_NAME = "com.iss.android.wearable.datalayer.provider";
     static final String URL = "content://" + PROVIDER_NAME + "/records";
     static final Uri CONTENT_URI = Uri.parse(URL);
 
@@ -53,17 +54,17 @@ public class ISSContentProvider extends ContentProvider {
     private SQLiteDatabase db;
     static final String DATABASE_NAME = "ISSRecordData";
     static final String RECORDS_TABLE_NAME = "records";
-    static final int DATABASE_VERSION = 1;
+    static final int DATABASE_VERSION = 2;
     static final String CREATE_DB_TABLE =
-            " CREATE TABLE " + RECORDS_TABLE_NAME +
-                    " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    " UserID INTEGER NOT NULL, " +
-                    " Measurement INTEGER NOT NULL, " +
-                    " timestamp TEXT NOT NULL, " +
-                    " extra TEXT NOT NULL);" +
-                    " value1 TEXT NOT NULL, " +
-                    " value2 TEXT NOT NULL, " +
-                    " value3 TEXT NOT NULL, ";
+            " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
+                    _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    USERID + " INTEGER NOT NULL, " +
+                    MEASUREMENT + " INTEGER NOT NULL, " +
+                    TIMESTAMP + " TEXT NOT NULL, " +
+                    EXTRA + " TEXT NOT NULL, " +
+                    VALUE1 + " TEXT NOT NULL, " +
+                    VALUE2 + " TEXT NOT NULL, " +
+                    VALUE3 + " TEXT NOT NULL);";
 
     /**
      * Helper class that actually creates and manages
@@ -160,7 +161,7 @@ public class ISSContentProvider extends ContentProvider {
         /**
          * Add a new ISS record
          */
-
+        Log.d("Inserted ", "something");
         long rowID = db.insert(RECORDS_TABLE_NAME, "", values);
 
         /**

@@ -115,7 +115,7 @@ public class MainActivity extends FragmentActivity implements
     }
 
     public static Context getContext() {
-        return getContext();
+        return itself;
     }
 
     @Override
@@ -166,6 +166,13 @@ public class MainActivity extends FragmentActivity implements
         }
 
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                Databasetestclass.fillWithData();
+            }
+        });
         // start handler which starts pending-intent after Application-Crash
         // That stuff may be cool for end users, but for developers it's nasty
         // Iaroslav: sorry, I uncomment sometimes this (and forget to comment it back) to check what exception crashed the app.
@@ -235,7 +242,6 @@ public class MainActivity extends FragmentActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-
     }
 
     @Override
