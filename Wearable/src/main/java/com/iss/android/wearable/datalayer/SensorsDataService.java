@@ -669,6 +669,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         // finally, kill the app in order to save the battery
         System.exit(0);
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     // returns the file where something is stored (?)
@@ -983,7 +984,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     @Override
     public void onDestroy() {
-
+        // ensures that all objects will be finalized and garbage collected when the the application exits
+        System.runFinalizersOnExit(true);
     }
 
     // this method defined user heart rate monitor prior to the enabling of the training mode

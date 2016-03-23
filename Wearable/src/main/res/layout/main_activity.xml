@@ -134,6 +134,7 @@
         android:id="@+id/BottomLayout"
         android:layout_width="wrap_content"
         android:layout_height="45dp"
+        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:background="@color/white">
 
