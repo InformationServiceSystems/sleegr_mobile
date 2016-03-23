@@ -410,7 +410,7 @@ public class MainActivity extends Activity {
                     if (batteryPct < 75 && !warned_evening[0]) {
                         warned_evening[0] = true;
                         displaySWBatteryWarning();
-                    } else if (batteryPct >= 50 && warned_evening[0]) {
+                    } else if (batteryPct >= 75 && warned_evening[0]) {
                         warned_evening[0] = false;
                     }
                 }
