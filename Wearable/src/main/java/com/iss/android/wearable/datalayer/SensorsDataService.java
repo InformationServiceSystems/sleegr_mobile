@@ -668,7 +668,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         startActivity(launchSleepIntent);
 
         // finally, kill the app in order to save the battery
-        System.exit(1);
+        System.exit(0);
     }
 
     // returns the file where something is stored (?)

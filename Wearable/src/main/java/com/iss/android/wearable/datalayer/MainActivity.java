@@ -406,7 +406,7 @@ public class MainActivity extends Activity {
                 int batteryPct = (int) (level / (float) scale * 100);
                 SWBatteryStatus.setText("SW: " + batteryPct + "%");
                 Calendar clnd = Calendar.getInstance();
-                if (clnd.get(Calendar.HOUR_OF_DAY) >= 20) {
+                if (clnd.get(Calendar.HOUR_OF_DAY) >= 5) {
                     if (batteryPct < 75 && !warned_evening[0]) {
                         warned_evening[0] = true;
                         displaySWBatteryWarning();
