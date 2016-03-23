@@ -184,7 +184,6 @@ public class MainActivity extends FragmentActivity implements
            @Override
            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
 
-
                AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 2000, pendingInt);
                System.exit(2);
