@@ -182,8 +182,6 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle b) {
 
-        Log.d("MainActivity", "is now being created");
-
         super.onCreate(b);
         itself = this;
 
@@ -200,8 +198,6 @@ public class MainActivity extends Activity {
         RegisterBroadcastsReceiver();
 
         CheckToShowRPE();
-
-        Log.d("MainActivity", "has been created");
 
     }
 
