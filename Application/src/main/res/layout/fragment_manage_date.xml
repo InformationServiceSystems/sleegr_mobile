@@ -26,7 +26,6 @@
             android:text="@string/hello_blank_fragment"
             android:layout_below="@+id/day"
             android:gravity="center_horizontal"
-            android:textColor="#a5a5a5"
             android:textSize="30dp" />
 
         <TextView

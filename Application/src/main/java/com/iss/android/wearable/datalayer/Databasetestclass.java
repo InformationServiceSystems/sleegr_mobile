@@ -7,6 +7,8 @@ import android.util.Log;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Michael on 22.03.2016.
@@ -17,7 +19,7 @@ public class Databasetestclass {
     static ContentResolver resolver = MainActivity.getContext().getContentResolver();
 
     public static void fillWithData() {
-        /*
+
         final Timer timer = new Timer();
         TimerTask timerTask = new TimerTask () {
             @Override
@@ -32,7 +34,7 @@ public class Databasetestclass {
             }
         };
         timer.schedule(timerTask, 0, 10);
-        */
+
     }
 
     private static ContentValues generateValues() {

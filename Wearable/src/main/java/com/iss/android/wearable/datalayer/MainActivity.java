@@ -55,10 +55,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.helper.StaticLabelsFormatter;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -85,8 +81,6 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
     public static MainActivity itself;
-    LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
-    });
     int current_time = 0;
     PendingIntent pendingInt = null;
     float heartbeat = 10;
@@ -126,15 +120,6 @@ public class MainActivity extends Activity {
                 int result = intent.getIntExtra(SensorsDataService.EXTRA_HR, 0);
                 // Need to convert the Int to String or else the app crashes. GJ Google.
                 HeartRate.setText(Integer.toString(result));
-                try {
-                    series.appendData(new DataPoint(current_time, result), true, 120);
-                    current_time += 1;
-                } catch (Exception ex) {
-
-                    String str = ex.toString();
-                    str = str + "d";
-
-                }
             } else if (intent.getAction().equals(SensorsDataService.UPDATE_GPS_PARAMS)) {
                 // Prints out the heart rate
                 /*final TextView speedLabel = (TextView) findViewById(R.id.speedLable);
@@ -208,13 +193,9 @@ public class MainActivity extends Activity {
         mHandler = new Handler();
         setContentView(R.layout.main_activity);
 
-        initializeGraph();
-
         initializeSWBatteryChecker();
 
         //initializeSportsActions();
-
-        initializeScreenOn();
 
         RegisterBroadcastsReceiver();
 
@@ -283,13 +264,6 @@ public class MainActivity extends Activity {
 
     }
 
-    // Keeps the screen on
-    private void initializeScreenOn() {
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-    }
-
     // If the app crashes, restart it. Currently disabled so we can bugfix
     private void initializeSelfRestarting() {
 
@@ -315,32 +289,6 @@ public class MainActivity extends Activity {
 
             }
         });/**/
-
-    }
-
-    // Initialises the graph that shows the heart rate
-    private void initializeGraph() {
-
-        GraphView graph = (GraphView) findViewById(R.id.heartRateGraph);
-
-        // some styling of the graph
-
-        graph.getViewport().setYAxisBoundsManual(true);
-        graph.getViewport().setMinY(0);
-        graph.getViewport().setMaxY(200);
-        graph.getViewport().setXAxisBoundsManual(true);
-        graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(120);
-        StaticLabelsFormatter staticLabelsFormatter = new StaticLabelsFormatter(graph);
-        staticLabelsFormatter.setHorizontalLabels(new String[]{"120", "60", "0"});
-        graph.getGridLabelRenderer().setLabelFormatter(staticLabelsFormatter);
-        graph.getGridLabelRenderer().setGridColor(Color.BLACK);
-        graph.getGridLabelRenderer().setHighlightZeroLines(true);
-        graph.getGridLabelRenderer().setVerticalLabelsColor(Color.BLACK);
-        graph.getGridLabelRenderer().setHorizontalLabelsColor(Color.BLACK);
-
-        graph.addSeries(series);
-        graph.setTitleColor(Color.BLACK);
 
     }
 
