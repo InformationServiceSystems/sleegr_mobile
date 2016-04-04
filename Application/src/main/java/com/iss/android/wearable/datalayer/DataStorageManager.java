@@ -210,13 +210,14 @@ public class DataStorageManager {
 
     // A method that determines all the *.csv Files in a given timespan.
     public static ArrayList<ArrayList<File>> GetAllFilesToUpload(String UserID, int timeSpan){
+        Log.d("Position", "GetAllFilesToUpload from " + UserID);
 
         ArrayList<ArrayList<File>> result = new  ArrayList<>();
         //result.add(sleepData);
 
         for (int i = 0; i < timeSpan; i++){
-
             File dayFolder = new File( userDataFolder, getDayFromToday(i));
+            Log.d("Position", "Retrieving files from day " + dayFolder.toString());
             File[] files = dayFolder.listFiles();
 
             ArrayList<File> day = new ArrayList<>();
@@ -228,8 +229,12 @@ public class DataStorageManager {
                         continue;
                     }
 
+                    Log.d("Filename", file.getName());
+
                     day.add(file);
                 }
+            } else {
+                Log.d("Files are", "empty");
             }
 
             result.add(day);

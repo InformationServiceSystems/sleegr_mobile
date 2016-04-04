@@ -16,9 +16,13 @@
         android:title="Graphs" />
 
 
-    <item
+    <!--<item
         android:id="@+id/button4"
-        android:title="Explore" />
+        android:title="Explore" />-->
+
+    <item
+        android:id="@+id/averageValues"
+        android:title="Averages" />
 
     <item
         android:id="@+id/registerUserMenu"

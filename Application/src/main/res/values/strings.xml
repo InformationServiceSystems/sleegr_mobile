@@ -61,5 +61,9 @@
     <string name="PlaceholderText">Default Text</string>
     <string name="saveSchedule">Save Schedule</string>
     <string name="cancelSchedule">Cancel</string>
+    <string name="title_activity_average">AverageActivity</string>
+    <string name="morning">Morning</string>
+    <string name="day">Day</string>
+    <string name="evening">Evening</string>
 
 </resources>

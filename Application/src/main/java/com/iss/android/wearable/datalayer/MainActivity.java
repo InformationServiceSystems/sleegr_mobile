@@ -264,8 +264,11 @@ public class MainActivity extends FragmentActivity implements
             case R.id.button3:
                 onWatchSync();
                 return true;
-            case R.id.button4:
+            /*case R.id.button4:
                 onExploreData();
+                return true;*/
+            case R.id.averageValues:
+                onShowAverages();
                 return true;
             case R.id.graphButton:
                 onGraphPlot();
@@ -639,6 +642,11 @@ public class MainActivity extends FragmentActivity implements
 
         UserParameters params = new UserParameters(30);
 
+    }
+
+    public void onShowAverages() {
+        Intent i = new Intent (MainActivity.this, AverageActivity.class);
+        startActivity(i);
     }
 
     // Constructs the lower fragment which is responsible for showing the data of the selected day
