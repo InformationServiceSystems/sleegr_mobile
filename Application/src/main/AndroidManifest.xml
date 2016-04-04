@@ -157,8 +157,7 @@
             android:name=".ISSContentProvider"
             android:authorities="com.iss.android.wearable.datalayer.provider"
             android:exported="true"
-            android:multiprocess="true"
-            android:permission="READ_TRIATHLON" />
+            android:multiprocess="true" />
 
         <activity
             android:name=".AverageActivity"
