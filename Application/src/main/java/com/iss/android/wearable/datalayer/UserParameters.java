@@ -67,7 +67,7 @@ public class UserParameters {
         userRPE.LineType = TimeSeries.SeriesLineTypes.Bar;
         rpe.Add(userRPE, Color.RED);
         rpe.Add(schedule, Color.GREEN);
-        rpe.Add(ComputeCompliences(schedule, userRPE,3), Color.GRAY);
+        rpe.Add(ComputeCompliences(schedule, userRPE,3), Color.WHITE);
 
         Visualizations.Subplot alphaGrph = visualizations.AddGraph("Alpha value predictions");
         alpha.LineType = TimeSeries.SeriesLineTypes.Bar;

@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="custom_theme_color">#ffffff</color>
-    <color name="background_material_light">#ffffff</color>
-    <color name="primary_material_light">#e5e5e5</color>
     <color name="blue" type="color">#FF33B5E5</color>
     <color name="purple" type="color">#FFAA66CC</color>
     <color name="green" type="color">#FF99CC00</color>
@@ -16,4 +13,12 @@
     <color name="white" type="color">#FFFFFFFF</color>
     <color name="black" type="color">#FF000000</color>
     <color name="grey" type="color">#FF777777</color>
+    <color name="accent_material_light_1">#563dfe</color>
+    <color name="accent_material_dark_1">#FF536DFE</color>
+    <color name="background_dark">#FFFAFAFA</color>
+    <color name="colorBackground">#FFFAFAFA</color>
+    <color name="accent_material_light_2">#536dfe</color>
+    <color name="accent_material_light">#536dfe</color>
+    <color name="background_material_light">#484848</color>
+    <color name="primary_material_light">#dedede</color>
 </resources>

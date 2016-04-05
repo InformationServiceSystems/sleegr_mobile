@@ -15,21 +15,22 @@
         android:id = "@+id/tableLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="5dp">
+        android:padding="5dp"
+        android:stretchColumns="0,1,2,3">
 
         <TableRow>
 
             <TextView
-                android:text="@string/morning"
-                android:layout_width="60dp"/>
+                android:text="@string/date"/>
 
             <TextView
-                android:text="@string/day"
-                android:layout_width="60dp"/>
+                android:text="@string/morning"/>
 
             <TextView
-                android:text="@string/evening"
-                android:layout_width="60dp"/>
+                android:text="@string/day"/>
+
+            <TextView
+                android:text="@string/evening"/>
 
         </TableRow>
 

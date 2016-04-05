@@ -4,6 +4,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -16,6 +19,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
+import static com.iss.android.wearable.datalayer.DateTimeManager.getDayFromToday;
 
 public class AverageActivity extends Activity {
 
@@ -105,36 +110,40 @@ public class AverageActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
+            // Writes all the retrieved data into the table. Headers are declared manually,
+            // the rest is filled in programmatically.
             DecimalFormat df = new DecimalFormat("#0.00");
             TableLayout table = (TableLayout)findViewById(R.id.tableLayout);
 
-            TextView morningHeaderTV = new TextView(itself);
-            morningHeaderTV.setText("_______");
-            TextView dayHeaderTV = new TextView(itself);
-            dayHeaderTV.setText("_______");
-            TextView eveningHeaderTV = new TextView(itself);
-            eveningHeaderTV.setText("_______");
 
-            TableRow rowHeader = new TableRow(itself);
-
-            rowHeader.addView(morningHeaderTV);
-            rowHeader.addView(dayHeaderTV);
-            rowHeader.addView(eveningHeaderTV);
-
-            table.addView(rowHeader);
             for (int i = 0; i<30; i++){
+                String date = getDayFromToday(i);
+                date = reformat(date);
+
                 TableRow dataRow = new TableRow(itself);
+
+                TextView dateHRTV = new TextView(itself);
+                dateHRTV.setText(date);
                 TextView morningHRTV = new TextView(itself);
                 morningHRTV.setText(String.valueOf(df.format(morningHR[i])));
                 TextView dayHRTV = new TextView(itself);
                 dayHRTV.setText(String.valueOf(df.format(dayHR[i])));
                 TextView eveningHRTV = new TextView(itself);
                 eveningHRTV.setText(String.valueOf(df.format(eveningHR[i])));
+
+                dataRow.addView(dateHRTV);
                 dataRow.addView(morningHRTV);
                 dataRow.addView(dayHRTV);
                 dataRow.addView(eveningHRTV);
+
                 table.addView(dataRow);
             }
+        }
+
+        private String reformat(String date) {
+            String[] dateArr = date.split("-");
+            date = dateArr[2] + "." + dateArr[1];
+            return date;
         }
 
         @Override
