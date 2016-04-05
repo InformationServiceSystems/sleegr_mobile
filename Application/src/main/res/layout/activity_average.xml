@@ -9,42 +9,30 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.iss.android.wearable.datalayer.AverageActivity">
 
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id = "@+id/tableLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:stretchColumns="1">
+        android:padding="5dp">
+
         <TableRow>
+
             <TextView
                 android:text="@string/morning"
-                android:padding="3dip" />
-            <TextView
-                android:id="@+id/MorningHR"
-                android:text=""
-                android:gravity="right"
-                android:padding="3dip" />
-        </TableRow>
+                android:layout_width="60dp"/>
 
-        <TableRow>
             <TextView
                 android:text="@string/day"
-                android:padding="3dip" />
-            <TextView
-                android:id="@+id/DayHR"
-                android:text=""
-                android:gravity="right"
-                android:padding="3dip" />
-        </TableRow>
+                android:layout_width="60dp"/>
 
-        <TableRow>
             <TextView
                 android:text="@string/evening"
-                android:padding="3dip" />
-            <TextView
-                android:id="@+id/EveningHR"
-                android:text=""
-                android:gravity="right"
-                android:padding="3dip" />
+                android:layout_width="60dp"/>
+
         </TableRow>
+
     </TableLayout>
 
 </RelativeLayout>

@@ -4,6 +4,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -21,9 +23,12 @@ public class AverageActivity extends Activity {
     // since we're basically reviewing a time series, but for now it should suffice. Maybe later we
     // can make this averaging more elaborate.
 
+    static AverageActivity itself;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        itself = this;
         setContentView(R.layout.activity_average);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         Log.d("Position", "onCreate");
@@ -34,12 +39,12 @@ public class AverageActivity extends Activity {
 
         ArrayList<ArrayList<File>> listOfFiles;
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-        Double morningHR = 0.0;
-        int morningMeasures = 0;
-        Double dayHR = 0.0;
-        int dayMeasures = 0;
-        Double eveningHR = 0.0;
-        int eveningMeasures = 0;
+        double[] morningHR = new double[30];
+        int[] morningMeasures = new int[30];
+        double[] dayHR = new double[30];
+        int[] dayMeasures = new int[30];
+        double[] eveningHR = new double[30];
+        int[] eveningMeasures = new int[30];
 
         @Override
         protected String doInBackground(String... params) {
@@ -61,34 +66,37 @@ public class AverageActivity extends Activity {
 
                                 Date date = dateFormat.parse(stringDate.substring(11));
                                 Double value = Double.parseDouble(stringValue);
-                                Log.d("value", String.valueOf(value));
+                                Log.d("Registered value", String.valueOf(value));
                                 // Now that we've got the time of the day this value was measured at, we sort it in correctly
-                                sortIn(date, value);
+                                sortIn(date, value, i);
                             }
                         }
                     } catch (Exception e) {
                         Log.d("Error:", e.getMessage());
                     }
                 }
+                // Divide the summed up heart rate value by the number of values
+                if (morningMeasures[i] > 0) morningHR[i]/=morningMeasures[i];
+                if (dayMeasures[i] > 0) dayHR[i]/=dayMeasures[i];
+                if (eveningMeasures[i] > 0) eveningHR[i]/=eveningMeasures[i];
             }
-            // Divide the summed up heart rate value by the number of values
-            if (morningMeasures > 0)morningHR/=morningMeasures;
-            if (dayMeasures > 0)dayHR/=dayMeasures;
-            if (eveningMeasures > 0)eveningHR/=eveningMeasures;
             return "Executed";
         }
 
-        private void sortIn(Date date, Double value) {
+        private void sortIn(Date date, Double value, int i) {
             try {
                 if (date.before(dateFormat.parse("12:00:00")) && date.after(dateFormat.parse("03:00:00"))){
-                    morningMeasures++;
-                    morningHR+=value;
+                    morningMeasures[i]++;
+                    morningHR[i]+=value;
+                    Log.d("Sorted", value + " into morning " + i);
                 } else if (date.before(dateFormat.parse("21:00:00")) && date.after(dateFormat.parse("12:00:00"))){
-                    dayMeasures++;
-                    dayHR+=value;
+                    dayMeasures[i]++;
+                    dayHR[i]+=value;
+                    Log.d("Sorted", value + " into day " + i);
                 } else if (date.before(dateFormat.parse("03:00:00")) && date.after(dateFormat.parse("21:00:00"))){
-                    eveningMeasures++;
-                    eveningHR+=value;
+                    eveningMeasures[i]++;
+                    eveningHR[i]+=value;
+                    Log.d("Sorted", value + " into evening " + i);
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -98,12 +106,35 @@ public class AverageActivity extends Activity {
         @Override
         protected void onPostExecute(String result) {
             DecimalFormat df = new DecimalFormat("#0.00");
-            TextView morningText = (TextView) findViewById(R.id.MorningHR);
-            morningText.setText(String.valueOf(df.format(morningHR)));
-            TextView dayText = (TextView) findViewById(R.id.DayHR);
-            dayText.setText(String.valueOf(df.format(dayHR)));
-            TextView eveningText = (TextView) findViewById(R.id.EveningHR);
-            eveningText.setText(String.valueOf(df.format(eveningHR)));
+            TableLayout table = (TableLayout)findViewById(R.id.tableLayout);
+
+            TextView morningHeaderTV = new TextView(itself);
+            morningHeaderTV.setText("_______");
+            TextView dayHeaderTV = new TextView(itself);
+            dayHeaderTV.setText("_______");
+            TextView eveningHeaderTV = new TextView(itself);
+            eveningHeaderTV.setText("_______");
+
+            TableRow rowHeader = new TableRow(itself);
+
+            rowHeader.addView(morningHeaderTV);
+            rowHeader.addView(dayHeaderTV);
+            rowHeader.addView(eveningHeaderTV);
+
+            table.addView(rowHeader);
+            for (int i = 0; i<30; i++){
+                TableRow dataRow = new TableRow(itself);
+                TextView morningHRTV = new TextView(itself);
+                morningHRTV.setText(String.valueOf(df.format(morningHR[i])));
+                TextView dayHRTV = new TextView(itself);
+                dayHRTV.setText(String.valueOf(df.format(dayHR[i])));
+                TextView eveningHRTV = new TextView(itself);
+                eveningHRTV.setText(String.valueOf(df.format(eveningHR[i])));
+                dataRow.addView(morningHRTV);
+                dataRow.addView(dayHRTV);
+                dataRow.addView(eveningHRTV);
+                table.addView(dataRow);
+            }
         }
 
         @Override
