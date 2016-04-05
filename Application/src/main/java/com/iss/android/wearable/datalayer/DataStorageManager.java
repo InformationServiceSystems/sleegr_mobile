@@ -76,7 +76,7 @@ public class DataStorageManager {
     // All other methods wouldn't let me write when using the scheduled RPE values.
     static String dataFolder = MainActivity.getContext().getFilesDir().toString();
     static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
-    static File userDataFolder = new File(dataFolder, "triathlon");
+    static File userDataFolder = new File(dataFolder, "/triathlon");
 
     // A method that converts a file into a bytearray
     public static byte[] FileToBytes(File file) {

@@ -9,12 +9,17 @@ import android.widget.TextView;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class AverageActivity extends Activity {
+
+    // This averaging currently just takes the arithmetical mean. It is not entirely correct,
+    // since we're basically reviewing a time series, but for now it should suffice. Maybe later we
+    // can make this averaging more elaborate.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +50,7 @@ public class AverageActivity extends Activity {
             for (int i = 0; i< listOfFiles.size(); i++){
                 for (File f: listOfFiles.get(i)){
                     try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+                        Log.d("Position", "read a file named " + f.getName());
                         String line;
                         while ((line = br.readLine()) != null) {
                             String[] parts = line.split(",");
@@ -66,9 +72,9 @@ public class AverageActivity extends Activity {
                 }
             }
             // Divide the summed up heart rate value by the number of values
-            morningHR/=morningMeasures;
-            dayHR/=dayMeasures;
-            eveningHR/=eveningMeasures;
+            if (morningMeasures > 0)morningHR/=morningMeasures;
+            if (dayMeasures > 0)dayHR/=dayMeasures;
+            if (eveningMeasures > 0)eveningHR/=eveningMeasures;
             return "Executed";
         }
 
@@ -91,12 +97,13 @@ public class AverageActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
+            DecimalFormat df = new DecimalFormat("#0.00");
             TextView morningText = (TextView) findViewById(R.id.MorningHR);
-            morningText.setText(String.valueOf(morningHR));
+            morningText.setText(String.valueOf(df.format(morningHR)));
             TextView dayText = (TextView) findViewById(R.id.DayHR);
-            dayText.setText(String.valueOf(dayHR));
+            dayText.setText(String.valueOf(df.format(dayHR)));
             TextView eveningText = (TextView) findViewById(R.id.EveningHR);
-            eveningText.setText(String.valueOf(eveningHR));
+            eveningText.setText(String.valueOf(df.format(eveningHR)));
         }
 
         @Override
