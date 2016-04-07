@@ -2,6 +2,7 @@ package com.iss.android.wearable.datalayer;
 
 import android.content.ContentValues;
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -123,14 +124,13 @@ public class CSVManager {
 
     // A method that reads sleepData from the file defined in DataStorageManager
     // and transcribes it into a HashMap
-    public static HashMap<String, Double> ReadSleepData() {
+    public static HashMap<String, Double[]> ReadSleepData() {
 
-        HashMap<String, Double> result = new HashMap<>();
+        HashMap<String, Double[]> result = new HashMap<>();
 
         if (!DataStorageManager.sleepData.exists()) {
             return result;
         }
-
         // read file line by line
         try (BufferedReader br = new BufferedReader(new FileReader(DataStorageManager.sleepData))) {
 
@@ -141,21 +141,22 @@ public class CSVManager {
             while ((line = br.readLine()) != null) {
 
                 skip = !skip;
-
                 if (skip)
                     continue;
 
                 // split the line
 
                 String[] split = line.split("\",\"");
-
+                // Sometimes Google Sleep fucks up and inserts an extra line. Need this to rule that out
+                if (split.length<3 || split[3].length()<12){
+                    continue;
+                }
                 String date = split[3].substring(0, 12);
                 String[] date_split = date.split(". ");
                 date = date_split[2] + "-" + date_split[1] + "-" + date_split[0];
                 Double value = Double.parseDouble(split[12]);
-
-                result.put(date, value);
-
+                Double length = Double.parseDouble(split[5]);
+                result.put(date, new Double[]{value, length});
 
             }
 

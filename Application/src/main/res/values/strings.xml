@@ -66,5 +66,8 @@
     <string name="day">Day</string>
     <string name="evening">Evening</string>
     <string name="date">Date</string>
+    <string name="deepsleep">Deep Sleep</string>
+    <string name="lightsleep">Light Sleep</string>
+    <string name="sleeplength">Sleep Length</string>
 
 </resources>

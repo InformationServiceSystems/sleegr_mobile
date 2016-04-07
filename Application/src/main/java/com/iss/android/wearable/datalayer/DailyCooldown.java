@@ -289,10 +289,10 @@ public class DailyCooldown {
 
         // read the sleep file
 
-        HashMap<String, Double> sleepData = CSVManager.ReadSleepData();
+        HashMap<String, Double[]> sleepData = CSVManager.ReadSleepData();
 
         if (sleepData.containsKey(daystr)){
-            DeepSleep = sleepData.get(daystr);
+            DeepSleep = sleepData.get(daystr)[0];
         }
 
 

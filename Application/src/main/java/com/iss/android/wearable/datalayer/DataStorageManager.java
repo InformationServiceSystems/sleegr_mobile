@@ -74,9 +74,10 @@ public class DataStorageManager {
 
     // I overwrote it so that it now takes Internal Storage, which is more fitting for in-app-data.
     // All other methods wouldn't let me write when using the scheduled RPE values.
-    static String dataFolder = MainActivity.getContext().getFilesDir().toString();
+    // static String dataFolder = MainActivity.getContext().getFilesDir().toString();
+    static String dataFolder = Environment.getExternalStorageDirectory().getAbsolutePath();
     static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
-    static File userDataFolder = new File(dataFolder, "/triathlon");
+    static File userDataFolder = new File(dataFolder + "/triathlon");
 
     // A method that converts a file into a bytearray
     public static byte[] FileToBytes(File file) {
@@ -213,7 +214,6 @@ public class DataStorageManager {
 
     // A method that determines all the *.csv Files in a given timespan.
     public static ArrayList<ArrayList<File>> GetAllFilesToUpload(String UserID, int timeSpan){
-        Log.d("Position", "GetAllFilesToUpload from " + UserID);
 
         ArrayList<ArrayList<File>> result = new  ArrayList<>();
         //result.add(sleepData);
@@ -233,7 +233,6 @@ public class DataStorageManager {
 
                     day.add(file);
                 }
-            } else {
             }
 
             result.add(day);
