@@ -69,5 +69,6 @@
     <string name="deepsleep">Deep Sleep</string>
     <string name="lightsleep">Light Sleep</string>
     <string name="sleeplength">Sleep Length</string>
+    <string name="title_activity_check_database">CheckDatabaseActivity</string>
 
 </resources>

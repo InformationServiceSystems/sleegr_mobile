@@ -279,9 +279,18 @@ public class MainActivity extends FragmentActivity implements
             case R.id.setSchedule:
                 onsetSchedule();
                 return true;
+            case R.id.testDatabase:
+                testDatabase();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void testDatabase() {
+
+        final Intent CheckDatabase = new Intent(this, CheckDatabaseActivity.class);
+        startActivity(CheckDatabase);
     }
 
     // A method which starts the SetScheduleActivity

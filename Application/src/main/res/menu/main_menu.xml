@@ -32,5 +32,9 @@
         android:id="@+id/setSchedule"
         android:title="Set Schedule" />
 
+    <item
+        android:id="@+id/testDatabase"
+        android:title="Test Database" />
+
 
 </menu>

@@ -119,7 +119,7 @@ public class ISSContentProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
-        if (sortOrder == null || sortOrder == "") {
+        if (sortOrder == null || sortOrder.equals("")) {
             /**
              * By default sort on record IDs
              */
