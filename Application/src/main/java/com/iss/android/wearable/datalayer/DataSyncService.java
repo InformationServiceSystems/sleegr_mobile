@@ -153,14 +153,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         }catch (Exception ex){
 
-
-
         }
-
         return START_STICKY;
-
-
-
     }
 
     @Override
