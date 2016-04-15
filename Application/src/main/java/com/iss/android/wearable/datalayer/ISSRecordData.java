@@ -61,20 +61,6 @@ public class ISSRecordData implements Serializable {
     // Converts the ISSRecordData to a String, the way it is stored in a *.csv
     public String toString(){
 
-        ISSContentProvider provider = new ISSContentProvider();
-        ContentValues values = new ContentValues();
-        values.put(ISSContentProvider.USERID, UserID);
-        values.put(ISSContentProvider.MEASUREMENT, MeasurementType);
-        values.put(ISSContentProvider.TIMESTAMP, Timestamp);
-        values.put(ISSContentProvider.EXTRA, ExtraData);
-        values.put(ISSContentProvider.VALUE1, Value1);
-        values.put(ISSContentProvider.VALUE2, Value2);
-        values.put(ISSContentProvider.VALUE3, Value3);
-
-        provider.insert(ISSContentProvider.CONTENT_URI, values);
-
-        Log.d("Inserting", "a value");
-
         String sep = ",";
         return UserID + sep + MeasurementType + sep + Timestamp + sep + ExtraData + sep + Value1 + sep + Value2 + sep + Value3;
 
@@ -112,5 +98,19 @@ public class ISSRecordData implements Serializable {
     }
 
 
+    public void saveToContentProvider() {
+        ISSContentProvider provider = new ISSContentProvider();
+        ContentValues values = new ContentValues();
+        values.put(ISSContentProvider.USERID, UserID);
+        values.put(ISSContentProvider.MEASUREMENT, MeasurementType);
+        values.put(ISSContentProvider.TIMESTAMP, Timestamp);
+        values.put(ISSContentProvider.EXTRA, ExtraData);
+        values.put(ISSContentProvider.VALUE1, Value1);
+        values.put(ISSContentProvider.VALUE2, Value2);
+        values.put(ISSContentProvider.VALUE3, Value3);
 
+        provider.insert(ISSContentProvider.CONTENT_URI, values);
+
+        Log.d("Inserting", "a value");
+    }
 }
