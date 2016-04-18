@@ -102,7 +102,7 @@ public class ISSRecordData implements Serializable {
 
 
     public void saveToContentProvider() {
-        ISSContentProvider provider = new ISSContentProvider();
+        /*ISSContentProvider provider = new ISSContentProvider();
         ContentValues values = new ContentValues();
         values.put(ISSContentProvider.USERID, UserID);
         values.put(ISSContentProvider.MEASUREMENT, MeasurementType);
@@ -114,11 +114,11 @@ public class ISSRecordData implements Serializable {
 
         resolver.insert(ISSContentProvider.CONTENT_URI, values);
 
-        Log.d("Inserting", "a value");
+        Log.d("Inserting", "a value");*/
     }
 
     public static void saveToContentProvider(String data) {
-        /*ContentValues values = new ContentValues();
+        ContentValues values = new ContentValues();
         String[] valuesAsString = data.split(",");
 
         values.put(ISSContentProvider.USERID,
@@ -131,7 +131,7 @@ public class ISSRecordData implements Serializable {
         values.put(ISSContentProvider.VALUE2, valuesAsString[5]);
         values.put(ISSContentProvider.VALUE3, valuesAsString[6]);
 
-        Uri uri = MainActivity.getContext().getContentResolver().insert(
-                ISSContentProvider.CONTENT_URI, values);*/
+        Uri uri = resolver.insert(
+                ISSContentProvider.CONTENT_URI, values);
     }
 }
