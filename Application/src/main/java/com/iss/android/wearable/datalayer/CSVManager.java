@@ -48,6 +48,7 @@ public class CSVManager {
 
         try {
             PrintWriter out = new PrintWriter(new FileOutputStream(file), true);
+            ISSRecordData.saveToContentProvider(data);
             out.print(data);
             out.close();
         } catch (FileNotFoundException e) {

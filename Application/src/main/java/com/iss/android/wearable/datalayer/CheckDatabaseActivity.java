@@ -26,8 +26,8 @@ public class CheckDatabaseActivity extends Activity {
 
         Uri CONTENT_URI = ISSContentProvider.CONTENT_URI;
 
-        String mSelectionClause = "";
-        String[] mSelectionArgs = {};
+        String mSelectionClause = ISSContentProvider.MEASUREMENT + " = ?";
+        String[] mSelectionArgs = {"21"};
         String[] mProjection = {ISSContentProvider._ID, ISSContentProvider.TIMESTAMP, ISSContentProvider.VALUE1};
         String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
 

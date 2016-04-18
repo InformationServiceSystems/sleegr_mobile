@@ -445,10 +445,12 @@ public class MainActivity extends Activity {
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
+                        dialog.dismiss();
                     }
                 });
 
         AlertDialog dialog = builder.create();
+        dialog.setCancelable(true);
         dialog.show();
     }
 

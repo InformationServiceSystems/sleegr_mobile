@@ -1,6 +1,8 @@
 package com.iss.android.wearable.datalayer;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.net.Uri;
 import android.util.Log;
 
 import java.io.Serializable;
@@ -15,6 +17,7 @@ import java.util.Date;
 public class ISSRecordData implements Serializable {
 
     static final long serialVersionUID = 1L;
+    static ContentResolver resolver = MainActivity.getContext().getContentResolver();
 
     static final int MEASUREMENT_HR = 21,
             MEASUREMENT_ACCELEROMETER = 1,
@@ -109,8 +112,26 @@ public class ISSRecordData implements Serializable {
         values.put(ISSContentProvider.VALUE2, Value2);
         values.put(ISSContentProvider.VALUE3, Value3);
 
-        provider.insert(ISSContentProvider.CONTENT_URI, values);
+        resolver.insert(ISSContentProvider.CONTENT_URI, values);
 
         Log.d("Inserting", "a value");
+    }
+
+    public static void saveToContentProvider(String data) {
+        /*ContentValues values = new ContentValues();
+        String[] valuesAsString = data.split(",");
+
+        values.put(ISSContentProvider.USERID,
+                (Integer.valueOf(valuesAsString[0])));
+        values.put(ISSContentProvider.MEASUREMENT,
+                (Integer.valueOf(valuesAsString[1])));
+        values.put(ISSContentProvider.TIMESTAMP, valuesAsString[2]);
+        values.put(ISSContentProvider.EXTRA, valuesAsString[3]);
+        values.put(ISSContentProvider.VALUE1, valuesAsString[4]);
+        values.put(ISSContentProvider.VALUE2, valuesAsString[5]);
+        values.put(ISSContentProvider.VALUE3, valuesAsString[6]);
+
+        Uri uri = MainActivity.getContext().getContentResolver().insert(
+                ISSContentProvider.CONTENT_URI, values);*/
     }
 }
