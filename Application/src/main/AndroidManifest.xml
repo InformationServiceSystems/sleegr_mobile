@@ -15,8 +15,8 @@
 --><!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iss.android.wearable.datalayer"
-    android:versionCode="33"
-    android:versionName="Tucana 33">
+    android:versionCode="34"
+    android:versionName="Tucana 34">
 
     <uses-sdk
         android:minSdkVersion="19"
