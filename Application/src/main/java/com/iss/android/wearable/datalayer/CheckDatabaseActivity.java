@@ -28,8 +28,8 @@ public class CheckDatabaseActivity extends Activity {
 
         String mSelectionClause = ISSContentProvider.MEASUREMENT + " = ?";
         String[] mSelectionArgs = {"21"};
-        String[] mProjection = {ISSContentProvider._ID, ISSContentProvider.TIMESTAMP, ISSContentProvider.VALUE1};
-        String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
+        String[] mProjection = {ISSContentProvider._ID, ISSContentProvider.DATE, ISSContentProvider.TIMESTAMP, ISSContentProvider.VALUE1};
+        String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC, " + ISSContentProvider.DATE + " DESC";
 
         // Does a query against the table and returns a Cursor object
         Cursor mCursor = getContentResolver().query(

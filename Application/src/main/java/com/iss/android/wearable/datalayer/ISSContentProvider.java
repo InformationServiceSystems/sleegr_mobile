@@ -28,6 +28,7 @@ public class ISSContentProvider extends ContentProvider {
 
     static final String _ID = "_id";
     static final String USERID = "UserID";
+    static final String DATE = "date";
     static final String TIMESTAMP = "timestamp";
     static final String EXTRA = "extra";
     static final String VALUE1 = "value1";
@@ -60,6 +61,7 @@ public class ISSContentProvider extends ContentProvider {
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     USERID + " INTEGER NOT NULL, " +
                     MEASUREMENT + " INTEGER NOT NULL, " +
+                    DATE + " TEXT NOT NULL, " +
                     TIMESTAMP + " TEXT NOT NULL, " +
                     EXTRA + " TEXT NOT NULL, " +
                     VALUE1 + " TEXT NOT NULL, " +

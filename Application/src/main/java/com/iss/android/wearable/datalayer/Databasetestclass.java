@@ -44,7 +44,8 @@ public class Databasetestclass {
                 (20));
         values.put(ISSContentProvider.MEASUREMENT,
                 (33));
-        values.put(ISSContentProvider.TIMESTAMP, generateDate());
+        values.put(ISSContentProvider.DATE, generateDate());
+        values.put(ISSContentProvider.TIMESTAMP, generateTime());
         values.put(ISSContentProvider.EXTRA, "");
         int hrvalue = ((int) (Math.random() * 100) + 60);
         values.put(ISSContentProvider.VALUE1, hrvalue);
@@ -57,7 +58,12 @@ public class Databasetestclass {
 
     private static String generateDate() {
         date.add(Calendar.SECOND, 1);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        return sdf.format(date.getTime());
+    }
+
+    private static String generateTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
         return sdf.format(date.getTime());
     }
 }

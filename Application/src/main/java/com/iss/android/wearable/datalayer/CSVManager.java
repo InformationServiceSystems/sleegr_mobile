@@ -65,7 +65,8 @@ public class CSVManager {
                 (Integer.valueOf(valuesAsString[0])));
         values.put(ISSContentProvider.MEASUREMENT,
                 (Integer.valueOf(valuesAsString[1])));
-        values.put(ISSContentProvider.TIMESTAMP, valuesAsString[2]);
+        values.put(ISSContentProvider.DATE, valuesAsString[2].substring(0,10));
+        values.put(ISSContentProvider.TIMESTAMP, valuesAsString[2].substring(11,20));
         values.put(ISSContentProvider.EXTRA, valuesAsString[3]);
         values.put(ISSContentProvider.VALUE1, valuesAsString[4]);
         values.put(ISSContentProvider.VALUE2, valuesAsString[5]);

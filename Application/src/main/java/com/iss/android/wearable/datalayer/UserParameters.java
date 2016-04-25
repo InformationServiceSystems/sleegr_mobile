@@ -36,24 +36,24 @@ public class UserParameters {
                 DataSyncService.OutputEventSq("Processing day " + i + " / " + timespan + " ...");
 
                 Date date = getDateFromToday(i);
-                DailyCooldown dailyCooldown = new DailyCooldown(date);
+                DailyData dailyData = new DailyData(date);
 
-                if (dailyCooldown.DALDA != null) {
-                    userDALDA.AddFirstValue(date, dailyCooldown.DALDA);
-                }
-
-                if (dailyCooldown.RPE != null) {
-                    userRPE.AddFirstValue(date, dailyCooldown.RPE);
-                }
-                if (dailyCooldown.alpha2min != null) {
-                    alpha2min.AddFirstValue(date, dailyCooldown.alpha2min);
-                }
-                if (dailyCooldown.alphaAllData != null) {
-                    alpha.AddFirstValue(date, dailyCooldown.alphaAllData);
+                if (dailyData.getDALDA() != null) {
+                    userDALDA.AddFirstValue(date, dailyData.getDALDA());
                 }
 
-                if (dailyCooldown.DeepSleep != null) {
-                    userDS.AddFirstValue(date, dailyCooldown.DeepSleep);
+                if (dailyData.getRPE() != null) {
+                    userRPE.AddFirstValue(date, dailyData.getRPE());
+                }
+                if (dailyData.getAlpha2min() != null) {
+                    alpha2min.AddFirstValue(date, dailyData.getAlpha2min());
+                }
+                if (dailyData.getAlphaAllData() != null) {
+                    alpha.AddFirstValue(date, dailyData.getAlphaAllData());
+                }
+
+                if (dailyData.getDeepSleep() != null) {
+                    userDS.AddFirstValue(date, dailyData.getDeepSleep());
                 }
 
             }catch (Exception ex){

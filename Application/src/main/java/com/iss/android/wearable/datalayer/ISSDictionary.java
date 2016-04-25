@@ -1,5 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
+import android.database.Cursor;
+
 /**
  * Created by micha on 25.04.2016.
  */
@@ -25,5 +27,16 @@ public class ISSDictionary {
                 return MEASUREMENT_HR;
         }
         return 0;
+    }
+
+    public static ISSRecordData CursorToISSRecordDate(Cursor mCursor) {
+        ISSRecordData record = new ISSRecordData(mCursor.getInt(1),
+                        mCursor.getInt(2),
+                        mCursor.getString(3) + mCursor.getString(4),
+                        mCursor.getString(5),
+                        mCursor.getFloat(6),
+                        mCursor.getFloat(7),
+                        mCursor.getFloat(8));
+        return record;
     }
 }

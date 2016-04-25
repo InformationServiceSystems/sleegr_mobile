@@ -165,6 +165,7 @@ public class MainActivity extends FragmentActivity implements
             startService(intent);
         }
 
+        //noinspection WrongConstant
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
 
         // This is a method to fill in the database to test the IntelXDK app.
@@ -688,17 +689,17 @@ public class MainActivity extends FragmentActivity implements
             Calendar date = new GregorianCalendar();
             date.add(Calendar.DATE, -29 + mNum);
             // Fill the GraphView with data for the current date
-            DailyCooldown cooldown = new DailyCooldown(date.getTime());
+            DailyData dailyData = new DailyData(date.getTime());
             GraphView graph = (GraphView) v.findViewById(R.id.graphtoday);
             TextView text = (TextView) v.findViewById(R.id.textV1);
-            new PlotGraphsTask(graph, text, v.getContext()).execute(cooldown);
+            new PlotGraphsTask(graph, text, v.getContext()).execute(dailyData);
             // I'll think about a solution with ASyncTask that will plot the graphs point for point.
             // Currently ultralaggy.
             GraphView[] graphs = {graph};
             TextView[] labels = new TextView[]{text};
 
             // I create specific formatter inline. This is more general and java-ish :)
-            VisualizationsPlotter.Plot(cooldown.visualizations, graphs, labels, new GraphStyler() {
+            VisualizationsPlotter.Plot(dailyData.getVisualizations(), graphs, labels, new GraphStyler() {
                 @Override
                 public void styleGraph(GraphView graphView, Visualizations.Subplot subplot) {
 
@@ -735,19 +736,19 @@ public class MainActivity extends FragmentActivity implements
 
             // Fill the TextViews below with the appropriate data
             TextView intctr = (TextView) v.findViewById(R.id.intensityCtr);
-            intctr.setText("Intensity ctr.: " + formatDouble(cooldown.alpha2min));
+            intctr.setText("Intensity ctr.: " + formatDouble(dailyData.getAlpha2min()));
             TextView intensity = (TextView) v.findViewById(R.id.intensity);
-            intensity.setText("Intensity: " + formatDouble(cooldown.alphaAllData));
+            intensity.setText("Intensity: " + formatDouble(dailyData.getAlphaAllData()));
 
             TextView meHR = (TextView) v.findViewById(R.id.morningEveningHR);
-            meHR.setText("HR: " + formatDouble(cooldown.morningHR) + " / " + formatDouble(cooldown.eveningHR));
+            meHR.setText("HR: " + formatDouble(dailyData.getMorningHR()) + " / " + formatDouble(dailyData.getEveningHR()));
 
             TextView dalda = (TextView) v.findViewById(R.id.dalda);
-            dalda.setText("DALDA scale: " + formatDouble(cooldown.DALDA));
+            dalda.setText("DALDA scale: " + formatDouble(dailyData.getDALDA()));
             TextView rpe = (TextView) v.findViewById(R.id.rpe);
-            rpe.setText("RPE scale: " + formatDouble(cooldown.RPE));
+            rpe.setText("RPE scale: " + formatDouble(dailyData.getRPE()));
             TextView sleep = (TextView) v.findViewById(R.id.sleep);
-            sleep.setText("Deep Sleep Cycles: " + formatDouble(cooldown.DeepSleep));
+            sleep.setText("Deep Sleep Cycles: " + formatDouble(dailyData.getDeepSleep()));
             return v;
         }
 
@@ -758,7 +759,7 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    private static class PlotGraphsTask extends AsyncTask<DailyCooldown, Void, Void> {
+    private static class PlotGraphsTask extends AsyncTask<DailyData, Void, Void> {
         public GraphView graph;
         public TextView text;
         public Context context;
@@ -769,7 +770,7 @@ public class MainActivity extends FragmentActivity implements
             this.context = argcontext;
         }
 
-        protected Void doInBackground(DailyCooldown... cooldown) {
+        protected Void doInBackground(DailyData... cooldown) {
             /*GraphView[] graphs = {graph};
             TextView[] labels = new TextView[]{text};
             VisualizationsPlotter.Plot(cooldown[0].visualizations, graphs, labels, context, "day");*/
