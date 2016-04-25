@@ -175,7 +175,9 @@ public class DailyCooldown {
         }
 
         // extract resting heart rate data
-        ArrayList<List<ISSRecordData>> resting = CSVManager.ReadSplitCSVdata(daystr, userID, "Resting");
+
+        // ArrayList<List<ISSRecordData>> resting = CSVManager.ReadSplitCSVdata(daystr, userID, "Resting");
+        ArrayList<List<ISSRecordData>> resting = DatabaseManager.GetData(daystr, "Resting");
 
         for (List<ISSRecordData> rest: resting){
 

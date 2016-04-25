@@ -33,7 +33,6 @@ public class CSVManager {
 
         for (int i = 0; i < exampleData.size(); i++) {
             ISSRecordData record = exampleData.get(i);
-            record.saveToContentProvider();
 
             bld.append(record.toString());
             bld.append("\r\n");
