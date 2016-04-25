@@ -17,20 +17,20 @@ import java.util.Date;
  */
 public class VisualizationsPlotter {
 
-    public static void Plot(Visualizations vis, GraphView [] graphs, TextView [] labels, GraphStyler graphStyler){
+    public static void Plot(Visualizations vis, GraphView[] graphs, TextView[] labels, GraphStyler graphStyler) {
 
-        for (int i = 0; i < vis.AllSubplots.size(); i++){
+        for (int i = 0; i < vis.AllSubplots.size(); i++) {
 
             Visualizations.Subplot subplot = vis.AllSubplots.get(i);
             labels[i].setText(subplot.name);
 
             GraphView graph = graphs[i];
 
-            graphStyler.styleGraph(graph,subplot);
+            graphStyler.styleGraph(graph, subplot);
 
             Date[] dates = subplot.getBounds();
 
-            if (dates != null){
+            if (dates != null) {
                 graph.getViewport().setXAxisBoundsManual(true);
                 graph.getViewport().setMinX(dates[0].getTime());
                 graph.getViewport().setMaxX(dates[1].getTime());
@@ -38,7 +38,7 @@ public class VisualizationsPlotter {
 
             graph.removeAllSeries();
 
-            for (TimeSeries series: subplot.data){
+            for (TimeSeries series : subplot.data) {
                 PutTimeSeriesToGraph(graph, series);
             }
 
@@ -48,25 +48,22 @@ public class VisualizationsPlotter {
             graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
 
 
-
-
-
         }
 
     }
 
     // Plots TimeSeries as a graph
-    public static void PutTimeSeriesToGraph(GraphView graph,  TimeSeries series){
+    public static void PutTimeSeriesToGraph(GraphView graph, TimeSeries series) {
 
-        BaseSeries<DataPoint> data_values= null;
+        BaseSeries<DataPoint> data_values = null;
 
-        switch (series.LineType){
+        switch (series.LineType) {
             case Line:
-                data_values = new LineGraphSeries<DataPoint>(new DataPoint[] {});
+                data_values = new LineGraphSeries<DataPoint>(new DataPoint[]{});
                 break;
             case Bar:
-                data_values = new BarGraphSeries<DataPoint>(new DataPoint[] {});
-                ((BarGraphSeries<DataPoint>)data_values).setSpacing(20);
+                data_values = new BarGraphSeries<DataPoint>(new DataPoint[]{});
+                ((BarGraphSeries<DataPoint>) data_values).setSpacing(20);
                 break;
         }
 
@@ -77,7 +74,7 @@ public class VisualizationsPlotter {
         boolean anything = false;
         for (int i = 0; i < series.Values.size(); i += 1) { // the step needs to be one, otherwise the weekly plot breaks
 
-            if (series.Values.get(i).y < 0){
+            if (series.Values.get(i).y < 0) {
                 continue;
             }
             anything = true;
@@ -86,16 +83,14 @@ public class VisualizationsPlotter {
             Double y = series.Values.get(i).y;
 
 
-
             try {
                 data_values.appendData(new DataPoint(x, y), true, series.Values.size());
-            }catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 System.out.print(ex.toString());
             }
         }
 
-        if (!anything){
+        if (!anything) {
             return;
         }
 
@@ -113,8 +108,5 @@ public class VisualizationsPlotter {
         newDate.set(Calendar.MILLISECOND, 0);
 
         return newDate.getTime();
-
     }
-
-
 }
