@@ -429,6 +429,7 @@ public class DailyCooldown {
                 continue;
             }
 
+
             series.AddValue(recordData.getTimestamp(), recordData.Value1);
 
         }
