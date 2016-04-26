@@ -74,8 +74,8 @@ public class DataStorageManager {
 
     // I overwrote it so that it now takes Internal Storage, which is more fitting for in-app-data.
     // All other methods wouldn't let me write when using the scheduled RPE values.
-    // static String dataFolder = MainActivity.getContext().getFilesDir().toString();
-    static String dataFolder = Environment.getExternalStorageDirectory().getAbsolutePath();
+    static String dataFolder = MainActivity.getContext().getFilesDir().toString();
+    // static String dataFolder = Environment.getExternalStorageDirectory().getAbsolutePath();
     static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
     static File userDataFolder = new File(dataFolder + "/triathlon");
 
