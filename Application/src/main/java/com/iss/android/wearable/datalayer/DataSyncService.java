@@ -32,6 +32,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public class DataSyncService extends Service implements DataApi.DataListener,
@@ -52,6 +54,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
 
     String uploadUrl = "http://46.101.214.58:5001/upload2/";
+    private boolean FetchedData;
 
     // A method broadcasting a String.
     public static void OutputEventSq(String str) {
@@ -351,12 +354,25 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             }
         }).start();
 
+        // This is a flag that gets set to true if the watch actually sent some data.
+        // Otherwise we just assume there's no new data.
+        FetchedData = false;
+        TimerTask action = new TimerTask() {
+            public void run() {
+                if (!FetchedData) {
+                    OutputEvent("No new data available.");
+                }
+            }
+        };
+        Timer CheckIfDataWasFetched = new Timer();
+        CheckIfDataWasFetched.schedule(action, 10000);
     }
 
     // A method that handles deletion of data that has successfully been send to the phone.
     public void ClearWatchData() {
 
         OutputEvent("Data saved. Clearing data on the watch");
+        FetchedData = true;
 
         new Thread(new Runnable() {
             @Override

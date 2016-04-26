@@ -60,6 +60,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToday;
 
@@ -164,6 +166,19 @@ public class MainActivity extends FragmentActivity implements
             Intent intent = new Intent(this, DataSyncService.class);
             startService(intent);
         }
+
+        // This resets the app every 3 hours. This fixes the date issue.
+        // I don't know how to dynamically do this, but this shouldn't be too bad.
+        TimerTask action = new TimerTask() {
+            public void run() {
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
+        };
+
+        Timer caretaker = new Timer();
+        caretaker.schedule(action, 3*60*60000);
 
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
 
@@ -321,7 +336,6 @@ public class MainActivity extends FragmentActivity implements
         if (dataUpdateReceiver == null) dataUpdateReceiver = new DataUpdateReceiver();
         IntentFilter intentFilter = new IntentFilter(DataSyncService.NEW_MESSAGE_AVAILABLE);
         registerReceiver(dataUpdateReceiver, intentFilter);
-
     }
 
     @Override
