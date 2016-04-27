@@ -128,9 +128,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             }
 
             if (event.values.length == 1) {
-                // TODO: add the heart rate value to the content. its position is value0
+                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], 0, 0);
+                DataStorageManager.insertISSRecordData(data);
             } else {
-                // TODO: add other data to the contentprovider. it's all 3 values.
+                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2]);
+                DataStorageManager.insertISSRecordData(data);
             }
 
             if (recordedSensorTypes.isEmpty()) {
@@ -256,7 +258,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                     int result = ReadHeartRateData(characteristic);
 
-                    // TODO: Add a ISSRecord to the database with the hrvalue "result"
+                    ISSRecordData data = new ISSRecordData(UserID, Sensor.TYPE_HEART_RATE, GetDateNow(), GetTimeNow(), currentState, result, 0, 0);
+                    DataStorageManager.insertISSRecordData(data);
 
                     sendHR(result);
 
@@ -447,21 +450,18 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    // Adds new data to a file somewhere to be stored
-    public void AddNewData(int uid, int sensortype, String date, String timenow, String extras, float v0, float v1, float v2) {
-
-        // data format: UserID, MeasurementType, Timestamp, ExtraData, MeasurementValue
-        ISSRecordData data = new ISSRecordData(uid, sensortype, date, timenow, extras, v0, v1, v2);
-        // TODO: insert the ISSRecordData into the table
-
-    }
-
     // returns the current time in string form
     public String GetTimeNow() {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
-        String currentDateandTime = sdf.format(new Date());
-        return currentDateandTime;
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        return sdf.format(new Date());
+
+    }
+
+    public String GetDateNow() {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
+        return sdf.format(new Date());
 
     }
 
@@ -697,7 +697,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                 // clear the existing data on the smartwatch
 
-                // TODO: Delete the content of the table where the Records get stored.
+                if (DataStorageManager.deleteISSRecords() > 0){
+                    OutputEvent("Data transferred");
+                };
 
             }
 

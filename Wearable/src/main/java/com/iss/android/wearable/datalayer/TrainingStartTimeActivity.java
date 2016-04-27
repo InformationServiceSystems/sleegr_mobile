@@ -56,16 +56,15 @@ public class TrainingStartTimeActivity extends Activity {
     }
 
     public void onSubmit(View view){
-
         NumberPicker hourPicker = (NumberPicker) findViewById(R.id.hourPicker);
         NumberPicker minutePicker = (NumberPicker) findViewById(R.id.minutePicker);
 
         float hour = hourPicker.getValue();
         float minute = minutePicker.getValue();
 
-        SensorsDataService.itself.TrainingEnd(hour, minute);
+        // TODO: Think about what to do here. Maybe introduce an extra table where every measurement is stored?
+        // SensorsDataService.itself.TrainingEnd(hour, minute);
         finish();
-
     }
 
 }

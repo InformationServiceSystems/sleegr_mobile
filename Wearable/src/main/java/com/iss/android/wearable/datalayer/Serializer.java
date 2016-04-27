@@ -25,35 +25,6 @@ import java.io.ObjectOutputStream;
  */
 public class Serializer {
 
-    // Serialises an object to a file
-    public static void SerializeToFile(Object obj, File file) throws IOException {
-
-        FileOutputStream fileOut;
-
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-
-        fileOut = new FileOutputStream(file);
-        byte[] data = SerializeToBytes(obj);
-
-        fileOut.write(data);
-        fileOut.close();
-
-    }
-
-    // Reads a file and constructs an object containing the contents of the file
-    public static Object DeserializeFromFile(File file) throws IOException, ClassNotFoundException {
-
-        FileInputStream fileIn;
-
-        fileIn = new FileInputStream(file);
-        byte[] data = InputStreamToByte(fileIn);
-        fileIn.close();
-
-        return DeserializeFromBytes(data);
-    }
-
     // Serialises an object to a byte array
     public static byte[] SerializeToBytes(Object object) throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -61,52 +32,6 @@ public class Serializer {
             out.writeObject(object);
             return bos.toByteArray();
         }
-    }
-
-    // deserialises an object from a byte array
-    public static Object DeserializeFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-             ObjectInput in = new ObjectInputStream(bis)) {
-            return in.readObject();
-        }
-    }
-
-    // transforms an inputstream to a byte array
-    public static byte[] InputStreamToByte(InputStream is) throws IOException {
-
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-        int nRead;
-        byte[] data = new byte[16384];
-
-        while ((nRead = is.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, nRead);
-        }
-
-        buffer.flush();
-
-        return buffer.toByteArray();
-
-    }
-
-    public static byte[] FileToBytes(File file) {
-
-        int size = (int) file.length();
-        byte[] bytes = new byte[size];
-
-        try {
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-            buf.read(bytes, 0, bytes.length);
-            buf.close();
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return bytes;
     }
 
 }

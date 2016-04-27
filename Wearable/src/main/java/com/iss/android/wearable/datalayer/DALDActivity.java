@@ -66,11 +66,13 @@ public class DALDActivity extends Activity {
                 }
 
                 if (time.equals("evening")) {
-                    SensorsDataService.itself.AddTrainingScore(SelectedIndex(rpe), "RPE");
+                    // TODO: Check what needs to be done here.
+                    // SensorsDataService.itself.AddTrainingScore(SelectedIndex(rpe), "RPE");
                 }
 
                 for (int i = 0; i < rgs.length; i++) {
-                    SensorsDataService.itself.AddTrainingScore(SelectedIndex(rgs[i])-1, daldaItems[i]);
+                    // TODO: And here.
+                    // SensorsDataService.itself.AddTrainingScore(SelectedIndex(rgs[i])-1, daldaItems[i]);
                 }
 
                 finish();

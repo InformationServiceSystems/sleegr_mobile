@@ -152,6 +152,10 @@ public class MainActivity extends Activity {
     };
     private DataUpdateReceiver dataUpdateReceiver;
 
+    public static Context getContext() {
+        return itself;
+    }
+
     @Override
     public void onCreate(Bundle b) {
 
