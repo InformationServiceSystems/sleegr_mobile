@@ -21,7 +21,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -43,6 +42,8 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -96,10 +97,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     //int [] sensorIDs = new int[]{ Sensor.TYPE_SIGNIFICANT_MOTION};
     TimerTask timerTask = null;
     Timer timer = null;
-    File mutexFile = new File(Environment.getExternalStorageDirectory(), "/triathlon_state.backup");
-
-
-    File sensorsData = new File(Environment.getExternalStorageDirectory(), "/triathlon_iss_package.bin");
     BluetoothDevice hrmDevice = null;
     BluetoothGatt mBluetoothGatt = null;
     BluetoothGattService heartRateService = null;
@@ -131,9 +128,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             }
 
             if (event.values.length == 1) {
-                AddNewData(UserID, event.sensor.getType(), GetTimeNow(), currentState, event.values[0], 0, 0);
+                // TODO: add the heart rate value to the content. its position is value0
             } else {
-                AddNewData(UserID, event.sensor.getType(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2]);
+                // TODO: add other data to the contentprovider. it's all 3 values.
             }
 
             if (recordedSensorTypes.isEmpty()) {
@@ -180,7 +177,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             };
     public boolean needToShowRPE = false;
     private String USERID_FORDATASTORAGE = "smartwatch";
-    private int USER_ASSUMED_SYNCTIME = 30*2;
+    private static HashMap<String, Boolean> recordedActivities;
 
     {
         mGattCallback = new BluetoothGattCallback() {
@@ -244,8 +241,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                                              BluetoothGattCharacteristic characteristic,
                                              int status) {
 
-                //OutputEvent("Characteristic read ");
-
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     int BatteryStatus = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
                     sendBatteryStatus(BatteryStatus);
@@ -261,19 +256,19 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                     int result = ReadHeartRateData(characteristic);
 
-                    AddNewData(UserID, Sensor.TYPE_HEART_RATE, GetTimeNow(), currentState, result, 0, 0);
+                    // TODO: Add a ISSRecord to the database with the hrvalue "result"
 
                     sendHR(result);
-
-                    //SendHRtoSmartphone(result);
-
-                    //mBluetoothGatt.disconnect();
 
                     mBluetoothGatt.readCharacteristic(batteryLevelCharacteristic);
                 } else return;
 
             }
         };
+    }
+
+    public static HashMap<String, Boolean> getRecordedActivities() {
+        return recordedActivities;
     }
 
     @Override
@@ -317,33 +312,17 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
-        // create sensor data file
-
-        if (!sensorsData.exists()) {
-            try {
-                Serializer.SerializeToFile(alldata, sensorsData);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         isInitialising = false;
-
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
     }
 
     int timerTime = 0;
     String currentState = "Idle";
     int timerTimeout = 60 * 60 * 24;
-    int COOLING_MEASUREMENT_TIME = 60 * 60 * 1; // cooling is measured for 60 minutes
     int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 3 min
-    int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
-    int COOLING_RPE_TIME = 60 * 15;
 
     // Checks if 5 minutes have passed since pressing the cooldown button.
     public void TimerEvent() {
-
         timerTime = timerTime + 1;
 
         // this checks for missing hrm
@@ -359,35 +338,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         SendTimerTime(timerTime / 60, timerTime % 60);
 
         if (timerTime > timerTimeout) {
-
-            boolean sleepMode = isNowASleepingHour() && currentState.equals("Resting");
-            boolean startRecovery = currentState.equals("Cooldown");
+            boolean sleepMode = currentState.equals("eveningHR");
+            BringIntoState("Idle");
 
             if (sleepMode){
-                BringIntoState("Idle");
                 startSleeping();
-            } /*else if(startRecovery){
-                BringIntoState("Recovery");
-            }*/
-            else{
-                BringIntoState("Idle");
             }
-
-
         }
-
-
-
         OutputCurrentState();
-
-
-        /*locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, gpsListener, null);
-        Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        gpsListener.onLocationChanged(lastKnownLocation);*/
-
-
-        DataStorageManager.InitializeTriathlonFolder();
-
     }
 
     static boolean isNowASleepingHour(){
@@ -430,15 +388,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         myIntent.putExtra("daldaItems", daldaItems);
         myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(myIntent);
-
-        /*SensorsDataService.itself.needToShowRPE = true;
-
-        Intent dialogIntent = new Intent(this, MainActivity.class);
-        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(dialogIntent);
-
-        Intent intent = new Intent(this.ASK_USER_FOR_RPE);
-        sendBroadcast(intent);*/
     }
 
     public void OutputCurrentState() {
@@ -449,18 +398,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     // broadcasts the time elapsed via intent
     public void SendTimerTime(int minutes, int seconds) {
-
         Intent intent = new Intent(UPDATE_TIMER_VALUE);
         intent.putExtra("minutes", minutes);
         intent.putExtra("seconds", seconds);
         sendBroadcast(intent);
-
     }
 
     // Unregisters and registers sensors.
     public void ResetSensors() {
-
-
         if (isInitialising) {
             return;
         }
@@ -486,10 +431,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                     mSensorManager.registerListener(sensorEventListener, androidSensor, SensorManager.SENSOR_DELAY_NORMAL);
                 }
 
-            /*if (mBluetoothGatt != null ){
-                mBluetoothGatt.connect();
-            }*/
-
                 recordedSensorTypes.clear();
 
                 for (int sensor : sensorIDs) {
@@ -507,26 +448,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     // Adds new data to a file somewhere to be stored
-    public void AddNewData(int uid, int sensortype, String timenow, String extras, float v0, float v1, float v2) {
+    public void AddNewData(int uid, int sensortype, String date, String timenow, String extras, float v0, float v1, float v2) {
 
         // data format: UserID, MeasurementType, Timestamp, ExtraData, MeasurementValue
-        ISSRecordData data = new ISSRecordData(uid, sensortype, timenow, extras, v0, v1, v2);
-        alldata.add(data);
-
-        if (alldata.size() % 30 == 0) {
-
-            ArrayList<ISSRecordData> copy = new ArrayList<>(alldata); // copy needed in order to avoid synchronization issues
-            SaveNewDataToFile(copy);
-            alldata.clear();
-            System.gc();
-
-        }
-
-    }
-
-    private void SaveNewDataToFile(ArrayList<ISSRecordData> data) {
-
-        DataStorageManager.SaveNewDataToFile(data, USERID_FORDATASTORAGE);
+        ISSRecordData data = new ISSRecordData(uid, sensortype, date, timenow, extras, v0, v1, v2);
+        // TODO: insert the ISSRecordData into the table
 
     }
 
@@ -541,12 +467,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     public void connectDevice(BluetoothDevice device) {
         mBluetoothGatt = device.connectGatt(this, true, mGattCallback);
-    }
-
-    public void ReadCharact() {
-        boolean result = mBluetoothGatt.readCharacteristic(heartRateCharacteristic);
-
-        //int resultData = ReadHeartRateData(heartRateCharacteristic);
     }
 
     // broadcasts the heart rate via intent
@@ -565,35 +485,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         sendBroadcast(batteryintent);
     }
 
-    public void SendHRtoSmartphone(float hr) {
-
-        NodeApi.GetConnectedNodesResult result =
-                Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-        List<Node> nodes = result.getNodes();
-        String nodeId = null;
-
-        byte[] data = null;
-
-        /*long startTime = System.currentTimeMillis();
-
-        try {
-            data = Serializer.FileToBytes(sensorsData);
-            //data = Serializer.SerializeToBytes(alldata);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        long totalTime = System.currentTimeMillis() - startTime;*/
-
-        if (nodes.size() > 0) {
-            for (int i = 0; i < nodes.size(); i++) {
-                nodeId = nodes.get(i).getId();
-                Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, Float.toString(hr), data);
-            }
-        }
-
-    }
-
     // reads the heart rate from the bluetooth sensor's value
     public int ReadHeartRateData(BluetoothGattCharacteristic characteristic) {
         int flag = characteristic.getProperties();
@@ -610,23 +501,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    public void RecordActivitySwitch() {
-
-        AddNewData(UserID, 0, GetTimeNow(), currentState, 0, 0, 0);
-
-    }
-
-    // Checks if the activity type is one that requires no cooldown
-    public boolean nonCoolable(String action){
-
-        return action.equals("Resting") ||
-                action.equals("Other") ||
-                action.equals("Cooldown") ||
-                action.equals("Recovery") ||
-                action.contains("Cooling");
-
-    }
-
     // Switches the sports action to the new activity type
     public void SwitchSportsAction(String action) {
 
@@ -635,15 +509,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         if (!currentState.equals("Idle")) {
 
             if (action.equals(currentState)){
-                if (nonCoolable(currentState)) {
-                    // stop recording cooling / resting prematurely
-                    newState = "Idle";
-                    RecordActivitySwitch();
-                } else {
-                    // start measuring cooling down
-                    newState = currentState + ":Cooling";
-                    OutputEvent("Cooling down ...");
-                }
+                // stop recording cooling / resting prematurely
+                newState = "Idle";
             }
             else
             {
@@ -652,7 +519,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         } else { // switch from idle state to measurement
 
             newState = action;
-            RecordActivitySwitch();
         }
 
         BringIntoState(newState);
@@ -672,67 +538,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         android.os.Process.killProcess(android.os.Process.myPid());
     }
 
-    // returns the file where something is stored (?)
-    static File getRecordedActivitiesFile(){
-
-        String daystr = DataStorageManager.getDayFromToday(0);
-        File file = new File(DataStorageManager.userDataFolder, daystr + ".activities");
-        return file;
-
-    }
-
-    // save and write to file that a certain activity type has been measured
-    public static void RecordActivityMeasured(String state){
-
-
-        File file = getRecordedActivitiesFile();
-        HashMap<String, Boolean> dictionary = new HashMap<>();
-
-        try {
-            if (!file.exists()){
-                Serializer.SerializeToFile(dictionary, file);
-            }
-
-            dictionary = (HashMap<String, Boolean>) Serializer.DeserializeFromFile(file);
-
-            if (dictionary.containsKey(state))
-                return;
-
-            if (state.equals("Resting")){
-                state = state + ":" + isNowASleepingHour();
-            }
-
-            dictionary.put(state, true);
-
-            Serializer.SerializeToFile(dictionary, file);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-    // Retrieves which activity types have been recorded
-    public static HashMap<String, Boolean> getRecordedActivities(){
-
-        File file = getRecordedActivitiesFile();
-        HashMap<String, Boolean> dictionary = new HashMap<>();
-
-        try {
-
-            if (file.exists()){
-                dictionary = (HashMap<String, Boolean>) Serializer.DeserializeFromFile(file);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return dictionary;
-
-    }
-
     // vibrates for 0.2 seconds, 0.2 seconds silence, 4 times.
     void outputVibration(){
 
@@ -744,6 +549,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     // Changes the state of the app so as to realise what is being measured at the moment
     private void BringIntoState(String state) {
+        recordedActivities.put(state, true);
 
         currentState = state;
 
@@ -751,62 +557,25 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         outputVibration();
 
-        try {
-            Serializer.SerializeToFile(state, mutexFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        RecordActivityMeasured(state);
-
         if (state.equals("Idle")) {
             return;
         }
 
-        if (state.equals("Resting")) {
+        if (state.equals("morningHR")) {
             // stop recording cooling / resting prematurely
             timerTimeout = RESTING_MEASUREMENT_TIME;
-
-            if (isNowASleepingHour()){
-                AskUserForFeedback("evening");
-            }
-            if (!isNowASleepingHour()) {
-                AskUserForFeedback("morning");
-            }
-
-        }else if (state.contains("Cooldown")) {
-            timerTimeout = RESTING_MEASUREMENT_TIME; // needed to recover the state of the app properly
-
-            // this ugly copy paste from below is sposed to make user input the end of the training for cooling / recovery
-            if (!getRecordedActivities().containsKey("Cooldown")){
-                Intent myIntent = new Intent(this, TrainingStartTimeActivity.class);
-                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(myIntent);
-            }
-
-            //StopGPS();
+            AskUserForFeedback("morning");
+        }else if (state.equals("eveningHR")){
+            // stop recording cooling / resting prematurely
+            timerTimeout = RESTING_MEASUREMENT_TIME;
+            AskUserForFeedback("evening");
         }else if (state.contains("Recovery")) {
-            timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
-
-            if (!getRecordedActivities().containsKey("Cooldown")){
-                Intent myIntent = new Intent(this, TrainingStartTimeActivity.class);
-                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(myIntent);
-            }
-
-            //StopGPS();
-        } else if (state.contains("Cooling")) {
-            timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
-            OutputEvent("Cooling down ...");
-            //StopGPS();
-        } else {
-            // start training
-            timerTimeout = TRAINING_TIMEOUT;
-            //StartGPS();
+            timerTimeout = RESTING_MEASUREMENT_TIME; // needed to recover the state of the app properly
+            Intent myIntent = new Intent(this, TrainingStartTimeActivity.class);
+            myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(myIntent);
         }
-
         StartMeasuring();
-
     }
 
     // Starts measuring the heart rate and, during that time, holds wakelock
@@ -857,16 +626,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
     }
 
-    public void genData() {
-
-        for (int i = 0; i < 1000; i++) {
-
-            AddNewData(1, 21, GetTimeNow(), currentState, 1, 3.123f, 3);
-
-        }
-
-    }
-
     // Sends the collected data to the smartphone
     public void SendCollectedData() {
 
@@ -881,32 +640,13 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                 //genData();
 
-                ArrayList<ISSRecordData> allData = new ArrayList<>();
-
-                // I assume that user synced with sw in last 2 month
-                ArrayList<File> files = DataStorageManager.GetAllFilesToUpload(USERID_FORDATASTORAGE, USER_ASSUMED_SYNCTIME);
-                Collections.reverse(files); // make sure that files are from oldest to newest
-
-                for (File file:files){
-
-                    if (file.exists()){
-
-                        try {
-                            List<ISSRecordData> issRecordDatas = CSVManager.ReadCSVdata(file);
-                            allData.addAll(issRecordDatas);
-                        }catch (Exception ex){
-
-                        }
-
-                    }
-                    //allData.add();
-
-                }
+                ArrayList<ISSRecordData> ISSRecords = DataStorageManager.GetAllFilesToUpload(USERID_FORDATASTORAGE);
+                File SleepData = DataStorageManager.GetSleepData();
 
                 byte [] data = null;
 
                 try {
-                    data = Serializer.SerializeToBytes(allData);
+                    data = ArrayUtils.addAll(Serializer.SerializeToBytes(ISSRecords),Serializer.SerializeToBytes(SleepData));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -921,13 +661,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                         dataMap.getDataMap().putAsset("sensorData", asset);
                         PutDataRequest request = dataMap.asPutDataRequest();
                         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
-
-
-                        /*PutDataRequest request = PutDataRequest.create("/sensorData");
-                        request.putAsset("sensorData", asset);
-                        Wearable.DataApi.putDataItem(mGoogleApiClient, request);*/
-
-                        //Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "data", data);
                     }
                 }
 
@@ -964,14 +697,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                 // clear the existing data on the smartwatch
 
-                ArrayList<File> files = DataStorageManager.GetAllFilesToUpload(USERID_FORDATASTORAGE, USER_ASSUMED_SYNCTIME);
-                Collections.reverse(files); // make sure that files are from oldest to newest
-
-                for (File file:files){
-                    if (file.exists()){
-                        file.delete();
-                    }
-                }
+                // TODO: Delete the content of the table where the Records get stored.
 
             }
 
@@ -990,133 +716,20 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     // this method defined user heart rate monitor prior to the enabling of the training mode
     public void GetHRMid() {
-
-        String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        switch (android_id) {
-            case "cf533cb594eb941f":
-                UserHRM = "E5:CF:3E:D5:22:1B";
-                break;
-            case "fb89ac5028563ab5":
-                UserHRM = "C3:65:88:2F:C0:12";
-                break;
-            case "bd9050e5d954b9a3":
-                UserHRM = "F7:71:B1:1D:EE:69";
-                break;
-            case "faa47b6b99e0a2b8":
-                UserHRM = "F1:CC:A3:7E:66:BD";
-                break;
-            case "f77a4bb95172c007":
-                UserHRM = "E0:28:1F:12:A1:20";
-                break;
-            case "760bd2c1de704a18":
-                UserHRM = "DA:2B:64:87:44:35";
-                break;
-            case "1af13a491433cd6d":
-                UserHRM = "CC:1F:BD:F5:24:FA";
-                break;
-            case "1f3ae220a852939f":
-                UserHRM = "DA:2B:64:87:44:35";
-                break;
-            case "b0bfcacefe39d7d6":
-                UserHRM = "C3:4D:73:79:04:0E";
-                break;
-            default:
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-                UserHRM = pref.getString(getString(R.string.device_address), "");
-                break;
-
-        }
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        UserHRM = pref.getString(getString(R.string.device_address), "");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         alarm.SetAlarm(this);
-
-        // get unique id of the device
-        String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-        //OutputEvent(android_id);
-
-        Log.d("ISS", "Android ID: " + android_id);
-
-        // for known IMEI's (those of athletes phones) lets let for now the hrm to be hardcoded.
-        // for other (potential) users, it would be read from the preferences
-        // p.s. user id is not important on wearable app and is deprectaded, will be removed in future
-        switch (android_id) {
-            case "cf533cb594eb941f":
-                UserID = 1;
-                UserHRM = "E5:CF:3E:D5:22:1B";
-                break;
-            case "fb89ac5028563ab5":
-                UserID = 2;
-                UserHRM = "C3:65:88:2F:C0:12";
-                break;
-            case "bd9050e5d954b9a3":
-                UserID = 3;
-                UserHRM = "F7:71:B1:1D:EE:69";
-                break;
-            case "faa47b6b99e0a2b8":
-                UserID = 4;
-                UserHRM = "F1:CC:A3:7E:66:BD";
-                break;
-            case "f77a4bb95172c007":
-                UserID = 5;
-                UserHRM = "E0:28:1F:12:A1:20";
-                break;
-            case "760bd2c1de704a18":
-                UserID = 256;
-                UserHRM = "DA:2B:64:87:44:35";
-                break;
-            case "1af13a491433cd6d":
-                UserID = 1024;
-                UserHRM = "CC:1F:BD:F5:24:FA";
-                break;
-            case "1f3ae220a852939f":
-                UserID = 127;
-                UserHRM = "DA:2B:64:87:44:35";
-                break;
-            case "b0bfcacefe39d7d6":
-                UserID = 257;
-                UserHRM = "C3:4D:73:79:04:0E";
-                break;
-            default:
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-                UserHRM = pref.getString(getString(R.string.device_address), "");
-                break;
-        }
-
-        InitializeMutexRecovery();
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        UserHRM = pref.getString(getString(R.string.device_address), "");
 
         StopSleepTracking();
 
         return START_STICKY;
-
-    }
-
-    // in case app crashes, its state is restored automatically
-    public void InitializeMutexRecovery() {
-
-        // create mutex file
-
-        if (!mutexFile.exists()) {
-            try {
-                Serializer.SerializeToFile(currentState, mutexFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        try {
-            currentState = (String) Serializer.DeserializeFromFile(mutexFile);
-            BringIntoState(currentState);
-        } catch (Exception e) {
-            e.printStackTrace();
-            OutputEvent(e.toString());
-        }
-
-        //OutputEvent("Mutex state: " + allowHRM);
-
 
     }
 
@@ -1173,16 +786,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                     byte[] data = null;
 
-                    /*long startTime = System.currentTimeMillis();
-                    try {
-                        data = Serializer.FileToBytes(sensorsData);
-                        //data = Serializer.SerializeToBytes(alldata);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    long totalTime = System.currentTimeMillis() - startTime;*/
-
                     if (nodes.size() > 0) {
                         for (int i = 0; i < nodes.size(); i++) {
                             nodeId = nodes.get(i).getId();
@@ -1198,104 +801,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     public void StopSleepTracking() {
-
         if (!SleepTrackingStopped) {
             StopSleep();
         }
-
     }
-
-    // Adds feedback about the difficulty of the exercise just performed.
-    public void AddTrainingScore(float position, String typeof) {
-        AddNewData(0, 1024, GetTimeNow(), "Feedback:" + typeof, position, 0, 0);
-        needToShowRPE = false;
-    }
-
-    // GPS processing
-
-    LocationManager locationManager = null;
-    LocationListener gpsListener = null;
-
-    Location locPrev = null;
-    double totalDistance = 0;
-
-    // Adds a record showing that the training has ended
-    public void TrainingEnd(float hour, float minute) {
-
-        AddNewData(0, 13, GetTimeNow(), currentState, hour, minute, 0.0f);
-
-    }
-/*
-    public void StartGPS() {
-
-        gpsListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-                double altitude = location.getAltitude();
-
-                AddNewData(UserID, 512, GetTimeNow(), currentState, (float) latitude, (float) longitude, (float) altitude);
-
-                float speed = location.getSpeed() * 3.6f;
-                AddNewData(UserID, 513, GetTimeNow(), currentState, speed, 0, 0);
-
-                if (locPrev != null) {
-                    float dis = locPrev.distanceTo(location);
-                    totalDistance += dis;
-                }
-                AddNewData(UserID, 514, GetTimeNow(), currentState, (float) totalDistance, 0, 0);
-
-                SendGPSdata(speed, totalDistance / 1000);
-
-                locPrev = location;
-
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-
-        try {
-            if (locationManager != null) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, gpsListener);
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, gpsListener);
-            }
-        } catch (Exception ex) {
-            OutputEvent(ex.toString());
-        }
-
-    }
-
-    // GPS processing
-
-    public void StopGPS() {
-
-        locationManager.removeUpdates(gpsListener);
-        totalDistance = 0;
-
-    }
-
-    public void SendGPSdata(double speed, double totalDistance) {
-
-        Intent intent = new Intent(this.UPDATE_GPS_PARAMS);
-        intent.putExtra("speed", speed);
-        intent.putExtra("totalDistance", totalDistance);
-        sendBroadcast(intent);
-
-    }
-*/
 }

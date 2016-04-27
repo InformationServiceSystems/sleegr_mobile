@@ -132,23 +132,8 @@ public class MainActivity extends Activity {
                 HeartRate.setText(Integer.toString(result));
             } else if (intent.getAction().equals(SensorsDataService.UPDATE_GPS_PARAMS)) {
                 // Prints out the heart rate
-                /*final TextView speedLabel = (TextView) findViewById(R.id.speedLable);
-                final TextView distanceLabel = (TextView) findViewById(R.id.distanceLabel);
-
-                double speed = intent.getDoubleExtra("speed", 0);
-                double totalDistance = intent.getDoubleExtra("totalDistance", 0);
-
-                NumberFormat formatter = new DecimalFormat("#0.0");
-
-                // Need to convert the Int to String or else the app crashes. GJ Google.
-                speedLabel.setText(formatter.format(speed));
-                distanceLabel.setText(formatter.format(totalDistance));*/
-
-
             } else if (intent.getAction().equals(SensorsDataService.ASK_USER_FOR_RPE)) {
-
                 CheckToShowRPE();
-
             } else if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
                 // prints out the Outputevent messages
                 final TextView MessageLabel = (TextView) findViewById(R.id.messageLabel);
@@ -166,28 +151,6 @@ public class MainActivity extends Activity {
         }
     };
     private DataUpdateReceiver dataUpdateReceiver;
-    private AdapterView.OnItemSelectedListener OnCatSpinnerCL = new AdapterView.OnItemSelectedListener() {
-        public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-
-            ((TextView) parent.getChildAt(0)).setTextColor(Color.BLUE);
-            ((TextView) parent.getChildAt(0)).setTextSize(5);
-
-        }
-
-        public void onNothingSelected(AdapterView<?> parent) {
-
-        }
-    };
-
-    public static void selectSpinnerItemByValue(Spinner spnr, String value) {
-        SimpleCursorAdapter adapter = (SimpleCursorAdapter) spnr.getAdapter();
-        for (int position = 0; position < adapter.getCount(); position++) {
-            if (value.equals(adapter.getItemId(position))) {
-                spnr.setSelection(position);
-                return;
-            }
-        }
-    }
 
     @Override
     public void onCreate(Bundle b) {
@@ -202,8 +165,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main_activity);
 
         initializeSWBatteryChecker();
-
-        //initializeSportsActions();
 
         RegisterBroadcastsReceiver();
 
@@ -267,33 +228,25 @@ public class MainActivity extends Activity {
         ImageButton continueCooldown = (ImageButton) findViewById(R.id.continueCooldown);
         ImageButton eveningHR = (ImageButton) findViewById(R.id.eveningHR);
 
-        morningHR.setBackgroundColor(recordedActivities.containsKey("Resting:false") ? Color.GREEN : Color.GRAY);
+        morningHR.setBackgroundColor(recordedActivities.containsKey("morningHR") ? Color.GREEN : Color.GRAY);
         startCooldown.setBackgroundColor(recordedActivities.containsKey("Cooldown") ? Color.GREEN : Color.GRAY);
         continueCooldown.setBackgroundColor(recordedActivities.containsKey("Recovery") ? Color.GREEN : Color.GRAY);
-        eveningHR.setBackgroundColor(recordedActivities.containsKey("Resting:true") ? Color.GREEN : Color.GRAY);
+        eveningHR.setBackgroundColor(recordedActivities.containsKey("eveningHR") ? Color.GREEN : Color.GRAY);
 
         int inProgressColor = Color.argb(255,255,165,0);
 
         if (SensorsDataService.itself.currentState.equals("Cooldown")){
             startCooldown.setBackgroundColor(inProgressColor);
         }
-
         if (SensorsDataService.itself.currentState.equals("Recovery")){
             continueCooldown.setBackgroundColor(inProgressColor);
         }
-
-        if (SensorsDataService.itself.currentState.equals("Resting") ){
-
-            if (SensorsDataService.isNowASleepingHour()) {
-                eveningHR.setBackgroundColor(inProgressColor);
-            }
-            else
-            {
-                morningHR.setBackgroundColor(inProgressColor);
-            }
-
+        if (SensorsDataService.itself.currentState.equals("morningHR") ) {
+            eveningHR.setBackgroundColor(inProgressColor);
         }
-
+        if (SensorsDataService.itself.currentState.equals("eveningHR") ) {
+            morningHR.setBackgroundColor(inProgressColor);
+        }
     }
 
     // If the app crashes, restart it. Currently disabled so we can bugfix
@@ -323,32 +276,6 @@ public class MainActivity extends Activity {
         });/**/
 
     }
-
-
-    /*private void initializeSportsActions() {
-
-        Spinner s = (Spinner) findViewById(R.id.sportsAction);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.activities, android.R.layout.simple_spinner_item);
-
-        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item,arraySpinner);
-
-
-        s.setAdapter(adapter);
-
-
-        // monstrosity below is needed to set the color of selected sports action
-        AdapterView.OnItemSelectedListener colorSpinnerListener = new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                ((TextView) parent.getChildAt(0)).setTextColor(Color.BLACK);
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        };
-        s.setOnItemSelectedListener(colorSpinnerListener);
-
-    }*/
 
     // Handles received broadcasted intents
     private void RegisterBroadcastsReceiver() {
@@ -499,7 +426,7 @@ public class MainActivity extends Activity {
                 if (SensorsDataService.itself != null) {
 
                     if (!SensorsDataService.isNowASleepingHour())
-                        SensorsDataService.itself.SwitchSportsAction("Resting");
+                        SensorsDataService.itself.SwitchSportsAction("MorningHR");
                 }
 
                 break;
@@ -522,7 +449,8 @@ public class MainActivity extends Activity {
             case R.id.eveningHR:
 
                 if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction("Resting");
+                    if (SensorsDataService.isNowASleepingHour())
+                        SensorsDataService.itself.SwitchSportsAction("EveningHR");
                 }
 
 
@@ -555,23 +483,6 @@ public class MainActivity extends Activity {
 
         }
     }
-
-    // Need to declare the handler here so it can be called off later
-   /* Handler handler = new Handler();
-    long[] time = {0, 0};
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            time[0] += 1;
-            if (time[0] > 59) {
-                time[1] += 1;
-                time[0] = 0;
-            }
-            updatetimetext();
-            handler.postDelayed(this, 1000);
-        }
-    };*/
-
 }
 
 
