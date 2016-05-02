@@ -27,7 +27,7 @@ public class ISSContentProvider extends ContentProvider {
     static final Uri RECORDS_CONTENT_URI = Uri.parse(RECORDS_URL);
     static final String MEASUREMENT_URL = "content://" + PROVIDER_NAME + "/measurement";
     static final Uri MEASUREMENT_CONTENT_URI = Uri.parse(MEASUREMENT_URL);
-    static final String RPE_URL = "content://" + PROVIDER_NAME + "/rpe_answers";
+    static final String RPE_URL = "content://" + PROVIDER_NAME + "/rpeanswers";
     static final Uri RPE_CONTENT_URI = Uri.parse(RPE_URL);
 
     static final String _ID = "_id";
@@ -58,9 +58,9 @@ public class ISSContentProvider extends ContentProvider {
         uriMatcher.addURI(PROVIDER_NAME, "records", RECORDSTYPE);
         uriMatcher.addURI(PROVIDER_NAME, "records/#", RECORD_IDTYPE);
         uriMatcher.addURI(PROVIDER_NAME, "measurement", MEASUREMENTSTYPE);
-        uriMatcher.addURI(PROVIDER_NAME, "records/#", MEASUREMENT_IDTYPE);
-        uriMatcher.addURI(PROVIDER_NAME, "records", RPESTYPE);
-        uriMatcher.addURI(PROVIDER_NAME, "records/#", RPE_IDTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "measurement/#", MEASUREMENT_IDTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "rpe", RPESTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "rpe/#", RPE_IDTYPE);
     }
 
     /**
@@ -70,8 +70,8 @@ public class ISSContentProvider extends ContentProvider {
     static final String DATABASE_NAME = "ISSRecordData";
     static final String RECORDS_TABLE_NAME = "records";
     static final String MEASUREMENTS_TABLE_NAME = "measurements";
-    static final String RPE_TABLE_NAME = "RPE-Sets";
-    static final int DATABASE_VERSION = 3;
+    static final String RPE_TABLE_NAME = "RPESets";
+    static final int DATABASE_VERSION = 9;
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -85,10 +85,11 @@ public class ISSContentProvider extends ContentProvider {
                     VALUE2 + " TEXT NOT NULL, " +
                     VALUE3 + " TEXT NOT NULL);";
     static final String CREATE_MEASUREMENT_DB_TABLE =
-            " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
-                    _ID + " INTEGER PRIMARY KEY AUTOINCREMENT);";
+            " CREATE TABLE " + MEASUREMENTS_TABLE_NAME + " (" +
+                    _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    TIMESTAMP + " TEXT NOT NULL);";
     static final String CREATE_RPE_DB_TABLE =
-            " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
+            " CREATE TABLE " + RPE_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     MEASUREMENT_ID + "INTEGER NOT NULL, " +
                     RPE_ANSWERS + "BLOB);";

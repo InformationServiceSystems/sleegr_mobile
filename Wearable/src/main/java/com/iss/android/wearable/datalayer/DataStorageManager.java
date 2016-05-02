@@ -11,11 +11,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Blob;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 
 /**
  * Created by Euler on 12/19/2015.
@@ -79,30 +81,32 @@ public class DataStorageManager {
     }
 
     public static void insertISSRecordData(ISSRecordData data) {
-        // Defines a new Uri object that receives the result of the insertion
-        Uri mNewUri;
+        if (data.measurementID != 0) {
+            // Defines a new Uri object that receives the result of the insertion
+            Uri mNewUri;
 
-        // Defines an object to contain the new values to insert
-        ContentValues mNewValues = new ContentValues();
+            // Defines an object to contain the new values to insert
+            ContentValues mNewValues = new ContentValues();
 
-        /*
-         * Sets the values of each column and inserts the word. The arguments to the "put"
-         * method are "column name" and "value"
-         */
-        mNewValues.put(ISSContentProvider.DATE, data.Date);
-        mNewValues.put(ISSContentProvider.TIMESTAMP, data.Timestamp);
-        mNewValues.put(ISSContentProvider.MEASUREMENT, data.MeasurementType);
-        mNewValues.put(ISSContentProvider.EXTRA, data.ExtraData);
-        mNewValues.put(ISSContentProvider.VALUE1, data.Value1);
-        mNewValues.put(ISSContentProvider.VALUE2, data.Value2);
-        mNewValues.put(ISSContentProvider.VALUE3, data.Value3);
-        mNewValues.put(ISSContentProvider.USERID, data.UserID);
-        mNewValues.put(ISSContentProvider.MEASUREMENT_ID, data.measurementID);
+            /*
+             * Sets the values of each column and inserts the word. The arguments to the "put"
+             * method are "column name" and "value"
+             */
+            mNewValues.put(ISSContentProvider.DATE, data.Date);
+            mNewValues.put(ISSContentProvider.TIMESTAMP, data.Timestamp);
+            mNewValues.put(ISSContentProvider.MEASUREMENT, data.MeasurementType);
+            mNewValues.put(ISSContentProvider.EXTRA, data.ExtraData);
+            mNewValues.put(ISSContentProvider.VALUE1, data.Value1);
+            mNewValues.put(ISSContentProvider.VALUE2, data.Value2);
+            mNewValues.put(ISSContentProvider.VALUE3, data.Value3);
+            mNewValues.put(ISSContentProvider.USERID, data.UserID);
+            mNewValues.put(ISSContentProvider.MEASUREMENT_ID, data.measurementID);
 
-        mNewUri = MainActivity.getContext().getContentResolver().insert(
-                ISSContentProvider.RECORDS_CONTENT_URI,   // the user dictionary content URI
-                mNewValues                          // the values to insert
-        );
+            mNewUri = MainActivity.getContext().getContentResolver().insert(
+                    ISSContentProvider.RECORDS_CONTENT_URI,   // the user dictionary content URI
+                    mNewValues                          // the values to insert
+            );
+        }
     }
 
     public static int deleteISSRecords() {
@@ -120,5 +124,61 @@ public class DataStorageManager {
                 mSelectionArgs                      // the value to compare to
         );
         return mRowsDeleted;
+    }
+
+    public static void storeQuestionnaire(HashMap<String, Integer> answers) {
+        int measurementID = GetLastMeasurementID();
+
+        // Defines a new Uri object that receives the result of the insertion
+        Uri mNewUri;
+
+        // Defines an object to contain the new values to insert
+        ContentValues mNewValues = new ContentValues();
+
+        /*
+         * Sets the values of each column and inserts the word. The arguments to the "put"
+         * method are "column name" and "value"
+         */
+        mNewValues.put(ISSContentProvider.MEASUREMENT_ID, measurementID);
+        mNewValues.put(ISSContentProvider.RPE_ANSWERS, ISSDictionary.MapToByteArray(answers));
+
+        mNewUri = MainActivity.getContext().getContentResolver().insert(
+                ISSContentProvider.RPE_CONTENT_URI,   // the user dictionary content URI
+                mNewValues                          // the values to insert
+        );
+    }
+
+
+    public static int GetLastMeasurementID() {
+        int measurementNumber = 0;
+        Uri CONTENT_URI = ISSContentProvider.MEASUREMENT_CONTENT_URI;
+
+        String mSelectionClause = null;
+        String[] mSelectionArgs = {};
+        String[] mProjection = {ISSContentProvider._ID};
+        String mSortOrder = ISSContentProvider._ID + " DESC";
+
+        // Does a query against the table and returns a Cursor object
+        Cursor mCursor = MainActivity.getContext().getContentResolver().query(
+                CONTENT_URI,                       // The content URI of the database table
+                mProjection,                       // The columns to return for each row
+                mSelectionClause,                  // Either null, or the word the user entered
+                mSelectionArgs,                    // Either empty, or the string the user entered
+                mSortOrder);                       // The sort order for the returned rows
+
+        // Some providers return null if an error occurs, others throw an exception
+        if (null == mCursor) {
+            // If the Cursor is empty, the provider found no matches
+        } else if (mCursor.getCount() < 1) {
+            // If the Cursor is empty, the provider found no matches
+        } else {
+            mCursor.moveToNext();
+            measurementNumber = mCursor.getInt(0);
+        }
+        if (measurementNumber > 0){
+            return measurementNumber;
+        } else {
+            return 0;
+        }
     }
 }

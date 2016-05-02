@@ -2,6 +2,11 @@ package com.iss.android.wearable.datalayer;
 
 import android.database.Cursor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
+
 /**
  * Created by micha on 25.04.2016.
  */
@@ -19,8 +24,9 @@ public class ISSDictionary {
             MEASUREMENT_SLEEP_LENGTH = 38,
             MEASUREMENT_TRAINING_END = 13,
             MEASUREMENT_STEPS = 39;
+
     public static int getMeasurementNumber(String measurement) {
-        switch (measurement){
+        switch (measurement) {
             case "resting":
                 return MEASUREMENT_HR;
             case "cooldown":
@@ -31,14 +37,33 @@ public class ISSDictionary {
 
     public static ISSRecordData CursorToISSRecordDate(Cursor mCursor) {
         ISSRecordData record = new ISSRecordData(mCursor.getInt(1),
-                        mCursor.getInt(2),
-                        mCursor.getString(3),
-                        mCursor.getString(4),
-                        mCursor.getString(5),
-                        mCursor.getFloat(6),
-                        mCursor.getFloat(7),
-                        mCursor.getFloat(8),
-                        mCursor.getInt(9));
+                mCursor.getInt(2),
+                mCursor.getString(3),
+                mCursor.getString(4),
+                mCursor.getString(5),
+                mCursor.getFloat(6),
+                mCursor.getFloat(7),
+                mCursor.getFloat(8),
+                mCursor.getInt(9));
         return record;
+    }
+
+    // Convert Map to byte array
+    public static byte[] MapToByteArray(HashMap<String, Integer> data) {
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        ObjectOutputStream out = null;
+        try {
+            out = new ObjectOutputStream(byteOut);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (out != null) {
+            try {
+                out.writeObject(data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return byteOut.toByteArray();
     }
 }

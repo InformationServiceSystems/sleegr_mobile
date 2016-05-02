@@ -14,6 +14,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import java.util.HashMap;
+
 public class DALDActivity extends Activity {
     String[] daldaItems;
     String time;
@@ -37,6 +39,7 @@ public class DALDActivity extends Activity {
 
     // Creates a button responsible for storing the information in the above choices if hit
     void createSubmitButton(){
+        final HashMap<String, Integer> answers = new HashMap<String, Integer>();
 
         Button button = new Button(this);
         button.setText("Submit");
@@ -66,15 +69,15 @@ public class DALDActivity extends Activity {
                 }
 
                 if (time.equals("evening")) {
-                    // TODO: Check what needs to be done here.
+                    answers.put("RPE", SelectedIndex(rpe));
                     // SensorsDataService.itself.AddTrainingScore(SelectedIndex(rpe), "RPE");
                 }
 
                 for (int i = 0; i < rgs.length; i++) {
-                    // TODO: And here.
+                    answers.put(daldaItems[i], SelectedIndex(rgs[i])-1);
                     // SensorsDataService.itself.AddTrainingScore(SelectedIndex(rgs[i])-1, daldaItems[i]);
                 }
-
+                DataStorageManager.storeQuestionnaire(answers);
                 finish();
 
             }

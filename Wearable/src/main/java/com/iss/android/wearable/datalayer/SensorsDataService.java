@@ -583,8 +583,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         // Starts a new Measurement in the database.
         ContentResolver resolver = MainActivity.getContext().getContentResolver();
         ContentValues values = new ContentValues();
-        resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, values);
-        GetLastMeasurementID(); //Loads the ID from the last measurement in the db
+        Date date = new Date();
+        values.put(ISSContentProvider.TIMESTAMP, date.toString());
+        resolver.insert(ISSContentProvider.MEASUREMENT_CONTENT_URI, values);
+        measurementNumber = DataStorageManager.GetLastMeasurementID(); //Loads the ID from the last measurement in the db
         // as a secondary key for the rpe values and the record data
 
         GetHRMid();
@@ -608,36 +610,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         timer.schedule(timerTask, 0, 1000);
 
-    }
-
-    private void GetLastMeasurementID() {
-        int measurementNumber = 0;
-        Uri CONTENT_URI = ISSContentProvider.MEASUREMENT_CONTENT_URI;
-
-        String mSelectionClause = null;
-        String[] mSelectionArgs = {};
-        String[] mProjection = {ISSContentProvider._ID};
-        String mSortOrder = ISSContentProvider._ID + " DESC";
-
-        // Does a query against the table and returns a Cursor object
-        Cursor mCursor = MainActivity.getContext().getContentResolver().query(
-                CONTENT_URI,                       // The content URI of the database table
-                mProjection,                       // The columns to return for each row
-                mSelectionClause,                  // Either null, or the word the user entered
-                mSelectionArgs,                    // Either empty, or the string the user entered
-                mSortOrder);                       // The sort order for the returned rows
-
-        // Some providers return null if an error occurs, others throw an exception
-        if (null == mCursor) {
-            // If the Cursor is empty, the provider found no matches
-        } else if (mCursor.getCount() < 1) {
-            // If the Cursor is empty, the provider found no matches
-        } else {
-            measurementNumber = mCursor.getInt(0);
-        }
-        if (measurementNumber > 0){
-            this.measurementNumber = measurementNumber;
-        }
     }
 
     // Stops measuring the heart rate
