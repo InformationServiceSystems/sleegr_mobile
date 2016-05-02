@@ -37,7 +37,8 @@ public class ISSDictionary {
                         mCursor.getString(5),
                         mCursor.getFloat(6),
                         mCursor.getFloat(7),
-                        mCursor.getFloat(8), measurementNumber);
+                        mCursor.getFloat(8),
+                        mCursor.getInt(9));
         return record;
     }
 }
