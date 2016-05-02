@@ -59,8 +59,8 @@ public class ISSContentProvider extends ContentProvider {
         uriMatcher.addURI(PROVIDER_NAME, "records/#", RECORD_IDTYPE);
         uriMatcher.addURI(PROVIDER_NAME, "measurement", MEASUREMENTSTYPE);
         uriMatcher.addURI(PROVIDER_NAME, "measurement/#", MEASUREMENT_IDTYPE);
-        uriMatcher.addURI(PROVIDER_NAME, "rpe", RPESTYPE);
-        uriMatcher.addURI(PROVIDER_NAME, "rpe/#", RPE_IDTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "rpeanswers", RPESTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "rpeanswers/#", RPE_IDTYPE);
     }
 
     /**
@@ -71,7 +71,7 @@ public class ISSContentProvider extends ContentProvider {
     static final String RECORDS_TABLE_NAME = "records";
     static final String MEASUREMENTS_TABLE_NAME = "measurements";
     static final String RPE_TABLE_NAME = "RPESets";
-    static final int DATABASE_VERSION = 9;
+    static final int DATABASE_VERSION = 10;
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
