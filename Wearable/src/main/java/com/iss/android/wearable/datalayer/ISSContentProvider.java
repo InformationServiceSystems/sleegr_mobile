@@ -23,30 +23,44 @@ import java.util.HashMap;
 public class ISSContentProvider extends ContentProvider {
 
     static final String PROVIDER_NAME = "com.iss.android.wearable.datalayer.provider";
-    static final String URL = "content://" + PROVIDER_NAME + "/records";
-    static final Uri CONTENT_URI = Uri.parse(URL);
+    static final String RECORDS_URL = "content://" + PROVIDER_NAME + "/records";
+    static final Uri RECORDS_CONTENT_URI = Uri.parse(RECORDS_URL);
+    static final String MEASUREMENT_URL = "content://" + PROVIDER_NAME + "/measurement";
+    static final Uri MEASUREMENT_CONTENT_URI = Uri.parse(MEASUREMENT_URL);
+    static final String RPE_URL = "content://" + PROVIDER_NAME + "/rpe_answers";
+    static final Uri RPE_CONTENT_URI = Uri.parse(RPE_URL);
 
     static final String _ID = "_id";
-    static final String USERID = "UserID";
+    static final String USERID = "user_id";
     static final String DATE = "date";
     static final String TIMESTAMP = "timestamp";
     static final String EXTRA = "extra";
     static final String VALUE1 = "value1";
     static final String VALUE2 = "value2";
     static final String VALUE3 = "value3";
-    static final String MEASUREMENT = "Measurement";
+    static final String MEASUREMENT = "measurement";
+    static final String MEASUREMENT_ID = "measurement_id";
+    static final String RPE_ANSWERS = "rpe_answers";
 
     private static HashMap<String, String> RECORDS_PROJECTION_MAP;
 
-    static final int RECORDS = 1;
-    static final int RECORD_ID = 2;
+    static final int RECORDSTYPE = 1;
+    static final int RECORD_IDTYPE = 2;
+    static final int MEASUREMENTSTYPE = 3;
+    static final int MEASUREMENT_IDTYPE = 4;
+    static final int RPESTYPE = 5;
+    static final int RPE_IDTYPE = 6;
 
     static final UriMatcher uriMatcher;
 
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(PROVIDER_NAME, "records", RECORDS);
-        uriMatcher.addURI(PROVIDER_NAME, "records/#", RECORD_ID);
+        uriMatcher.addURI(PROVIDER_NAME, "records", RECORDSTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "records/#", RECORD_IDTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "measurement", MEASUREMENTSTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "records/#", MEASUREMENT_IDTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "records", RPESTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "records/#", RPE_IDTYPE);
     }
 
     /**
@@ -55,8 +69,10 @@ public class ISSContentProvider extends ContentProvider {
     private SQLiteDatabase db;
     static final String DATABASE_NAME = "ISSRecordData";
     static final String RECORDS_TABLE_NAME = "records";
-    static final int DATABASE_VERSION = 2;
-    static final String CREATE_DB_TABLE =
+    static final String MEASUREMENTS_TABLE_NAME = "measurements";
+    static final String RPE_TABLE_NAME = "RPE-Sets";
+    static final int DATABASE_VERSION = 3;
+    static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     USERID + " INTEGER NOT NULL, " +
@@ -64,9 +80,18 @@ public class ISSContentProvider extends ContentProvider {
                     DATE + " TEXT NOT NULL, " +
                     TIMESTAMP + " TEXT NOT NULL, " +
                     EXTRA + " TEXT NOT NULL, " +
+                    MEASUREMENT_ID + " INTEGER NOT NULL, " +
                     VALUE1 + " TEXT NOT NULL, " +
                     VALUE2 + " TEXT NOT NULL, " +
                     VALUE3 + " TEXT NOT NULL);";
+    static final String CREATE_MEASUREMENT_DB_TABLE =
+            " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
+                    _ID + " INTEGER PRIMARY KEY AUTOINCREMENT);";
+    static final String CREATE_RPE_DB_TABLE =
+            " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
+                    _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    MEASUREMENT_ID + "INTEGER NOT NULL, " +
+                    RPE_ANSWERS + "BLOB);";
 
     /**
      * Helper class that actually creates and manages
@@ -79,12 +104,16 @@ public class ISSContentProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(CREATE_DB_TABLE);
+            db.execSQL(CREATE_RECORDS_DB_TABLE);
+            db.execSQL(CREATE_MEASUREMENT_DB_TABLE);
+            db.execSQL(CREATE_RPE_DB_TABLE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             db.execSQL("DROP TABLE IF EXISTS " + RECORDS_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + MEASUREMENTS_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + RPE_TABLE_NAME);
             onCreate(db);
         }
     }
@@ -106,14 +135,35 @@ public class ISSContentProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setTables(RECORDS_TABLE_NAME);
 
         switch (uriMatcher.match(uri)) {
-            case RECORDS:
+            case RECORDSTYPE:
+                qb.setTables(RECORDS_TABLE_NAME);
                 qb.setProjectionMap(RECORDS_PROJECTION_MAP);
                 break;
 
-            case RECORD_ID:
+            case RECORD_IDTYPE:
+                qb.setTables(RECORDS_TABLE_NAME);
+                qb.appendWhere(_ID + "=" + uri.getPathSegments().get(1));
+                break;
+
+            case MEASUREMENTSTYPE:
+                qb.setTables(MEASUREMENTS_TABLE_NAME);
+                qb.setProjectionMap(RECORDS_PROJECTION_MAP);
+                break;
+
+            case MEASUREMENT_IDTYPE:
+                qb.setTables(MEASUREMENTS_TABLE_NAME);
+                qb.appendWhere(_ID + "=" + uri.getPathSegments().get(1));
+                break;
+
+            case RPESTYPE:
+                qb.setTables(RPE_TABLE_NAME);
+                qb.setProjectionMap(RECORDS_PROJECTION_MAP);
+                break;
+
+            case RPE_IDTYPE:
+                qb.setTables(RPE_TABLE_NAME);
                 qb.appendWhere(_ID + "=" + uri.getPathSegments().get(1));
                 break;
 
@@ -143,14 +193,27 @@ public class ISSContentProvider extends ContentProvider {
             /**
              * Get all ISS records
              */
-            case RECORDS:
+            case RECORDSTYPE:
                 return "vnd.android.cursor.dir/vnd.example.records";
 
             /**
              * Get a particular record
              */
-            case RECORD_ID:
+            case RECORD_IDTYPE:
                 return "vnd.android.cursor.item/vnd.example.records";
+
+            // And so forth
+            case MEASUREMENTSTYPE:
+                return "vnd.android.cursor.dir/vnd.example.measurements";
+
+            case MEASUREMENT_IDTYPE:
+                return "vnd.android.cursor.item/vnd.example.measurements";
+
+            case RPESTYPE:
+                return "vnd.android.cursor.dir/vnd.example.rpes";
+
+            case RPE_IDTYPE:
+                return "vnd.android.cursor.item/vnd.example.rpes";
 
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
@@ -160,20 +223,56 @@ public class ISSContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        /**
-         * Add a new ISS record
-         */
-        Log.d("Inserted ", "something");
-        long rowID = db.insert(RECORDS_TABLE_NAME, "", values);
+        long rowID;
+        switch (uriMatcher.match(uri)){
+            case RECORDSTYPE:
+                /**
+                 * Add a new ISS record
+                 */
+                rowID = db.insert(RECORDS_TABLE_NAME, "", values);
 
-        /**
-         * If record is added successfully
-         */
+                /**
+                 * If record is added successfully
+                 */
 
-        if (rowID > 0) {
-            Uri _uri = ContentUris.withAppendedId(CONTENT_URI, rowID);
-            getContext().getContentResolver().notifyChange(_uri, null);
-            return _uri;
+                if (rowID > 0) {
+                    Uri _uri = ContentUris.withAppendedId(RECORDS_CONTENT_URI, rowID);
+                    getContext().getContentResolver().notifyChange(_uri, null);
+                    return _uri;
+                }
+                throw new SQLException("Failed to add a record into " + uri);
+            case MEASUREMENTSTYPE:
+                /**
+                 * Add a new ISS record
+                 */
+                rowID = db.insert(MEASUREMENTS_TABLE_NAME, "", values);
+
+                /**
+                 * If record is added successfully
+                 */
+
+                if (rowID > 0) {
+                    Uri _uri = ContentUris.withAppendedId(MEASUREMENT_CONTENT_URI, rowID);
+                    getContext().getContentResolver().notifyChange(_uri, null);
+                    return _uri;
+                }
+                throw new SQLException("Failed to add a record into " + uri);
+            case RPESTYPE:
+                /**
+                 * Add a new ISS record
+                 */
+                rowID = db.insert(RPE_TABLE_NAME, "", values);
+
+                /**
+                 * If record is added successfully
+                 */
+
+                if (rowID > 0) {
+                    Uri _uri = ContentUris.withAppendedId(RPE_CONTENT_URI, rowID);
+                    getContext().getContentResolver().notifyChange(_uri, null);
+                    return _uri;
+                }
+                throw new SQLException("Failed to add a record into " + uri);
         }
         throw new SQLException("Failed to add a record into " + uri);
     }
@@ -181,18 +280,36 @@ public class ISSContentProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         int count = 0;
+        String id = "";
 
         switch (uriMatcher.match(uri)) {
-            case RECORDS:
+            case RECORDSTYPE:
                 count = db.delete(RECORDS_TABLE_NAME, selection, selectionArgs);
                 break;
 
-            case RECORD_ID:
-                String id = uri.getPathSegments().get(1);
+            case RECORD_IDTYPE:
+                id = uri.getPathSegments().get(1);
                 count = db.delete(RECORDS_TABLE_NAME, _ID + " = " + id +
                         (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
                 break;
+            case MEASUREMENTSTYPE:
+                count = db.delete(MEASUREMENTS_TABLE_NAME, selection, selectionArgs);
+                break;
 
+            case MEASUREMENT_IDTYPE:
+                id = uri.getPathSegments().get(1);
+                count = db.delete(MEASUREMENTS_TABLE_NAME, _ID + " = " + id +
+                        (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
+                break;
+            case RPESTYPE:
+                count = db.delete(RPE_TABLE_NAME, selection, selectionArgs);
+                break;
+
+            case RPE_IDTYPE:
+                id = uri.getPathSegments().get(1);
+                count = db.delete(RPE_TABLE_NAME, _ID + " = " + id +
+                        (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -206,11 +323,11 @@ public class ISSContentProvider extends ContentProvider {
         int count = 0;
 
         switch (uriMatcher.match(uri)) {
-            case RECORDS:
+            case RECORDSTYPE:
                 count = db.update(RECORDS_TABLE_NAME, values, selection, selectionArgs);
                 break;
 
-            case RECORD_ID:
+            case RECORD_IDTYPE:
                 count = db.update(RECORDS_TABLE_NAME, values, _ID + " = " + uri.getPathSegments().get(1) +
                         (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
                 break;

@@ -10,23 +10,23 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -50,7 +50,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -128,10 +127,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             }
 
             if (event.values.length == 1) {
-                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], 0, 0);
+                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], 0, 0, measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             } else {
-                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2]);
+                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2], measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             }
 
@@ -180,6 +179,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     public boolean needToShowRPE = false;
     private String USERID_FORDATASTORAGE = "smartwatch";
     private static HashMap<String, Boolean> recordedActivities = new HashMap<String, Boolean>();
+    private int measurementNumber = 0;
 
     {
         mGattCallback = new BluetoothGattCallback() {
@@ -258,7 +258,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                     int result = ReadHeartRateData(characteristic);
 
-                    ISSRecordData data = new ISSRecordData(UserID, Sensor.TYPE_HEART_RATE, GetDateNow(), GetTimeNow(), currentState, result, 0, 0);
+                    ISSRecordData data = new ISSRecordData(UserID, Sensor.TYPE_HEART_RATE, GetDateNow(), GetTimeNow(), currentState, result, 0, 0, measurementNumber);
                     DataStorageManager.insertISSRecordData(data);
 
                     sendHR(result);
@@ -561,11 +561,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             return;
         }
 
-        if (state.equals("morningHR")) {
+        if (state.equals("MorningHR")) {
             // stop recording cooling / resting prematurely
             timerTimeout = RESTING_MEASUREMENT_TIME;
             AskUserForFeedback("morning");
-        }else if (state.equals("eveningHR")){
+        }else if (state.equals("EveningHR")){
             // stop recording cooling / resting prematurely
             timerTimeout = RESTING_MEASUREMENT_TIME;
             AskUserForFeedback("evening");
@@ -580,6 +580,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     // Starts measuring the heart rate and, during that time, holds wakelock
     void StartMeasuring() {
+        // Starts a new Measurement in the database.
+        ContentResolver resolver = MainActivity.getContext().getContentResolver();
+        ContentValues values = new ContentValues();
+        resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, values);
+        GetLastMeasurementID(); //Loads the ID from the last measurement in the db
+        // as a secondary key for the rpe values and the record data
 
         GetHRMid();
 
@@ -602,6 +608,36 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         timer.schedule(timerTask, 0, 1000);
 
+    }
+
+    private void GetLastMeasurementID() {
+        int measurementNumber = 0;
+        Uri CONTENT_URI = ISSContentProvider.MEASUREMENT_CONTENT_URI;
+
+        String mSelectionClause = null;
+        String[] mSelectionArgs = {};
+        String[] mProjection = {ISSContentProvider._ID};
+        String mSortOrder = ISSContentProvider._ID + " DESC";
+
+        // Does a query against the table and returns a Cursor object
+        Cursor mCursor = MainActivity.getContext().getContentResolver().query(
+                CONTENT_URI,                       // The content URI of the database table
+                mProjection,                       // The columns to return for each row
+                mSelectionClause,                  // Either null, or the word the user entered
+                mSelectionArgs,                    // Either empty, or the string the user entered
+                mSortOrder);                       // The sort order for the returned rows
+
+        // Some providers return null if an error occurs, others throw an exception
+        if (null == mCursor) {
+            // If the Cursor is empty, the provider found no matches
+        } else if (mCursor.getCount() < 1) {
+            // If the Cursor is empty, the provider found no matches
+        } else {
+            measurementNumber = mCursor.getInt(0);
+        }
+        if (measurementNumber > 0){
+            this.measurementNumber = measurementNumber;
+        }
     }
 
     // Stops measuring the heart rate

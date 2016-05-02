@@ -232,10 +232,10 @@ public class MainActivity extends Activity {
         ImageButton continueCooldown = (ImageButton) findViewById(R.id.continueCooldown);
         ImageButton eveningHR = (ImageButton) findViewById(R.id.eveningHR);
 
-        morningHR.setBackgroundColor(recordedActivities.containsKey("morningHR") ? Color.GREEN : Color.GRAY);
+        morningHR.setBackgroundColor(recordedActivities.containsKey("MorningHR") ? Color.GREEN : Color.GRAY);
         startCooldown.setBackgroundColor(recordedActivities.containsKey("Cooldown") ? Color.GREEN : Color.GRAY);
         continueCooldown.setBackgroundColor(recordedActivities.containsKey("Recovery") ? Color.GREEN : Color.GRAY);
-        eveningHR.setBackgroundColor(recordedActivities.containsKey("eveningHR") ? Color.GREEN : Color.GRAY);
+        eveningHR.setBackgroundColor(recordedActivities.containsKey("EveningHR") ? Color.GREEN : Color.GRAY);
 
         int inProgressColor = Color.argb(255,255,165,0);
 
@@ -245,11 +245,11 @@ public class MainActivity extends Activity {
         if (SensorsDataService.itself.currentState.equals("Recovery")){
             continueCooldown.setBackgroundColor(inProgressColor);
         }
-        if (SensorsDataService.itself.currentState.equals("morningHR") ) {
-            eveningHR.setBackgroundColor(inProgressColor);
-        }
-        if (SensorsDataService.itself.currentState.equals("eveningHR") ) {
+        if (SensorsDataService.itself.currentState.equals("MorningHR") ) {
             morningHR.setBackgroundColor(inProgressColor);
+        }
+        if (SensorsDataService.itself.currentState.equals("EveningHR") ) {
+            eveningHR.setBackgroundColor(inProgressColor);
         }
     }
 

@@ -128,7 +128,7 @@
         <provider
             android:name=".ISSContentProvider"
             android:authorities="com.iss.android.wearable.datalayer.provider"
-            android:exported="false"
+            android:exported="true"
             android:multiprocess="true" />
     </application>
 

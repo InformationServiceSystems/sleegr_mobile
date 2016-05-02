@@ -39,20 +39,21 @@ public class DataStorageManager {
                         ISSContentProvider.EXTRA,
                         ISSContentProvider.VALUE1,
                         ISSContentProvider.VALUE2,
-                        ISSContentProvider.VALUE3
+                        ISSContentProvider.VALUE3,
+                        ISSContentProvider.MEASUREMENT_ID
                 };
 
         // Defines a string to contain the selection clause
         String mSelectionClause = null;
 
         // Initializes an array to contain selection arguments
-        String[] mSelectionArgs = {""};
+        String[] mSelectionArgs = {};
 
         // Define a sorting order for the query results to appear in
         String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC, " + ISSContentProvider.DATE + " DESC";
 
         Cursor mCursor = MainActivity.getContext().getContentResolver().query(
-                ISSContentProvider.CONTENT_URI,    // The content URI of the words table
+                ISSContentProvider.RECORDS_CONTENT_URI,    // The content URI of the words table
                 mProjection,                       // The columns to return for each row
                 mSelectionClause,                  // Either null, or the word the user entered
                 mSelectionArgs,                    // Either empty, or the string the user entered
@@ -96,9 +97,10 @@ public class DataStorageManager {
         mNewValues.put(ISSContentProvider.VALUE2, data.Value2);
         mNewValues.put(ISSContentProvider.VALUE3, data.Value3);
         mNewValues.put(ISSContentProvider.USERID, data.UserID);
+        mNewValues.put(ISSContentProvider.MEASUREMENT_ID, data.measurementID);
 
         mNewUri = MainActivity.getContext().getContentResolver().insert(
-                ISSContentProvider.CONTENT_URI,   // the user dictionary content URI
+                ISSContentProvider.RECORDS_CONTENT_URI,   // the user dictionary content URI
                 mNewValues                          // the values to insert
         );
     }
@@ -113,7 +115,7 @@ public class DataStorageManager {
 
         // Deletes the words that match the selection criteria
         mRowsDeleted = MainActivity.getContext().getContentResolver().delete(
-                ISSContentProvider.CONTENT_URI,     // the user dictionary content URI
+                ISSContentProvider.RECORDS_CONTENT_URI,     // the user dictionary content URI
                 mSelectionClause,                   // the column to select on
                 mSelectionArgs                      // the value to compare to
         );
