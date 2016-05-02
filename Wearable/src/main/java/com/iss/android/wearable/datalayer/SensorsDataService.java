@@ -179,7 +179,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             };
     public boolean needToShowRPE = false;
     private String USERID_FORDATASTORAGE = "smartwatch";
-    private static HashMap<String, Boolean> recordedActivities;
+    private static HashMap<String, Boolean> recordedActivities = new HashMap<String, Boolean>();
 
     {
         mGattCallback = new BluetoothGattCallback() {
