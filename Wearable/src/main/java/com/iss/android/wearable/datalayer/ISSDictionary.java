@@ -2,10 +2,13 @@ package com.iss.android.wearable.datalayer;
 
 import android.database.Cursor;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by micha on 25.04.2016.
@@ -65,5 +68,37 @@ public class ISSDictionary {
             }
         }
         return byteOut.toByteArray();
+    }
+
+    public static ISSMeasurement CursorToISSMeasurement(Cursor mCursor) {
+        ISSMeasurement measurement = new ISSMeasurement(mCursor.getInt(0),
+                mCursor.getString(1),
+                mCursor.getString(2));
+        return measurement;
+    }
+
+    public static ISSRPEAnswers CursorToISSRPEAnswers(Cursor mCursor) {
+        ISSRPEAnswers measurement = new ISSRPEAnswers(mCursor.getString(1),
+                BlobToMap(mCursor.getBlob(2)));
+        return measurement;
+    }
+
+    private static HashMap<String, Integer> BlobToMap(byte[] blob) {
+        HashMap<String, Integer> data2 = new HashMap<>();
+        ByteArrayInputStream byteIn = new ByteArrayInputStream(blob);
+        ObjectInputStream in = null;
+        try {
+            in = new ObjectInputStream(byteIn);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            data2 = (HashMap<String, Integer>) in.readObject();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return data2;
     }
 }

@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -245,14 +246,7 @@ public class ISSContentProvider extends ContentProvider {
                 }
                 throw new SQLException("Failed to add a record into " + uri);
             case MEASUREMENTSTYPE:
-                /**
-                 * Add a new ISS record
-                 */
                 rowID = db.insert(MEASUREMENTS_TABLE_NAME, "", values);
-
-                /**
-                 * If record is added successfully
-                 */
 
                 if (rowID > 0) {
                     Uri _uri = ContentUris.withAppendedId(MEASUREMENT_CONTENT_URI, rowID);
@@ -261,14 +255,7 @@ public class ISSContentProvider extends ContentProvider {
                 }
                 throw new SQLException("Failed to add a record into " + uri);
             case RPESTYPE:
-                /**
-                 * Add a new ISS record
-                 */
                 rowID = db.insert(RPE_TABLE_NAME, "", values);
-
-                /**
-                 * If record is added successfully
-                 */
 
                 if (rowID > 0) {
                     Uri _uri = ContentUris.withAppendedId(RPE_CONTENT_URI, rowID);

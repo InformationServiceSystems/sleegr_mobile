@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +30,7 @@ public class DataStorageManager {
     static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
 
     // Collects all ISSRecordDatas in the database that haven't been sent to the smartphone yet
-    public static ArrayList<ISSRecordData> GetAllFilesToUpload(String UserID){
+    public static ArrayList<ISSRecordData> GetAllFilesToUpload(){
         ArrayList<ISSRecordData> result = new ArrayList<>();
         // A "projection" defines the columns that will be returned for each row
         String[] mProjection =
@@ -180,5 +182,105 @@ public class DataStorageManager {
         } else {
             return 0;
         }
+    }
+
+    public static byte[] BuildItem() throws IOException {
+        ArrayList<ISSRecordData> ISSRecords = GetAllFilesToUpload();
+        File SleepData = DataStorageManager.GetSleepData();
+        ArrayList<ISSMeasurement> Measurements = GetAllMeasurements();
+        ArrayList<ISSRPEAnswers> RPEAnswers = GetAllRPEAnswers();
+        byte [][] data = new byte[7][];
+
+        try {
+            String Split = "-";
+            data[0] = Serializer.SerializeToBytes(ISSRecords);
+            data[1] = Serializer.SerializeToBytes(Split);
+            data[2] = Serializer.SerializeToBytes(SleepData);
+            data[3] = Serializer.SerializeToBytes(Split);
+            data[4] = Serializer.SerializeToBytes(Measurements);
+            data[5] = Serializer.SerializeToBytes(Split);
+            data[6] = Serializer.SerializeToBytes(RPEAnswers);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Serializer.SerializeToBytes(data);
+    }
+
+    private static ArrayList<ISSRPEAnswers> GetAllRPEAnswers() {
+        ArrayList<ISSRPEAnswers> result = new ArrayList<>();
+        // A "projection" defines the columns that will be returned for each row
+        String[] mProjection =
+                {
+                        ISSContentProvider._ID,
+                        ISSContentProvider.MEASUREMENT_ID,
+                        ISSContentProvider.RPE_ANSWERS
+                };
+
+        // Defines a string to contain the selection clause
+        String mSelectionClause = null;
+
+        // Initializes an array to contain selection arguments
+        String[] mSelectionArgs = {};
+
+        // Define a sorting order for the query results to appear in
+        String mSortOrder = ISSContentProvider._ID + " ASC";
+
+        Cursor mCursor = MainActivity.getContext().getContentResolver().query(
+                ISSContentProvider.MEASUREMENT_CONTENT_URI,    // The content URI of the words table
+                mProjection,                       // The columns to return for each row
+                mSelectionClause,                  // Either null, or the word the user entered
+                mSelectionArgs,                    // Either empty, or the string the user entered
+                mSortOrder);                       // The sort order for the returned rows
+
+        if (null == mCursor) {
+            // If the Cursor is empty, the provider found no matches
+        } else if (mCursor.getCount() < 1) {
+            // If the Cursor is empty, the provider found no matches
+        } else {
+            while (mCursor.moveToNext()) {
+                ISSRPEAnswers issrpeAnswers = ISSDictionary.CursorToISSRPEAnswers(mCursor);
+                result.add(issrpeAnswers);
+            }
+        }
+        return result;
+    }
+
+    private static ArrayList<ISSMeasurement> GetAllMeasurements() {
+        ArrayList<ISSMeasurement> result = new ArrayList<>();
+        // A "projection" defines the columns that will be returned for each row
+        String[] mProjection =
+                {
+                        ISSContentProvider._ID,
+                        ISSContentProvider.MEASUREMENT_ID,
+                        ISSContentProvider.RPE_ANSWERS
+                };
+
+        // Defines a string to contain the selection clause
+        String mSelectionClause = null;
+
+        // Initializes an array to contain selection arguments
+        String[] mSelectionArgs = {};
+
+        // Define a sorting order for the query results to appear in
+        String mSortOrder = ISSContentProvider._ID + " ASC";
+
+        Cursor mCursor = MainActivity.getContext().getContentResolver().query(
+                ISSContentProvider.MEASUREMENT_CONTENT_URI,    // The content URI of the words table
+                mProjection,                       // The columns to return for each row
+                mSelectionClause,                  // Either null, or the word the user entered
+                mSelectionArgs,                    // Either empty, or the string the user entered
+                mSortOrder);                       // The sort order for the returned rows
+
+        if (null == mCursor) {
+            // If the Cursor is empty, the provider found no matches
+        } else if (mCursor.getCount() < 1) {
+            // If the Cursor is empty, the provider found no matches
+        } else {
+            while (mCursor.moveToNext()) {
+                ISSMeasurement measurement = ISSDictionary.CursorToISSMeasurement(mCursor);
+                result.add(measurement);
+            }
+        }
+        return result;
     }
 }

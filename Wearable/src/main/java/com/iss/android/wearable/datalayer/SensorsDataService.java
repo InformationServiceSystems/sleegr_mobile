@@ -649,13 +649,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                 //genData();
 
-                ArrayList<ISSRecordData> ISSRecords = DataStorageManager.GetAllFilesToUpload(USERID_FORDATASTORAGE);
-                File SleepData = DataStorageManager.GetSleepData();
-
-                byte [] data = null;
-
+                byte[] data = new byte[0];
                 try {
-                    data = ArrayUtils.addAll(Serializer.SerializeToBytes(ISSRecords),Serializer.SerializeToBytes(SleepData));
+                    data = DataStorageManager.BuildItem();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
