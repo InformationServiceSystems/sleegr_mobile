@@ -41,6 +41,7 @@ public class ISSContentProvider extends ContentProvider {
     static final String MEASUREMENT = "measurement";
     static final String MEASUREMENT_ID = "measurement_id";
     static final String RPE_ANSWERS = "rpe_answers";
+    static final String TYPE = "type";
 
     private static HashMap<String, String> RECORDS_PROJECTION_MAP;
 
@@ -71,7 +72,7 @@ public class ISSContentProvider extends ContentProvider {
     static final String RECORDS_TABLE_NAME = "records";
     static final String MEASUREMENTS_TABLE_NAME = "measurements";
     static final String RPE_TABLE_NAME = "RPESets";
-    static final int DATABASE_VERSION = 10;
+    static final int DATABASE_VERSION = 11;
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -87,6 +88,7 @@ public class ISSContentProvider extends ContentProvider {
     static final String CREATE_MEASUREMENT_DB_TABLE =
             " CREATE TABLE " + MEASUREMENTS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    TYPE + " TEXT NOT NULL, " +
                     TIMESTAMP + " TEXT NOT NULL);";
     static final String CREATE_RPE_DB_TABLE =
             " CREATE TABLE " + RPE_TABLE_NAME + " (" +

@@ -585,6 +585,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         ContentValues values = new ContentValues();
         Date date = new Date();
         values.put(ISSContentProvider.TIMESTAMP, date.toString());
+        values.put(ISSContentProvider.TYPE, currentState);
         resolver.insert(ISSContentProvider.MEASUREMENT_CONTENT_URI, values);
         measurementNumber = DataStorageManager.GetLastMeasurementID(); //Loads the ID from the last measurement in the db
         // as a secondary key for the rpe values and the record data
