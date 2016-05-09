@@ -5,6 +5,10 @@ import android.database.Cursor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -34,7 +38,7 @@ public class ISSDictionary {
         return 0;
     }
 
-    public static ISSRecordData CursorToISSRecordDate(Cursor mCursor) {
+    public static ISSRecordData CursorToISSRecordData(Cursor mCursor) {
         ISSRecordData record = new ISSRecordData(mCursor.getInt(1),
                         mCursor.getInt(2),
                         mCursor.getString(3),
@@ -62,5 +66,10 @@ public class ISSDictionary {
             }
         }
         return byteOut.toByteArray();
+    }
+
+    public static String dateToDayString(Date date) {
+        DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
+        return df.format(date);
     }
 }

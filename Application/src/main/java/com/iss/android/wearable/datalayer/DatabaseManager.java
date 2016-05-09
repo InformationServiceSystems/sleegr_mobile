@@ -48,7 +48,7 @@ public class DatabaseManager {
             // If the Cursor is empty, the provider found no matches
         } else {
             while (mCursor.moveToNext()) {
-                ISSRecordData record = ISSDictionary.CursorToISSRecordDate(mCursor);
+                ISSRecordData record = ISSDictionary.CursorToISSRecordData(mCursor);
                 data.add(record);
             }
         }

@@ -43,6 +43,7 @@ public class ISSContentProvider extends ContentProvider {
     static final String MEASUREMENT_ID = "measurement_id";
     static final String RPE_ANSWERS = "rpe_answers";
     static final String TYPE = "type";
+    static final String SENT = "sent";
 
     private static HashMap<String, String> RECORDS_PROJECTION_MAP;
 
@@ -77,6 +78,7 @@ public class ISSContentProvider extends ContentProvider {
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    SENT + " BOOLEAN NOT NULL, " +
                     USERID + " INTEGER NOT NULL, " +
                     MEASUREMENT + " INTEGER NOT NULL, " +
                     DATE + " TEXT NOT NULL, " +

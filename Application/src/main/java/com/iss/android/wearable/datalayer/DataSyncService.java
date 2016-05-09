@@ -5,6 +5,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -26,12 +28,13 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -327,6 +330,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             for (ISSRecordData row: ISSRecords) {
 
                 ContentValues values = new ContentValues();
+                values.put(ISSContentProvider.SENT, false);
                 values.put(ISSContentProvider.USERID,
                         row.UserID);
                 values.put(ISSContentProvider.MEASUREMENT,
@@ -467,19 +471,48 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     // A method that collects all files of the last week (see GetAllFilestoUpload),
     // converts them to an ISSRecordData list, seperates them by measurement type
     // and sends them to the server using the UploadingManager class.
+    // I query only for the values of the last 30 days, but that's easily adjustable.
     public void ShareDataWithServer() {
+        ArrayList<String> dateList = createDateList();
 
-        ArrayList<ArrayList<File>> arrayLists = DataStorageManager.GetAllFilesToUpload(UserID, 7);
-
-        for (ArrayList<File> day : arrayLists) {
+        for (String date : dateList) {
 
             // get all data
 
             ArrayList<ISSRecordData> alldata = new ArrayList<>();
+            Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
 
-            for (File file : day) {
-                // TODO: Assemble the stuff for server transmission
-                alldata.addAll(records);
+            String mSelectionClause = ISSContentProvider.DATE + " = ?, " + ISSContentProvider.SENT + " = false";
+            String[] mSelectionArgs = {date};
+            String[] mProjection = {ISSContentProvider._ID,
+                    ISSContentProvider.DATE,
+                    ISSContentProvider.TIMESTAMP,
+                    ISSContentProvider.EXTRA,
+                    ISSContentProvider.VALUE1,
+                    ISSContentProvider.VALUE2,
+                    ISSContentProvider.VALUE3,
+                    ISSContentProvider.MEASUREMENT,
+                    ISSContentProvider.USERID};
+            String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
+
+            // Does a query against the table and returns a Cursor object
+            Cursor mCursor = MainActivity.getContext().getContentResolver().query(
+                    CONTENT_URI,                       // The content URI of the database table
+                    mProjection,                       // The columns to return for each row
+                    mSelectionClause,                  // Either null, or the word the user entered
+                    mSelectionArgs,                    // Either empty, or the string the user entered
+                    mSortOrder);                       // The sort order for the returned rows
+
+            // Some providers return null if an error occurs, others throw an exception
+            if (null == mCursor) {
+                // If the Cursor is empty, the provider found no matches
+            } else if (mCursor.getCount() < 1) {
+                // If the Cursor is empty, the provider found no matches
+            } else {
+                while (mCursor.moveToNext()) {
+                    ISSRecordData record = ISSDictionary.CursorToISSRecordData(mCursor);
+                    alldata.add(record);
+                }
             }
 
             // sort data in chronological order?
@@ -488,9 +521,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             if (alldata.size() == 0)
                 continue;
-
-            // the day component of file name
-            String dateName = TimeSeries.dictionary_format.format(alldata.get(0).getTimestamp());
 
             // determine all measurement types
             HashMap<Integer, ArrayList<ISSRecordData>> map = new HashMap<>();
@@ -506,7 +536,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             // upload data separately for each measurement type
 
             for (Integer measurementType : map.keySet()) {
-                String uploadingName = dateName + "-" + measurementType + ".csv";
+                String uploadingName = date + "-" + measurementType + ".csv";
 
                 ArrayList<ISSRecordData> measurementData = map.get(measurementType);
 
@@ -522,6 +552,18 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         UploadingManager.UploadUserFileToServer( Serializer.FileToBytes(DataStorageManager.sleepData), "sleep-export.csv", uploadUrl, UserID);
         OutputEvent("Sent data files to server");
 
+    }
+
+    private ArrayList<String> createDateList() {
+        ArrayList<String> dateList = new ArrayList<String>();
+        Calendar cal = Calendar.getInstance();
+        for (int i = 0; i < 30; i++){
+            Date date = cal.getTime();
+            cal.add(Calendar.DATE,-1);
+            String dateAsString = ISSDictionary.dateToDayString(date);
+            dateList.add(dateAsString);
+        }
+        return dateList;
     }
 
     @Override

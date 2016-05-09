@@ -46,7 +46,7 @@ public class ISSRecordData implements Serializable {
     public String toString(){
 
         String sep = ",";
-        return UserID + sep + MeasurementType + sep + Date + sep + Timestamp + sep + ExtraData + sep + Value1 + sep + Value2 + sep + Value3;
+        return UserID + sep + MeasurementType + sep + Date + "_" + Timestamp + sep + ExtraData + sep + Value1 + sep + Value2 + sep + Value3;
 
     }
 
