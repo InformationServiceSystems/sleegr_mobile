@@ -312,6 +312,11 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             ArrayList<ISSMeasurement> Measurements = (ArrayList<ISSMeasurement>) Serializer.DeserializeFromBytes(data[2]);
             ArrayList<ISSRPEAnswers> RPEAnswers = (ArrayList<ISSRPEAnswers>) Serializer.DeserializeFromBytes(data[3]);
 
+            InsertIntoDB(ISSRecords);
+            InsertIntoDB(SleepData);
+            InsertIntoDB(Measurements);
+            InsertIntoDB(RPEAnswers);
+
             // TODO: Here store the values from the byte array into the database.
             ClearWatchData();
 
