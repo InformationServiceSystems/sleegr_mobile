@@ -1,6 +1,8 @@
 package com.iss.android.wearable.datalayer;
 
 import android.app.Service;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -308,16 +310,45 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             byte[] dataAsByteArray = Serializer.InputStreamToByte(assetInputStream);
             byte[][] data = (byte[][]) Serializer.DeserializeFromBytes(dataAsByteArray);
             ArrayList<ISSRecordData> ISSRecords = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data[0]);
-            File SleepData = (File) Serializer.DeserializeFromBytes(data[1]);
-            ArrayList<ISSMeasurement> Measurements = (ArrayList<ISSMeasurement>) Serializer.DeserializeFromBytes(data[2]);
-            ArrayList<ISSRPEAnswers> RPEAnswers = (ArrayList<ISSRPEAnswers>) Serializer.DeserializeFromBytes(data[3]);
+            ArrayList<ISSMeasurement> Measurements = (ArrayList<ISSMeasurement>) Serializer.DeserializeFromBytes(data[1]);
+            ArrayList<ISSRPEAnswers> RPEAnswers = (ArrayList<ISSRPEAnswers>) Serializer.DeserializeFromBytes(data[2]);
 
-            InsertIntoDB(ISSRecords);
-            InsertIntoDB(SleepData);
-            InsertIntoDB(Measurements);
-            InsertIntoDB(RPEAnswers);
+            // Okay this looks f'kin ugly, but there's no other way due to erasure of ArrayLists.
+            // It's bs but there's no way around.
+            for (ISSRPEAnswers row: RPEAnswers) {
 
-            // TODO: Here store the values from the byte array into the database.
+                ContentValues values = new ContentValues();
+                values.put(ISSContentProvider.MEASUREMENT_ID,
+                        row.Measurement_ID);
+                values.put(ISSContentProvider.RPE_ANSWERS,
+                        ISSDictionary.MapToByteArray(row.Answers));
+                resolver.insert(ISSContentProvider.RPE_CONTENT_URI, values);
+            }
+            for (ISSRecordData row: ISSRecords) {
+
+                ContentValues values = new ContentValues();
+                values.put(ISSContentProvider.USERID,
+                        row.UserID);
+                values.put(ISSContentProvider.MEASUREMENT,
+                        row.MeasurementType);
+                values.put(ISSContentProvider.DATE, row.Date);
+                values.put(ISSContentProvider.TIMESTAMP, row.Timestamp);
+                values.put(ISSContentProvider.EXTRA, row.ExtraData);
+                values.put(ISSContentProvider.VALUE1, row.Value1);
+                values.put(ISSContentProvider.VALUE2, row.Value2);
+                values.put(ISSContentProvider.VALUE3, row.Value3);
+                resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, values);
+            }
+            for (ISSMeasurement row: Measurements) {
+
+                ContentValues values = new ContentValues();
+                values.put(ISSContentProvider._ID, row._ID);
+                values.put(ISSContentProvider.TIMESTAMP,
+                        row.timestamp);
+                values.put(ISSContentProvider.TYPE,
+                        row.type);
+                resolver.insert(ISSContentProvider.MEASUREMENT_CONTENT_URI, values);
+            }
             ClearWatchData();
 
         } catch (Exception e) {
@@ -326,6 +357,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }
 
     }
+    static ContentResolver resolver = MainActivity.getContext().getContentResolver();
 
     // A method broadcasting a String, generally updates about the state of the app.
     public void OutputEvent(String str) {

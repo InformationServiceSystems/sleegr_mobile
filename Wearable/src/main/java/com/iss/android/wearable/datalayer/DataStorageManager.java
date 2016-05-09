@@ -27,7 +27,6 @@ import java.util.HashMap;
 public class DataStorageManager {
 
     static String dataFolder = Environment.getExternalStorageDirectory().toString();
-    static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
 
     // Collects all ISSRecordDatas in the database that haven't been sent to the smartphone yet
     public static ArrayList<ISSRecordData> GetAllFilesToUpload(){
@@ -75,11 +74,6 @@ public class DataStorageManager {
         }
 
         return result;
-    }
-
-    // Returns the file that contains the sleep data
-    public static File GetSleepData() {
-        return sleepData;
     }
 
     public static void insertISSRecordData(ISSRecordData data) {
@@ -186,16 +180,14 @@ public class DataStorageManager {
 
     public static byte[] BuildItem() throws IOException {
         ArrayList<ISSRecordData> ISSRecords = GetAllFilesToUpload();
-        File SleepData = DataStorageManager.GetSleepData();
         ArrayList<ISSMeasurement> Measurements = GetAllMeasurements();
         ArrayList<ISSRPEAnswers> RPEAnswers = GetAllRPEAnswers();
-        byte [][] data = new byte[4][];
+        byte [][] data = new byte[3][];
 
         try {
             data[0] = Serializer.SerializeToBytes(ISSRecords);
-            data[1] = Serializer.SerializeToBytes(SleepData);
-            data[2] = Serializer.SerializeToBytes(Measurements);
-            data[3] = Serializer.SerializeToBytes(RPEAnswers);
+            data[1] = Serializer.SerializeToBytes(Measurements);
+            data[2] = Serializer.SerializeToBytes(RPEAnswers);
         } catch (IOException e) {
             e.printStackTrace();
         }

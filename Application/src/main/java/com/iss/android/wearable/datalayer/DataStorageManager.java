@@ -111,36 +111,6 @@ public class DataStorageManager {
 
     }
 
-    // A method that determines all the *.csv Files in a given timespan.
-    public static ArrayList<ArrayList<File>> GetAllFilesToUpload(String UserID, int timeSpan){
-
-        ArrayList<ArrayList<File>> result = new  ArrayList<>();
-        //result.add(sleepData);
-
-        for (int i = 0; i < timeSpan; i++){
-            File dayFolder = new File( userDataFolder, getDayFromToday(i));
-            File[] files = dayFolder.listFiles();
-
-            ArrayList<File> day = new ArrayList<>();
-
-            if (files != null){
-                for (File file : files) {
-
-                    if (!file.getName().contains(".csv")){
-                        continue;
-                    }
-
-                    day.add(file);
-                }
-            }
-
-            result.add(day);
-
-        }
-
-        return result;
-    }
-
     // A method responsible for creating a file in which the scheduled RPE values will be saved (in CSVManager.WriteNewCSVdata)
     public static void storeScheduleLine(String scheduleString) {
         File file = new File(userDataFolder, "schedule.csv");

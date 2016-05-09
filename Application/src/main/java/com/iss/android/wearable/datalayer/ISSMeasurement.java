@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by micha on 03.05.2016.
  */
 public class ISSMeasurement implements Serializable{
-    static public long _ID;
+    public long _ID;
     public String type;
     public String timestamp;
 

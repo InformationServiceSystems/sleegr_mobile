@@ -2,6 +2,11 @@ package com.iss.android.wearable.datalayer;
 
 import android.database.Cursor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
+
 /**
  * Created by micha on 25.04.2016.
  */
@@ -32,11 +37,30 @@ public class ISSDictionary {
     public static ISSRecordData CursorToISSRecordDate(Cursor mCursor) {
         ISSRecordData record = new ISSRecordData(mCursor.getInt(1),
                         mCursor.getInt(2),
-                        mCursor.getString(3) + mCursor.getString(4),
+                        mCursor.getString(3),
+                        mCursor.getString(4),
                         mCursor.getString(5),
                         mCursor.getFloat(6),
                         mCursor.getFloat(7),
                         mCursor.getFloat(8));
         return record;
+    }
+
+    public static byte[] MapToByteArray(HashMap<String, Integer> answers) {
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        ObjectOutputStream out = null;
+        try {
+            out = new ObjectOutputStream(byteOut);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (out != null) {
+            try {
+                out.writeObject(answers);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return byteOut.toByteArray();
     }
 }
