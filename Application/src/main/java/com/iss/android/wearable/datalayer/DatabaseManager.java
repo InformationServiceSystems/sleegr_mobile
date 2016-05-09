@@ -17,7 +17,7 @@ public class DatabaseManager {
 
     public static ArrayList<ISSRecordData> getData(Date time) {
         ArrayList<ISSRecordData> data = new ArrayList<ISSRecordData>();
-        Uri CONTENT_URI = ISSContentProvider.CONTENT_URI;
+        Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
         String date = time.toString();
 
         String mSelectionClause = ISSContentProvider.DATE + " = ?";

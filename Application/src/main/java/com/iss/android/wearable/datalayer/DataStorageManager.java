@@ -67,7 +67,6 @@ public class DataStorageManager {
     }
 
 
-    // Environment.getDataDirectory().toString()
     // I use here external storage directory, as the previous versions of the
     // app use the external directory. In case ext. storage is not available, use
     // Environment.getDataDirectory().toString()
@@ -79,36 +78,10 @@ public class DataStorageManager {
     static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
     static File userDataFolder = new File(dataFolder + "/triathlon");
 
-    // A method that converts a file into a bytearray
-    public static byte[] FileToBytes(File file) {
-
-        int size = (int) file.length();
-        byte[] bytes = new byte[size];
-
-        try {
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-            buf.read(bytes, 0, bytes.length);
-            buf.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return bytes;
-    }
-
     // A method that transcribes the UserID. Currently replaces "@" with "_at_"
     public static String getProperUserID(String UserID){
 
         return UserID.replace("@", "_at_");
-
-    }
-
-    public static String getFileTemplate(int dayoffset, String UserID){
-
-
-        return getProperUserID(UserID) +  "-" + getDayFromToday(dayoffset);
 
     }
 
@@ -135,78 +108,6 @@ public class DataStorageManager {
         }
 
         return  getStateKey(mark);
-
-    }
-
-    // A method that stores a list of ISSRecordData belonging to the same type in a file.
-    public static void SaveBinnedData(ArrayList<ISSRecordData> accumulator, String UserID, String activityType){
-
-        // get date of first record
-        Calendar cal = Calendar.getInstance();
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
-
-        try {
-            cal.setTime(sdf.parse(accumulator.get(0).Timestamp));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        cal.add(Calendar.HOUR, -4); // this is in case someone goes to sleep at like around 3 am, we assume that it still corresponds to previous day
-
-        SimpleDateFormat folderFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String folderName = folderFormat.format(cal.getTime());
-
-        // create folder for the time, if not created already
-        File dayFolder = new File( userDataFolder, folderName);
-
-        if(!dayFolder.exists()){
-            boolean result = dayFolder.mkdir();
-            //DataSyncService.itself.OutputEvent("create folder: " + result);
-        }
-
-        CSVManager.AppendStringToFile(
-                new File(dayFolder, getProperUserID(UserID) + "_" + folderName + "_" + activityType + ".csv"),
-                CSVManager.RecordsToCSV(accumulator).toString()
-        );
-
-    }
-
-    // A method that divides a list of ISSRecordData by type and makes them be stored seperately in SaveBinnedData
-    public static void SaveNewDataToFile(ArrayList<ISSRecordData> data, String UserID) {
-
-        try {
-
-            if (data.size() < 1){
-                return;
-            }
-
-            ArrayList<ISSRecordData> accumulator = new ArrayList<ISSRecordData>();
-            String previousKey = getKey(data.get(0));
-
-            // separate data into different folders
-            for(ISSRecordData record: data){
-                String key = getKey(record);
-
-                if (!previousKey.equals(key)){
-                    SaveBinnedData(accumulator, UserID, previousKey);
-                    previousKey = key;
-                    accumulator.clear();
-                }
-
-                accumulator.add(record);
-            }
-
-            if (accumulator.size() > 0){
-                SaveBinnedData(accumulator, UserID, previousKey);
-            }
-
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
 
     }
 

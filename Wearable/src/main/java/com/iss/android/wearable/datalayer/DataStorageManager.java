@@ -189,17 +189,13 @@ public class DataStorageManager {
         File SleepData = DataStorageManager.GetSleepData();
         ArrayList<ISSMeasurement> Measurements = GetAllMeasurements();
         ArrayList<ISSRPEAnswers> RPEAnswers = GetAllRPEAnswers();
-        byte [][] data = new byte[7][];
+        byte [][] data = new byte[4][];
 
         try {
-            String Split = "-";
             data[0] = Serializer.SerializeToBytes(ISSRecords);
-            data[1] = Serializer.SerializeToBytes(Split);
-            data[2] = Serializer.SerializeToBytes(SleepData);
-            data[3] = Serializer.SerializeToBytes(Split);
-            data[4] = Serializer.SerializeToBytes(Measurements);
-            data[5] = Serializer.SerializeToBytes(Split);
-            data[6] = Serializer.SerializeToBytes(RPEAnswers);
+            data[1] = Serializer.SerializeToBytes(SleepData);
+            data[2] = Serializer.SerializeToBytes(Measurements);
+            data[3] = Serializer.SerializeToBytes(RPEAnswers);
         } catch (IOException e) {
             e.printStackTrace();
         }

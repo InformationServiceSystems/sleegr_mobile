@@ -24,7 +24,7 @@ public class CheckDatabaseActivity extends Activity {
 
         TextView emptyBox = (TextView) this.findViewById(R.id.empty);
 
-        Uri CONTENT_URI = ISSContentProvider.CONTENT_URI;
+        Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
 
         String mSelectionClause = ISSContentProvider.MEASUREMENT + " = ?";
         String[] mSelectionArgs = {"21"};

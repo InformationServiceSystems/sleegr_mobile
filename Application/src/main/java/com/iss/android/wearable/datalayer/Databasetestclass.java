@@ -25,7 +25,7 @@ public class Databasetestclass {
             @Override
             public void run() {
                 i++;
-                resolver.insert(ISSContentProvider.CONTENT_URI, generateValues());
+                resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, generateValues());
                 if (i>1000){
                     this.cancel();
                     timer.cancel();

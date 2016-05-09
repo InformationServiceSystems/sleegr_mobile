@@ -305,11 +305,14 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         try {
 
-            byte[] data = Serializer.InputStreamToByte(assetInputStream);
+            byte[] dataAsByteArray = Serializer.InputStreamToByte(assetInputStream);
+            byte[][] data = (byte[][]) Serializer.DeserializeFromBytes(dataAsByteArray);
+            ArrayList<ISSRecordData> ISSRecords = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data[0]);
+            File SleepData = (File) Serializer.DeserializeFromBytes(data[1]);
+            ArrayList<ISSMeasurement> Measurements = (ArrayList<ISSMeasurement>) Serializer.DeserializeFromBytes(data[2]);
+            ArrayList<ISSRPEAnswers> RPEAnswers = (ArrayList<ISSRPEAnswers>) Serializer.DeserializeFromBytes(data[3]);
 
-            ArrayList<ISSRecordData> receivedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data);
-            OutputEvent("Recieved " + receivedData.size() + " of data");
-            DataStorageManager.SaveNewDataToFile(receivedData, UserID);
+            // TODO: Here store the values from the byte array into the database.
             ClearWatchData();
 
         } catch (Exception e) {
@@ -438,7 +441,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             ArrayList<ISSRecordData> alldata = new ArrayList<>();
 
             for (File file : day) {
-                List<ISSRecordData> records = CSVManager.ReadCSVdata(file);
+                // TODO: Assemble the stuff for server transmission
                 alldata.addAll(records);
             }
 
