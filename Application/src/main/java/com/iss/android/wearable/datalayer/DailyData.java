@@ -6,6 +6,8 @@ import java.util.Date;
 /**
  * Created by micha on 25.04.2016.
  */
+
+// TODO: Fill up this class in the constructor
 public class DailyData {
     // This is an object containing all data available for a single day.
     ArrayList<ISSRecordData> data = new ArrayList<ISSRecordData>();

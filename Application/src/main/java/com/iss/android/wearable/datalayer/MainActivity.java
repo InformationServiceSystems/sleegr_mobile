@@ -699,7 +699,7 @@ public class MainActivity extends FragmentActivity implements
             TextView[] labels = new TextView[]{text};
 
             // I create specific formatter inline. This is more general and java-ish :)
-            VisualizationsPlotter.Plot(dailyData.getVisualizations(), graphs, labels, new GraphStyler() {
+            /*VisualizationsPlotter.Plot(dailyData.getVisualizations(), graphs, labels, new GraphStyler() {
                 @Override
                 public void styleGraph(GraphView graphView, Visualizations.Subplot subplot) {
 
@@ -749,6 +749,7 @@ public class MainActivity extends FragmentActivity implements
             rpe.setText("RPE scale: " + formatDouble(dailyData.getRPE()));
             TextView sleep = (TextView) v.findViewById(R.id.sleep);
             sleep.setText("Deep Sleep Cycles: " + formatDouble(dailyData.getDeepSleep()));
+            */
             return v;
         }
 

@@ -74,7 +74,7 @@ public class ISSContentProvider extends ContentProvider {
     static final String RECORDS_TABLE_NAME = "records";
     static final String MEASUREMENTS_TABLE_NAME = "measurements";
     static final String RPE_TABLE_NAME = "RPESets";
-    static final int DATABASE_VERSION = 11;
+    static final int DATABASE_VERSION = 12;
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -96,8 +96,8 @@ public class ISSContentProvider extends ContentProvider {
     static final String CREATE_RPE_DB_TABLE =
             " CREATE TABLE " + RPE_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    MEASUREMENT_ID + "INTEGER NOT NULL, " +
-                    RPE_ANSWERS + "BLOB);";
+                    MEASUREMENT_ID + " INTEGER NOT NULL, " +
+                    RPE_ANSWERS + " BLOB);";
 
     /**
      * Helper class that actually creates and manages

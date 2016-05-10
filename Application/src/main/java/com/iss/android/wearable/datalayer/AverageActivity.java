@@ -59,7 +59,7 @@ public class AverageActivity extends Activity {
         @Override
         protected String doInBackground(String... params) {
             // Determine the dates today and 30 days ago and retrieve the csvs
-            listOfFiles = DataStorageManager.GetAllFilesToUpload(DataSyncService.getUserID(),30);
+            /*listOfFiles = DataStorageManager.GetAllFilesToUpload(DataSyncService.getUserID(),30);
             // Iterate over all heart rate values and assign their value to morning, day or evening
             for (int i = 0; i< listOfFiles.size(); i++){
                 for (File f: listOfFiles.get(i)){
@@ -87,7 +87,7 @@ public class AverageActivity extends Activity {
             }
             for (int i = 0; i < 30; i++){
                 sortSleepIn(i, sleepData);
-            }
+            }*/
             return "Executed";
         }
 

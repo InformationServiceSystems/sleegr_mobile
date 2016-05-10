@@ -214,7 +214,7 @@ public class DataStorageManager {
         String mSortOrder = ISSContentProvider._ID + " ASC";
 
         Cursor mCursor = MainActivity.getContext().getContentResolver().query(
-                ISSContentProvider.MEASUREMENT_CONTENT_URI,    // The content URI of the words table
+                ISSContentProvider.RPE_CONTENT_URI,    // The content URI of the words table
                 mProjection,                       // The columns to return for each row
                 mSelectionClause,                  // Either null, or the word the user entered
                 mSelectionArgs,                    // Either empty, or the string the user entered
@@ -239,8 +239,8 @@ public class DataStorageManager {
         String[] mProjection =
                 {
                         ISSContentProvider._ID,
-                        ISSContentProvider.MEASUREMENT_ID,
-                        ISSContentProvider.RPE_ANSWERS
+                        ISSContentProvider.TYPE,
+                        ISSContentProvider.TIMESTAMP
                 };
 
         // Defines a string to contain the selection clause
