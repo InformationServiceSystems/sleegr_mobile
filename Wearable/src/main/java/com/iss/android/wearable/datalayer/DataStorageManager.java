@@ -2,9 +2,11 @@ package com.iss.android.wearable.datalayer;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -119,6 +121,16 @@ public class DataStorageManager {
                 mSelectionClause,                   // the column to select on
                 mSelectionArgs                      // the value to compare to
         );
+        mRowsDeleted = MainActivity.getContext().getContentResolver().delete(
+                ISSContentProvider.RPE_CONTENT_URI,     // the user dictionary content URI
+                mSelectionClause,                   // the column to select on
+                mSelectionArgs                      // the value to compare to
+        );
+        mRowsDeleted = MainActivity.getContext().getContentResolver().delete(
+                ISSContentProvider.MEASUREMENT_CONTENT_URI,     // the user dictionary content URI
+                mSelectionClause,                   // the column to select on
+                mSelectionArgs                      // the value to compare to
+        );
         return mRowsDeleted;
     }
 
@@ -146,36 +158,8 @@ public class DataStorageManager {
 
 
     public static int GetLastMeasurementID() {
-        int measurementNumber = 0;
-        Uri CONTENT_URI = ISSContentProvider.MEASUREMENT_CONTENT_URI;
-
-        String mSelectionClause = null;
-        String[] mSelectionArgs = {};
-        String[] mProjection = {ISSContentProvider._ID};
-        String mSortOrder = ISSContentProvider._ID + " DESC";
-
-        // Does a query against the table and returns a Cursor object
-        Cursor mCursor = MainActivity.getContext().getContentResolver().query(
-                CONTENT_URI,                       // The content URI of the database table
-                mProjection,                       // The columns to return for each row
-                mSelectionClause,                  // Either null, or the word the user entered
-                mSelectionArgs,                    // Either empty, or the string the user entered
-                mSortOrder);                       // The sort order for the returned rows
-
-        // Some providers return null if an error occurs, others throw an exception
-        if (null == mCursor) {
-            // If the Cursor is empty, the provider found no matches
-        } else if (mCursor.getCount() < 1) {
-            // If the Cursor is empty, the provider found no matches
-        } else {
-            mCursor.moveToNext();
-            measurementNumber = mCursor.getInt(0);
-        }
-        if (measurementNumber > 0){
-            return measurementNumber;
-        } else {
-            return 0;
-        }
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
+        return pref.getInt("LastMeasurement", 0);
     }
 
     public static byte[] BuildItem() throws IOException {
@@ -270,5 +254,11 @@ public class DataStorageManager {
             }
         }
         return result;
+    }
+
+    public static void SetLastMeasurementID(int measurementNumber) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt("LastMeasurement", measurementNumber);
     }
 }

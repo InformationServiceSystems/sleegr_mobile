@@ -41,6 +41,7 @@ public class ISSRecordData implements Serializable {
     public float Value1;
     public float Value2;
     public float Value3;
+    public int measurementID;
 
     // Converts the ISSRecordData to a String, the way it is stored in a *.csv
     public String toString(){
@@ -50,16 +51,17 @@ public class ISSRecordData implements Serializable {
 
     }
 
-    public ISSRecordData(int UID, int MType, String SDate, String timestamp, String extraData, float v1, float v2, float v3){
+    public ISSRecordData(int UID, int MType, String date, String timestamp, String extraData, float v1, float v2, float v3, int measurementNumber){
 
         UserID = UID;
         MeasurementType = MType;
-        Date = SDate;
+        Date = date;
         Timestamp = timestamp;
         ExtraData = extraData;
         Value1 = v1;
         Value2 = v2;
         Value3 = v3;
+        measurementID = measurementNumber;
 
     }
 

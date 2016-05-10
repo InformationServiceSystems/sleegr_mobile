@@ -328,13 +328,15 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 resolver.insert(ISSContentProvider.RPE_CONTENT_URI, values);
             }
             for (ISSRecordData row: ISSRecords) {
-
+                Log.d("measurement id", String.valueOf(row.measurementID));
                 ContentValues values = new ContentValues();
                 values.put(ISSContentProvider.SENT, false);
                 values.put(ISSContentProvider.USERID,
-                        row.UserID);
+                        getUserID());
                 values.put(ISSContentProvider.MEASUREMENT,
                         row.MeasurementType);
+                values.put(ISSContentProvider.MEASUREMENT_ID,
+                        row.measurementID);
                 values.put(ISSContentProvider.DATE, row.Date);
                 values.put(ISSContentProvider.TIMESTAMP, row.Timestamp);
                 values.put(ISSContentProvider.EXTRA, row.ExtraData);
