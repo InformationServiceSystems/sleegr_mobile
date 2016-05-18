@@ -24,11 +24,6 @@ public class SyncAlarm extends BroadcastReceiver
 
         if (DataSyncService.itself != null) {
 
-            if (!DataSyncService.itself.serverSync)
-                DataSyncService.itself.RequestDataFromWatch();
-            else
-                DataSyncService.itself.ShareDataWithServer();
-
             DataSyncService.itself.serverSync = !DataSyncService.itself.serverSync;
         }
 

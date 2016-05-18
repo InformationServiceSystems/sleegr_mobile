@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -566,9 +567,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             timerTimeout = RESTING_MEASUREMENT_TIME;
             AskUserForFeedback("morning");
         }else if (state.equals("EveningHR")){
-            // stop recording cooling / resting prematurely
             timerTimeout = RESTING_MEASUREMENT_TIME;
             AskUserForFeedback("evening");
+        }else if (state.equals("Cooldown")) {
+            timerTimeout = RESTING_MEASUREMENT_TIME;
         }else if (state.contains("Recovery")) {
             timerTimeout = RESTING_MEASUREMENT_TIME; // needed to recover the state of the app properly
             Intent myIntent = new Intent(this, TrainingStartTimeActivity.class);
@@ -587,6 +589,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         values.put(ISSContentProvider.TIMESTAMP, date.toString());
         values.put(ISSContentProvider.TYPE, currentState);
         measurementNumber = DataStorageManager.GetLastMeasurementID(); //Loads the ID from the last measurement in the db
+        Log.d("Loaded measurement as", String.valueOf(measurementNumber));
         measurementNumber++;
         values.put(ISSContentProvider._ID, measurementNumber);
         DataStorageManager.SetLastMeasurementID(measurementNumber);
@@ -702,12 +705,15 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 // send available data
                 OutputEvent("Data saved");
                 alldata.clear();
+                Log.d("Order received", "Will delete data");
+                ISSContentProvider.clear();
+                OutputEvent("Data deleted");
 
                 // clear the existing data on the smartwatch
 
-                if (DataStorageManager.deleteISSRecords() > 0){
+                /*if (DataStorageManager.deleteISSRecords() > 0){
                     OutputEvent("Data transferred");
-                };
+                };*/
 
             }
 

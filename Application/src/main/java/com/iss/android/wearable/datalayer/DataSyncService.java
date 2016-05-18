@@ -346,7 +346,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, values);
             }
             for (ISSMeasurement row: Measurements) {
-
+                Log.d("tries to insert", String.valueOf(row._ID));
                 ContentValues values = new ContentValues();
                 values.put(ISSContentProvider._ID, row._ID);
                 values.put(ISSContentProvider.TIMESTAMP,
@@ -396,13 +396,13 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 }
             }
         }).start();
-
     }
 
     // A method that handles deletion of data that has successfully been send to the phone.
     public void ClearWatchData() {
 
         OutputEvent("Data saved. Clearing data on the watch");
+        Log.d("Now clearing", "Data on the watch");
 
         new Thread(new Runnable() {
             @Override
@@ -418,7 +418,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                         Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "Clear the data", new byte[]{2});
                     }
                 }
-
             }
         }).start();
     }

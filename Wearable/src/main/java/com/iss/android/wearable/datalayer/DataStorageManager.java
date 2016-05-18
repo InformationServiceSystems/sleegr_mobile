@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -28,7 +29,7 @@ import java.util.HashMap;
  */
 public class DataStorageManager {
 
-    static String dataFolder = Environment.getExternalStorageDirectory().toString();
+    static SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
 
     // Collects all ISSRecordDatas in the database that haven't been sent to the smartphone yet
     public static ArrayList<ISSRecordData> GetAllFilesToUpload(){
@@ -158,7 +159,6 @@ public class DataStorageManager {
 
 
     public static int GetLastMeasurementID() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
         return pref.getInt("LastMeasurement", 0);
     }
 
@@ -257,8 +257,9 @@ public class DataStorageManager {
     }
 
     public static void SetLastMeasurementID(int measurementNumber) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
         SharedPreferences.Editor editor = pref.edit();
+        Log.d("Set measurement id", "to" + String.valueOf(measurementNumber));
         editor.putInt("LastMeasurement", measurementNumber);
+        editor.apply();
     }
 }

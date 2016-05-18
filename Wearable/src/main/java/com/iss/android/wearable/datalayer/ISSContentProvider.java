@@ -68,12 +68,12 @@ public class ISSContentProvider extends ContentProvider {
     /**
      * Database specific constant declarations
      */
-    private SQLiteDatabase db;
+    private static SQLiteDatabase db;
     static final String DATABASE_NAME = "ISSRecordData";
     static final String RECORDS_TABLE_NAME = "records";
     static final String MEASUREMENTS_TABLE_NAME = "measurements";
     static final String RPE_TABLE_NAME = "RPESets";
-    static final int DATABASE_VERSION = 16;
+    static final int DATABASE_VERSION = 32;
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -96,6 +96,23 @@ public class ISSContentProvider extends ContentProvider {
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     MEASUREMENT_ID + " INTEGER NOT NULL, " +
                     RPE_ANSWERS + " BLOB);";
+
+    public static void clear() {
+        db.execSQL("DELETE FROM " + ISSContentProvider.RECORDS_TABLE_NAME + "; " +
+                "DELETE FROM " + ISSContentProvider.MEASUREMENTS_TABLE_NAME + "; " +
+                "DELETE FROM " + ISSContentProvider.RPE_TABLE_NAME + ";");
+        String count = "SELECT count(*) FROM " + ISSContentProvider.RECORDS_TABLE_NAME;
+        Cursor mcursor = db.rawQuery(count, null);
+        mcursor.moveToFirst();
+        int icount = mcursor.getInt(0);
+        if(icount>0){
+            Log.d("Deleted", "not everything");
+        }
+        else{
+            Log.d("Deleted", "everything");
+            // test
+        }
+    }
 
     /**
      * Helper class that actually creates and manages
@@ -121,6 +138,10 @@ public class ISSContentProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + RPE_TABLE_NAME);
             onCreate(db);
         }
+    }
+
+    public static SQLiteDatabase getDB() {
+        return db;
     }
 
     @Override
