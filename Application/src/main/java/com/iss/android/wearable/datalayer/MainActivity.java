@@ -16,6 +16,7 @@
 
 package com.iss.android.wearable.datalayer;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -70,14 +71,12 @@ import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToda
  * item every second while it is open. Also allows user to take a photo and send that as an asset
  * to the paired wearable.
  */
-public class MainActivity extends FragmentActivity implements
-        ManageDateFragment.OnFragmentInteractionListener {
+public class MainActivity extends Activity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int NUM_ITEMS = 30;
     private static final String TAG = "MainActivity";
     public static android.content.Context itself;
-    MyAdapter mAdapter;
     ViewPager mPager;
     int mCurrentTabPosition = 30;
     PendingIntent pendingInt = null;
@@ -87,15 +86,6 @@ public class MainActivity extends FragmentActivity implements
     private DataItemAdapter mDataItemListAdapter;
     private Handler mHandler;
     private Calendar date = new GregorianCalendar();
-    private final ViewPager.SimpleOnPageChangeListener mPageChangeListener = new ViewPager.SimpleOnPageChangeListener() {
-
-        @Override
-        public void onPageSelected(final int position) {
-            onTabChanged(mPager.getAdapter(), mCurrentTabPosition, position);
-            mCurrentTabPosition = position;
-            checkPositon(position);
-        }
-    };
     private DataUpdateReceiver dataUpdateReceiver;
 
     // A method which returns a double value as a formatted String in the form d.dd
@@ -126,41 +116,6 @@ public class MainActivity extends FragmentActivity implements
         mHandler = new Handler();
         itself = this;
         setContentView(R.layout.main_activity);
-        setupViews();
-        // Stores DataItems received by the local broadcaster or from the paired watch.
-        mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
-        mDataItemList.setAdapter(mDataItemListAdapter);
-
-        mAdapter = new MyAdapter(getSupportFragmentManager());
-
-        mPager = (ViewPager) findViewById(R.id.pager);
-        mPager.setAdapter(mAdapter);
-        mPager.setCurrentItem(30);
-        checkPositon(29);
-        mPager.setOnPageChangeListener(mPageChangeListener);
-
-        TextView text = (TextView) findViewById(R.id.text);
-        String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));
-        text.setText(datestring);
-        TextView day = (TextView) findViewById(R.id.day);
-        day.setText(String.format("%1$tA", date).substring(0, 3).toUpperCase());
-        datestring = String.valueOf(date.get(GregorianCalendar.MONTH) + 1) + " / " + String.valueOf(date.get(GregorianCalendar.YEAR));
-        TextView year = (TextView) findViewById(R.id.year);
-        year.setText(datestring);
-
-        // Watch for button clicks.
-        ImageButton button = (ImageButton) findViewById(R.id.left);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                mPager.setCurrentItem(mPager.getCurrentItem() - 1);
-            }
-        });
-        button = (ImageButton) findViewById(R.id.right);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                mPager.setCurrentItem(mPager.getCurrentItem() + 1);
-            }
-        });
 
         if (DataSyncService.itself == null) {
             Intent intent = new Intent(this, DataSyncService.class);
@@ -225,33 +180,6 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
-    // If the lower fragment was swiped, change the content of the upper fragment accordingly
-    protected void onTabChanged(final PagerAdapter adapter, final int oldPosition, final int newPosition) {
-        //Calc if swipe was left to right, or right to left
-        if (oldPosition > newPosition) {
-            TextView text = (TextView) findViewById(R.id.text);
-            date.add(Calendar.DATE, -1);
-            String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));
-            text.setText(datestring);
-            TextView day = (TextView) findViewById(R.id.day);
-            day.setText(String.format("%1$tA", date).substring(0, 3).toUpperCase());
-            datestring = String.valueOf(date.get(GregorianCalendar.MONTH) + 1) + " / " + String.valueOf(date.get(GregorianCalendar.YEAR));
-            TextView year = (TextView) findViewById(R.id.year);
-            year.setText(datestring);
-        } else {
-            TextView text = (TextView) findViewById(R.id.text);
-            date.add(Calendar.DATE, 1);
-            String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));
-            text.setText(datestring);
-            TextView day = (TextView) findViewById(R.id.day);
-            day.setText(String.format("%1$tA", date).substring(0, 3).toUpperCase());
-            datestring = String.valueOf(date.get(GregorianCalendar.MONTH) + 1) + " / " + String.valueOf(date.get(GregorianCalendar.YEAR));
-            TextView year = (TextView) findViewById(R.id.year);
-            year.setText(datestring);
-        }
-
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -279,45 +207,12 @@ public class MainActivity extends FragmentActivity implements
             case R.id.button3:
                 onWatchSync();
                 return true;
-            /*case R.id.button4:
-                onExploreData();
-                return true;*/
-            case R.id.averageValues:
-                onShowAverages();
-                return true;
-            case R.id.graphButton:
-                onGraphPlot();
-                return true;
             case R.id.registerUserMenu:
                 onRegisterUser();
-                return true;
-            case R.id.setSchedule:
-                onsetSchedule();
-                return true;
-            case R.id.testDatabase:
-                testDatabase();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void testDatabase() {
-
-        final Intent CheckDatabase = new Intent(this, CheckDatabaseActivity.class);
-        startActivity(CheckDatabase);
-    }
-
-    // A method which starts the SetScheduleActivity
-    private void onsetSchedule() {
-
-        final Intent setSchedule = new Intent(this, SetScheduleActivity.class);
-        startActivity(setSchedule);
-    }
-
-    @Override
-    public void changeDisplayDate(Calendar calendar) {
-
     }
 
     // A method handling the click on the Server Sync button.
@@ -400,26 +295,6 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    public TimeSeries randomRPEReq(int past, int future) {
-
-        TimeSeries requirements = new TimeSeries("RPE schedule");
-
-        for (int i = 0; i < past; i++) {
-            long round = Math.round(Math.random() * 10);
-            Date date = getDateFromToday(i);
-            requirements.AddFirstValue(date, round);
-        }
-
-        for (int i = 0; i < future; i++) {
-            long round = Math.round(Math.random() * 10);
-            Date date = getDateFromToday(-i - 1);
-            requirements.AddValue(date, round);
-        }
-
-        return requirements;
-
-    }
-
     // A method that predicts the recovery based on history data
     public double predictRecovery(ArrayList<Double> pastX, ArrayList<Double> pastY, Double futureX) {
 
@@ -492,82 +367,6 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    public TimeSeries predictTimeSeries(TimeSeries xReq, TimeSeries xActual, TimeSeries yActual, int offset) {
-
-        TimeSeries result = new TimeSeries(yActual.name + ", pred.");
-
-        for (int i = 0; i < xReq.Values.size() - offset; i++) {
-
-            Date date = xReq.Values.get(i).x;
-            Double val = xReq.Values.get(i).y;
-
-            TimeSeries xActBefore = xActual.beforeDate(date);
-            TimeSeries yActBefore = yActual.beforeDate(date);
-
-            if (xActBefore.Values.size() == 0) {
-                continue;
-            }
-
-            HashMap<String, Double> predValues = yActBefore.toDictionary();
-
-            ArrayList<Double> xvalues = new ArrayList<>();
-            ArrayList<Double> yvalues = new ArrayList<>();
-
-            // generate training set
-            for (int j = 0; j < xActBefore.Values.size(); j++) {
-
-                Date locdate = offsetDate(xActBefore.Values.get(j).x, offset);
-                double x = xActBefore.Values.get(j).y;
-
-                if (!predValues.containsKey(TimeSeries.formatData(locdate))) {
-                    continue;
-                }
-
-                double y = predValues.get(TimeSeries.formatData(locdate));
-
-                xvalues.add(x);
-                yvalues.add(y);
-
-            }
-
-            double prediction = predictRecovery(xvalues, yvalues, val);
-            result.AddValue(offsetDate(date, offset), prediction);
-        }
-
-        return result;
-
-    }
-
-    public void onGraphPlot() {
-        StartAnalysis();
-    }
-
-    public void onAnalysisClick(View view) {
-        StartAnalysis();
-    }
-
-    // computes the visualizations objects for the last 30 days
-    public void StartAnalysis() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-
-                    Visualizations vis = null;
-
-                    vis = (new UserParameters(30)).visualizations;
-
-                    Intent i = new Intent(MainActivity.this, IntensityStatisticsActivity.class);
-                    i.putExtra("visualizations", Serializer.SerializeToBytes(vis));
-                    startActivity(i);
-
-                } catch (Exception ex) {
-                    OutputEvent(ex.toString());
-                }
-            }
-        }).start();
-    }
-
     public void onSyncClick(View view) {
         onWatchSync();
     }
@@ -581,7 +380,6 @@ public class MainActivity extends FragmentActivity implements
                 try {
 
                     // recompute the params for last 60 days
-                    new UserParameters(30);
 
                     DataSyncService.itself.ShareDataWithServer();
 
@@ -591,221 +389,6 @@ public class MainActivity extends FragmentActivity implements
             }
         }).start();
 
-    }
-
-    private TimeSeries ComputeCompliences(TimeSeries requirements, TimeSeries values, int timewindow) {
-
-        TimeSeries result = new TimeSeries(values.name + ", avg. divergence");
-
-        for (int i = 0; i < values.Values.size(); i++) {
-
-            Date x = requirements.Values.get(i).x;
-
-            TimeSeries req = requirements.beforeDate(x);
-            TimeSeries vals = values.beforeDate(x);
-
-            ArrayList<Double> seq1 = new ArrayList<>();
-            ArrayList<Double> seq2 = new ArrayList<>();
-
-            // construct data
-            HashMap<String, Double> reqVals = req.toDictionary();
-
-            for (int j = 0; j < vals.Values.size(); j++) {
-
-                int last = vals.Values.size() - j - 1;
-
-                Date d = vals.Values.get(last).x;
-
-                if (!reqVals.containsKey(TimeSeries.formatData(d)))
-                    continue;
-
-                Double yp = reqVals.get(TimeSeries.formatData(d));
-                Double y = vals.Values.get(last).y;
-
-                seq1.add(0, yp);
-                seq2.add(0, y);
-
-                if (seq1.size() >= timewindow) {
-                    break;
-                }
-
-            }
-
-            if (seq1.size() == 0) {
-                result.AddValue(x, -1);
-                continue;
-            }
-
-            result.AddValue(x, ComplienceMeasure(seq1, seq2));
-
-        }
-
-
-        return result;
-
-    }
-
-    // Computes the normalised difference between to vectors.
-    private double ComplienceMeasure(ArrayList<Double> seq1, ArrayList<Double> seq2) {
-
-        double result = 0;
-
-        for (int i = 0; i < seq1.size(); i++) {
-            result += Math.abs(seq1.get(i) - seq2.get(i)) / seq1.size();
-        }
-
-        return result;
-
-    }
-
-    public void onExploreData() {
-
-        /*Intent i = new Intent(MainActivity.this, SelectAvailableData.class);
-        startActivity(i);*/
-
-        UserParameters params = new UserParameters(30);
-
-    }
-
-    public void onShowAverages() {
-        Intent i = new Intent (MainActivity.this, AverageActivity.class);
-        startActivity(i);
-    }
-
-    // Constructs the lower fragment which is responsible for showing the data of the selected day
-    public static class SessionsFragment extends Fragment {
-        int mNum;
-
-        static SessionsFragment newInstance(int num) {
-            SessionsFragment f = new SessionsFragment();
-
-            // Supply num input as an argument.
-            Bundle args = new Bundle();
-            args.putInt("num", num);
-            f.setArguments(args);
-
-            return f;
-        }
-
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            // Inflate the layout for this fragment
-            View v = inflater.inflate(R.layout.fragment_pager_list, container, false);
-            Calendar date = new GregorianCalendar();
-            date.add(Calendar.DATE, -29 + mNum);
-            // Fill the GraphView with data for the current date
-            DailyCooldown cooldown = new DailyCooldown(date.getTime());
-            GraphView graph = (GraphView) v.findViewById(R.id.graphtoday);
-            TextView text = (TextView) v.findViewById(R.id.textV1);
-            new PlotGraphsTask(graph, text, v.getContext()).execute(cooldown);
-            // I'll think about a solution with ASyncTask that will plot the graphs point for point.
-            // Currently ultralaggy.
-            GraphView[] graphs = {graph};
-            TextView[] labels = new TextView[]{text};
-
-            // I create specific formatter inline. This is more general and java-ish :)
-            VisualizationsPlotter.Plot(cooldown.visualizations, graphs, labels, new GraphStyler() {
-                @Override
-                public void styleGraph(GraphView graphView, Visualizations.Subplot subplot) {
-
-                    // set label formatting
-                    graphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
-                        @Override
-                        public String formatLabel(double value, boolean isValueX) {
-                            if (isValueX) {
-                                // show normal x values
-
-                                Calendar mCalendar = Calendar.getInstance();
-                                mCalendar.setTimeInMillis((long) value);
-                                String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
-
-                                return time;
-                            } else {
-                                // show currency for y values
-                                return super.formatLabel(value, isValueX);
-                            }
-                        }
-                    });
-
-                    // set number of labels on the horiz axis
-                    graphView.getGridLabelRenderer().setNumHorizontalLabels(5);
-
-                    graphView.getViewport().setYAxisBoundsManual(true);
-                    graphView.getViewport().setMinY(30);
-                    graphView.getViewport().setMaxY(200);
-
-                    subplot.setBounds(subplot.min_max_x());
-
-                }
-            });
-
-            // Fill the TextViews below with the appropriate data
-            TextView intctr = (TextView) v.findViewById(R.id.intensityCtr);
-            intctr.setText("Intensity ctr.: " + formatDouble(cooldown.alpha2min));
-            TextView intensity = (TextView) v.findViewById(R.id.intensity);
-            intensity.setText("Intensity: " + formatDouble(cooldown.alphaAllData));
-
-            TextView meHR = (TextView) v.findViewById(R.id.morningEveningHR);
-            meHR.setText("HR: " + formatDouble(cooldown.morningHR) + " / " + formatDouble(cooldown.eveningHR));
-
-            TextView dalda = (TextView) v.findViewById(R.id.dalda);
-            dalda.setText("DALDA scale: " + formatDouble(cooldown.DALDA));
-            TextView rpe = (TextView) v.findViewById(R.id.rpe);
-            rpe.setText("RPE scale: " + formatDouble(cooldown.RPE));
-            TextView sleep = (TextView) v.findViewById(R.id.sleep);
-            sleep.setText("Deep Sleep Cycles: " + formatDouble(cooldown.DeepSleep));
-            return v;
-        }
-
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-        }
-
-    }
-
-    private static class PlotGraphsTask extends AsyncTask<DailyCooldown, Void, Void> {
-        public GraphView graph;
-        public TextView text;
-        public Context context;
-
-        public PlotGraphsTask(GraphView arggraph, TextView argtext, Context argcontext) {
-            this.graph = arggraph;
-            this.text = argtext;
-            this.context = argcontext;
-        }
-
-        protected Void doInBackground(DailyCooldown... cooldown) {
-            /*GraphView[] graphs = {graph};
-            TextView[] labels = new TextView[]{text};
-            VisualizationsPlotter.Plot(cooldown[0].visualizations, graphs, labels, context, "day");*/
-            return null;
-        }
-    }
-
-    // Adapter for the Fragments
-    public static class MyAdapter extends FragmentPagerAdapter {
-        public MyAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public int getCount() {
-            return NUM_ITEMS;
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return SessionsFragment.newInstance(position);
-        }
     }
 
     /**

@@ -33,39 +33,6 @@ public class DataStorageManager {
 
     }
 
-    // A method reading the schedule.csv file and parsing it to TimeSeries
-    public static TimeSeries readUserSchedule(){
-
-        TimeSeries result = new TimeSeries("RPE required");
-
-        File csvSchedule = new File(userDataFolder, "schedule.csv");
-
-        if (!csvSchedule.exists())
-            return result;
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
-
-        try (BufferedReader br = new BufferedReader(new FileReader(csvSchedule))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-
-                String dateStr = line.substring(0, 10);
-                String contents = line.substring(11);
-
-                Date date = dateFormat.parse(dateStr);
-                Double value = Double.parseDouble(contents);
-
-                result.AddValue(date,value);
-
-            }
-        } catch (Exception e) {
-
-        }
-
-        return result;
-
-    }
-
 
     // Environment.getDataDirectory().toString()
     // I use here external storage directory, as the previous versions of the
@@ -240,19 +207,5 @@ public class DataStorageManager {
         }
 
         return result;
-    }
-
-    // A method responsible for creating a file in which the scheduled RPE values will be saved (in CSVManager.WriteNewCSVdata)
-    public static void storeScheduleLine(String scheduleString) {
-        File file = new File(userDataFolder, "schedule.csv");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                Log.d("Creating file", "failed");
-                e.printStackTrace();
-            }
-        }
-        CSVManager.WriteNewCSVdata(file, scheduleString);
     }
 }

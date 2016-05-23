@@ -466,7 +466,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 continue;
 
             // the day component of file name
-            String dateName = TimeSeries.dictionary_format.format(alldata.get(0).getTimestamp());
+            String dateName = DateTimeManager.format(alldata.get(0).getTimestamp());
 
             // determine all measurement types
             HashMap<Integer, ArrayList<ISSRecordData>> map = new HashMap<>();
@@ -482,7 +482,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             // upload data separately for each measurement type
 
             for (Integer measurementType : map.keySet()) {
-                String uploadingName = dateName + "-" + measurementType + ".csv";
+                String uploadingName = "Masters-" + dateName + "-" + measurementType + ".csv";
 
                 ArrayList<ISSRecordData> measurementData = map.get(measurementType);
 

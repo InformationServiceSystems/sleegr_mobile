@@ -336,10 +336,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     int timerTime = 0;
     String currentState = "Idle";
     int timerTimeout = 60 * 60 * 24;
-    int COOLING_MEASUREMENT_TIME = 60 * 60 * 1; // cooling is measured for 60 minutes
-    int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 3 min
-    int TRAINING_TIMEOUT = 60 * 60 * 24; // we assume that training times out eventually
-    int COOLING_RPE_TIME = 60 * 15;
+    int FIVEHOUR_MEASUREMENT_TIME = 60 * 60 * 5; // 5 Hour time out measurement
+    int THREEMINUTE_MEASUREMENT_TIME = 60 * 3; // 3 Minute measurement
 
     // Checks if 5 minutes have passed since pressing the cooldown button.
     public void TimerEvent() {
@@ -359,32 +357,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         SendTimerTime(timerTime / 60, timerTime % 60);
 
         if (timerTime > timerTimeout) {
-
-            boolean sleepMode = isNowASleepingHour() && currentState.equals("Resting");
-            boolean startRecovery = currentState.equals("Cooldown");
-
-            if (sleepMode){
-                BringIntoState("Idle");
-                startSleeping();
-            } /*else if(startRecovery){
-                BringIntoState("Recovery");
-            }*/
-            else{
-                BringIntoState("Idle");
-            }
-
-
+            BringIntoState("Idle");
         }
 
-
-
         OutputCurrentState();
-
-
-        /*locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, gpsListener, null);
-        Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        gpsListener.onLocationChanged(lastKnownLocation);*/
-
 
         DataStorageManager.InitializeTriathlonFolder();
 
@@ -409,37 +385,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             "9 Very very very hard",
             "10 Maximal"
     };
-
-    // Opens the feedback dialog asking the user about the training in form of some radio buttons
-    private void AskUserForFeedback(String time) {
-
-        Intent myIntent = new Intent(this, DALDActivity.class);
-        String[] daldaItems;
-        if (time.equals("evening")) {
-            daldaItems = new String[]{"Sport training", "Health", "Muscle pain", "Tiredness", "Recovery time"};
-            myIntent.putExtra("time", "evening");
-        } else if (time.equals("morning")) {
-            daldaItems = new String[]{"Sleep"};
-            myIntent.putExtra("time", "morning");
-        } else {
-            daldaItems = new String[]{};
-        }
-
-
-        myIntent.putExtra("rpeValues", rpeValues);
-        myIntent.putExtra("daldaItems", daldaItems);
-        myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(myIntent);
-
-        /*SensorsDataService.itself.needToShowRPE = true;
-
-        Intent dialogIntent = new Intent(this, MainActivity.class);
-        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(dialogIntent);
-
-        Intent intent = new Intent(this.ASK_USER_FOR_RPE);
-        sendBroadcast(intent);*/
-    }
 
     public void OutputCurrentState() {
 
@@ -633,43 +578,20 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         String newState = "";
 
         if (!currentState.equals("Idle")) {
-
             if (action.equals(currentState)){
-                if (nonCoolable(currentState)) {
-                    // stop recording cooling / resting prematurely
-                    newState = "Idle";
-                    RecordActivitySwitch();
-                } else {
-                    // start measuring cooling down
-                    newState = currentState + ":Cooling";
-                    OutputEvent("Cooling down ...");
-                }
+                // stop recording cooling / resting prematurely
+                newState = "Idle";
+                RecordActivitySwitch();
             }
             else
             {
                 newState = action;
             }
         } else { // switch from idle state to measurement
-
             newState = action;
             RecordActivitySwitch();
         }
-
         BringIntoState(newState);
-    }
-
-    // starts sleep tracking
-    private void startSleeping(){
-        Intent intent = new Intent(this, SensorsDataService.class);
-        stopService(intent);
-
-        // then launch sleep tracking
-        Intent launchSleepIntent = getPackageManager().getLaunchIntentForPackage("com.urbandroid.sleep");
-        startActivity(launchSleepIntent);
-
-        // finally, kill the app in order to save the battery
-        System.exit(0);
-        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     // returns the file where something is stored (?)
@@ -678,38 +600,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         String daystr = DataStorageManager.getDayFromToday(0);
         File file = new File(DataStorageManager.userDataFolder, daystr + ".activities");
         return file;
-
-    }
-
-    // save and write to file that a certain activity type has been measured
-    public static void RecordActivityMeasured(String state){
-
-
-        File file = getRecordedActivitiesFile();
-        HashMap<String, Boolean> dictionary = new HashMap<>();
-
-        try {
-            if (!file.exists()){
-                Serializer.SerializeToFile(dictionary, file);
-            }
-
-            dictionary = (HashMap<String, Boolean>) Serializer.DeserializeFromFile(file);
-
-            if (dictionary.containsKey(state))
-                return;
-
-            if (state.equals("Resting")){
-                state = state + ":" + isNowASleepingHour();
-            }
-
-            dictionary.put(state, true);
-
-            Serializer.SerializeToFile(dictionary, file);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
 
     }
 
@@ -757,52 +647,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             e.printStackTrace();
         }
 
-        RecordActivityMeasured(state);
-
         if (state.equals("Idle")) {
             return;
-        }
-
-        if (state.equals("Resting")) {
-            // stop recording cooling / resting prematurely
-            timerTimeout = RESTING_MEASUREMENT_TIME;
-
-            if (isNowASleepingHour()){
-                AskUserForFeedback("evening");
-            }
-            if (!isNowASleepingHour()) {
-                AskUserForFeedback("morning");
-            }
-
-        }else if (state.contains("Cooldown")) {
-            timerTimeout = RESTING_MEASUREMENT_TIME; // needed to recover the state of the app properly
-
-            // this ugly copy paste from below is sposed to make user input the end of the training for cooling / recovery
-            if (!getRecordedActivities().containsKey("Cooldown")){
-                Intent myIntent = new Intent(this, TrainingStartTimeActivity.class);
-                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(myIntent);
-            }
-
-            //StopGPS();
-        }else if (state.contains("Recovery")) {
-            timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
-
-            if (!getRecordedActivities().containsKey("Cooldown")){
-                Intent myIntent = new Intent(this, TrainingStartTimeActivity.class);
-                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(myIntent);
-            }
-
-            //StopGPS();
-        } else if (state.contains("Cooling")) {
-            timerTimeout = COOLING_MEASUREMENT_TIME; // needed to recover the state of the app properly
-            OutputEvent("Cooling down ...");
-            //StopGPS();
-        } else {
-            // start training
-            timerTimeout = TRAINING_TIMEOUT;
-            //StartGPS();
+        }else if (state.contains("threeMinute")) {
+            timerTimeout = THREEMINUTE_MEASUREMENT_TIME; // needed to recover the state of the app properly
+        }else if (state.contains("fiveHour")) {
+            timerTimeout = FIVEHOUR_MEASUREMENT_TIME; // needed to recover the state of the app properly
         }
 
         StartMeasuring();

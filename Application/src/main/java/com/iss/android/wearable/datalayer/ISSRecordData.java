@@ -99,39 +99,4 @@ public class ISSRecordData implements Serializable {
         return time.getTime();
 
     }
-
-
-    public void saveToContentProvider() {
-        /*ISSContentProvider provider = new ISSContentProvider();
-        ContentValues values = new ContentValues();
-        values.put(ISSContentProvider.USERID, UserID);
-        values.put(ISSContentProvider.MEASUREMENT, MeasurementType);
-        values.put(ISSContentProvider.TIMESTAMP, Timestamp);
-        values.put(ISSContentProvider.EXTRA, ExtraData);
-        values.put(ISSContentProvider.VALUE1, Value1);
-        values.put(ISSContentProvider.VALUE2, Value2);
-        values.put(ISSContentProvider.VALUE3, Value3);
-
-        resolver.insert(ISSContentProvider.CONTENT_URI, values);
-
-        Log.d("Inserting", "a value");*/
-    }
-
-    public static void saveToContentProvider(String data) {
-        ContentValues values = new ContentValues();
-        String[] valuesAsString = data.split(",");
-
-        values.put(ISSContentProvider.USERID,
-                (Integer.valueOf(valuesAsString[0])));
-        values.put(ISSContentProvider.MEASUREMENT,
-                (Integer.valueOf(valuesAsString[1])));
-        values.put(ISSContentProvider.TIMESTAMP, valuesAsString[2]);
-        values.put(ISSContentProvider.EXTRA, valuesAsString[3]);
-        values.put(ISSContentProvider.VALUE1, valuesAsString[4]);
-        values.put(ISSContentProvider.VALUE2, valuesAsString[5]);
-        values.put(ISSContentProvider.VALUE3, valuesAsString[6]);
-
-        Uri uri = resolver.insert(
-                ISSContentProvider.CONTENT_URI, values);
-    }
 }

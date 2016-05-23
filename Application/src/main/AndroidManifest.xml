@@ -103,69 +103,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".IntensityStatisticsActivity"
-            android:label="@string/title_activity_intensity_statistics"
-            android:parentActivityName=".MainActivity">
 
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
-            android:name=".SelectAvailableData"
-            android:label="@string/title_activity_select_available_data"
-            android:parentActivityName=".MainActivity">
-
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
-            android:name=".DisplayActivityFile"
-            android:label="@string/title_activity_display_activity_file"
-            android:parentActivityName=".SelectAvailableData">
-
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SelectAvailableData" />
-        </activity>
-        <activity
-            android:name=".SetScheduleActivity"
-            android:label="@string/title_activity_set_schedule"
-            android:parentActivityName=".MainActivity">
-
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-
-        <provider
-            android:name=".ISSContentProvider"
-            android:authorities="com.iss.android.wearable.datalayer.provider"
-            android:exported="true"
-            android:multiprocess="true" />
-
-        <activity
-            android:name=".AverageActivity"
-            android:label="@string/title_activity_average"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.iss.android.wearable.datalayer.MainActivity" />
-        </activity>
-        <activity
-            android:name=".CheckDatabaseActivity"
-            android:label="@string/title_activity_check_database"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.iss.android.wearable.datalayer.MainActivity" />
-        </activity>
     </application>
 
 </manifest>

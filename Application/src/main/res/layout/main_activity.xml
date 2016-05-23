@@ -63,13 +63,6 @@
         android:id="@+id/systemMessage"
         android:gravity="center" />
 
-    <fragment
-        class="com.iss.android.wearable.datalayer.ManageDateFragment"
-        android:id="@+id/chooser"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:layout="@layout/fragment_manage_date" />
-
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"

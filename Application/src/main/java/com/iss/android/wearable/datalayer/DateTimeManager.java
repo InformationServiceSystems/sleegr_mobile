@@ -47,4 +47,9 @@ public class DateTimeManager
 
     }
 
+    public static String format(Date timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
+        String dateString = sdf.format(timestamp);
+        return dateString;
+    }
 }

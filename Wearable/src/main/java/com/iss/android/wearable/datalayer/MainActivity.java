@@ -260,38 +260,20 @@ public class MainActivity extends Activity {
         }
 
         // get measured states
-        HashMap<String, Boolean> recordedActivities = SensorsDataService.getRecordedActivities();
-
-        ImageButton morningHR = (ImageButton) findViewById(R.id.morningHR);
-        ImageButton startCooldown = (ImageButton) findViewById(R.id.startCooldown);
-        ImageButton continueCooldown = (ImageButton) findViewById(R.id.continueCooldown);
-        ImageButton eveningHR = (ImageButton) findViewById(R.id.eveningHR);
-
-        morningHR.setBackgroundColor(recordedActivities.containsKey("Resting:false") ? Color.GREEN : Color.GRAY);
-        startCooldown.setBackgroundColor(recordedActivities.containsKey("Cooldown") ? Color.GREEN : Color.GRAY);
-        continueCooldown.setBackgroundColor(recordedActivities.containsKey("Recovery") ? Color.GREEN : Color.GRAY);
-        eveningHR.setBackgroundColor(recordedActivities.containsKey("Resting:true") ? Color.GREEN : Color.GRAY);
+        ImageButton startCooldown = (ImageButton) findViewById(R.id.threeMinute);
+        ImageButton continueCooldown = (ImageButton) findViewById(R.id.fiveHour);
+        TextView time = (TextView) findViewById(R.id.timer);
 
         int inProgressColor = Color.argb(255,255,165,0);
 
-        if (SensorsDataService.itself.currentState.equals("Cooldown")){
+        if (SensorsDataService.itself.currentState.equals("threeMinute")){
             startCooldown.setBackgroundColor(inProgressColor);
-        }
-
-        if (SensorsDataService.itself.currentState.equals("Recovery")){
+        } else if (SensorsDataService.itself.currentState.equals("fiveHour")){
             continueCooldown.setBackgroundColor(inProgressColor);
-        }
-
-        if (SensorsDataService.itself.currentState.equals("Resting") ){
-
-            if (SensorsDataService.isNowASleepingHour()) {
-                eveningHR.setBackgroundColor(inProgressColor);
-            }
-            else
-            {
-                morningHR.setBackgroundColor(inProgressColor);
-            }
-
+        } else if (SensorsDataService.itself.currentState.equals("Idle")){
+            startCooldown.setBackgroundColor(Color.GRAY);
+            continueCooldown.setBackgroundColor(Color.GRAY);
+            time.setText("0:00");
         }
 
     }
@@ -494,36 +476,18 @@ public class MainActivity extends Activity {
 
     public void onClicked(View view) {
         switch (view.getId()) {
-            case R.id.morningHR:
+            case R.id.threeMinute:
 
                 if (SensorsDataService.itself != null) {
-
-                    if (!SensorsDataService.isNowASleepingHour())
-                        SensorsDataService.itself.SwitchSportsAction("Resting");
-                }
-
-                break;
-            case R.id.startCooldown:
-
-                if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction("Cooldown");
+                    SensorsDataService.itself.SwitchSportsAction("threeMinute");
                 }
 
 
                 break;
-            case R.id.continueCooldown:
+            case R.id.fiveHour:
 
                 if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction("Recovery");
-                }
-
-
-                break;
-            case R.id.eveningHR:
-
-                if (SensorsDataService.itself != null) {
-                    if (SensorsDataService.isNowASleepingHour())
-                        SensorsDataService.itself.SwitchSportsAction("Resting");
+                    SensorsDataService.itself.SwitchSportsAction("fiveHour");
                 }
 
 
