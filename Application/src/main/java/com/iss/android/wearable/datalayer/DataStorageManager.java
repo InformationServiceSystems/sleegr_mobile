@@ -28,7 +28,10 @@ public class DataStorageManager {
     public  static void InitializeTriathlonFolder(){
 
         if(!userDataFolder.exists()){
-            userDataFolder.mkdir();
+            boolean result = userDataFolder.mkdir();
+            if (!result){
+                Log.d("Initialize", "failed");
+            }
         }
 
     }
@@ -41,10 +44,10 @@ public class DataStorageManager {
 
     // I overwrote it so that it now takes Internal Storage, which is more fitting for in-app-data.
     // All other methods wouldn't let me write when using the scheduled RPE values.
-    static String dataFolder = MainActivity.getContext().getFilesDir().toString();
-    // static String dataFolder = Environment.getExternalStorageDirectory().getAbsolutePath();
-    static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
-    static File userDataFolder = new File(dataFolder + "/triathlon");
+    // static String dataFolder = MainActivity.getContext().getFilesDir().toString();
+    static File dataFolder = Environment.getExternalStorageDirectory();
+    static File sleepData = new File(dataFolder, "sleep-data/sleep-export.csv");
+    static File userDataFolder = new File(dataFolder, "triathlon");
 
     // A method that converts a file into a bytearray
     public static byte[] FileToBytes(File file) {
@@ -127,10 +130,16 @@ public class DataStorageManager {
         String folderName = folderFormat.format(cal.getTime());
 
         // create folder for the time, if not created already
-        File dayFolder = new File( userDataFolder, folderName);
+        File dayFolder = new File(userDataFolder, folderName + "/");
 
         if(!dayFolder.exists()){
-            boolean result = dayFolder.mkdir();
+            boolean result = dayFolder.mkdirs();
+            if (!dayFolder.exists()){
+                Log.d("Dayfolder", "existiert immer noch nicht");
+            }
+            if (!result){
+                Log.d("dayFolder creation", "failed");
+            }
             //DataSyncService.itself.OutputEvent("create folder: " + result);
         }
 

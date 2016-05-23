@@ -311,6 +311,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             byte[] data = Serializer.InputStreamToByte(assetInputStream);
 
             ArrayList<ISSRecordData> receivedData = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data);
+            for (ISSRecordData d: receivedData){
+                Log.d("Received", d.toString());
+            }
             OutputEvent("Recieved " + receivedData.size() + " of data");
             DataStorageManager.SaveNewDataToFile(receivedData, UserID);
             ClearWatchData();

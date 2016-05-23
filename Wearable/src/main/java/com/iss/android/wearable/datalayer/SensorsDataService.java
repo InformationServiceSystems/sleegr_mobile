@@ -743,6 +743,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                         try {
                             List<ISSRecordData> issRecordDatas = CSVManager.ReadCSVdata(file);
+                            for (ISSRecordData d: issRecordDatas) {
+                                Log.d("Added", d.toString());
+                            }
                             allData.addAll(issRecordDatas);
                         }catch (Exception ex){
 

@@ -1,6 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -32,7 +33,6 @@ public class DataStorageManager {
     // app use the external directory. In case ext. storage is not available, use
     // Environment.getDataDirectory().toString()
     static String dataFolder = Environment.getExternalStorageDirectory().toString();
-    static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
     static File userDataFolder = new File(dataFolder, "triathlon");
 
     // reads a file into a byte array
@@ -186,7 +186,6 @@ public class DataStorageManager {
     public static ArrayList<File> GetAllFilesToUpload(String UserID, int timeSpan){
 
         ArrayList<File> result = new  ArrayList<File>();
-        result.add(sleepData);
 
         for (int i = 0; i < timeSpan; i++){
 
@@ -195,6 +194,7 @@ public class DataStorageManager {
 
             if (files != null){
                 for (File file : files) {
+                    Log.d("Gathered file", file.getName());
                     result.add(file);
                 }
             }
