@@ -14,7 +14,7 @@
      limitations under the License.
 --><!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.iss.android.wearable.datalayer"
+    package="com.iss.android.wearable.readingHR"
     android:versionCode="34"
     android:versionName="Tucana 34">
 
@@ -58,14 +58,14 @@
             android:value="@string/facebook_app_id" />
 
         <receiver
-            android:name=".SyncAlarm"
+            android:name="com.iss.android.wearable.readingHR.SyncAlarm"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.iss.android.wearable.datalayer.ALARM" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".StartMyActivityAtBootReceiver"
+            android:name="com.iss.android.wearable.readingHR.StartMyActivityAtBootReceiver"
             android:enabled="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
@@ -81,21 +81,21 @@
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity
-            android:name=".MainActivity"
+            android:name="com.iss.android.wearable.readingHR.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTask" />
 
         <service
-            android:name=".DataSyncService"
+            android:name="com.iss.android.wearable.readingHR.DataSyncService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".RegisterUserActivity"
+            android:name="com.iss.android.wearable.readingHR.RegisterUserActivity"
             android:label="@string/title_activity_register_user" />
         <activity
-            android:name=".ChooseRegisterServiceActivity"
+            android:name="com.iss.android.wearable.readingHR.ChooseRegisterServiceActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

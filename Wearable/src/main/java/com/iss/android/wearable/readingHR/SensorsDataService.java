@@ -1,4 +1,4 @@
-package com.iss.android.wearable.datalayer;
+package com.iss.android.wearable.readingHR;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -58,7 +58,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-import static com.iss.android.wearable.datalayer.DataLayerListenerService.LOGD;
+import static com.iss.android.wearable.readingHR.DataLayerListenerService.LOGD;
 
 public class SensorsDataService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, DataApi.DataListener, MessageApi.MessageListener,

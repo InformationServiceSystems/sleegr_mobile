@@ -29,7 +29,7 @@
  * limitations under the License.
  */
 
-package com.iss.android.wearable.datalayer;
+package com.iss.android.wearable.readingHR;
 
 import android.Manifest;
 import android.app.Activity;
@@ -49,7 +49,6 @@ import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -63,7 +62,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 
 /**
  * The main activity with a view pager, containing three pages:<p/>

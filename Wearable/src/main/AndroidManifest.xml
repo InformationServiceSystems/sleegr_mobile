@@ -16,7 +16,7 @@
 -->
 <!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.iss.android.wearable.datalayer"
+    package="com.iss.android.wearable.readingHR"
     android:versionCode="34"
     android:versionName="Tucana 34">
 
@@ -60,14 +60,14 @@
             android:value="@integer/google_play_services_version" />
 
         <receiver
-            android:name=".Alarm"
+            android:name="com.iss.android.wearable.readingHR.Alarm"
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.iss.android.wearable.datalayer.ALARM" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".StartMyActivityAtBootReceiver"
+            android:name="com.iss.android.wearable.readingHR.StartMyActivityAtBootReceiver"
             android:enabled="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
             <intent-filter>
@@ -77,14 +77,14 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".DataLayerListenerService" >
+        <service android:name="com.iss.android.wearable.readingHR.DataLayerListenerService" >
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
         </service>
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.iss.android.wearable.readingHR.MainActivity"
             android:enabled="true"
             android:label="@string/app_name"
             android:launchMode="singleTask" >
@@ -100,7 +100,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DeviceScanActivity"
+            android:name="com.iss.android.wearable.readingHR.DeviceScanActivity"
             android:enabled="true"
             android:label="hello" >
             <intent-filter>
@@ -116,11 +116,11 @@
         </activity>
 
         <service
-            android:name=".SensorsDataService"
+            android:name="com.iss.android.wearable.readingHR.SensorsDataService"
             android:enabled="true"
             android:exported="true" />
         <service
-            android:name=".BluetoothLeService"
+            android:name="com.iss.android.wearable.readingHR.BluetoothLeService"
             android:enabled="true"
             android:exported="true" />
 

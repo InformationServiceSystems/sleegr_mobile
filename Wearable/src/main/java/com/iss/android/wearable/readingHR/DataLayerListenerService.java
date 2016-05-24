@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.iss.android.wearable.datalayer;
+package com.iss.android.wearable.readingHR;
 
 import android.content.Intent;
 import android.net.Uri;
