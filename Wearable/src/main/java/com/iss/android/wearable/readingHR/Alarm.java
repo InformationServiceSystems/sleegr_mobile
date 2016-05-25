@@ -26,7 +26,7 @@ public class Alarm extends BroadcastReceiver {
     public void SetAlarm(Context context) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, Alarm.class);
-        intent.setAction("com.example.android.wearable.datalayer.ALARM");
+        intent.setAction("com.example.android.wearable.readingHR.ALARM");
         PendingIntent broadcast = PendingIntent.getBroadcast(context, 0, intent, 0);
         am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000 * 30 * 1, broadcast); // Millisec * Second * Minute
     }

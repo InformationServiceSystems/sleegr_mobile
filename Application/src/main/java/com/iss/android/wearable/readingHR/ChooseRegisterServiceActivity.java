@@ -66,7 +66,7 @@ public class ChooseRegisterServiceActivity extends Activity {
 
         try {
             PackageInfo info = getPackageManager().getPackageInfo(
-                    "com.iss.android.wearable.datalayer",
+                    "com.iss.android.wearable.readingHR",
                     PackageManager.GET_SIGNATURES);
             for (Signature signature : info.signatures) {
                 MessageDigest md = MessageDigest.getInstance("SHA");

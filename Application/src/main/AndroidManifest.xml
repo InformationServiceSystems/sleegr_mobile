@@ -15,8 +15,8 @@
 --><!-- version code and name should be the same for smartphone and watch apps -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.iss.android.wearable.readingHR"
-    android:versionCode="34"
-    android:versionName="Tucana 34">
+    android:versionCode="35"
+    android:versionName="Tucana 35">
 
     <uses-sdk
         android:minSdkVersion="19"
@@ -61,7 +61,7 @@
             android:name="com.iss.android.wearable.readingHR.SyncAlarm"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.iss.android.wearable.datalayer.ALARM" />
+                <action android:name="com.iss.android.wearable.readingHR.ALARM" />
             </intent-filter>
         </receiver>
         <receiver
