@@ -39,6 +39,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 23
         applicationId 'com.iss.android.wearable.readingHR'
+        multiDexEnabled true
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
