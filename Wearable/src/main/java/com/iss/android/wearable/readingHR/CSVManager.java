@@ -1,5 +1,7 @@
 package com.iss.android.wearable.readingHR;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,6 +20,7 @@ public class CSVManager {
 
     // Transcribes a list of ISSRecordData to a StringBuilder
     public static StringBuilder RecordsToCSV(List<ISSRecordData> exampleData ){
+        Log.d("Wrote string", exampleData.toString());
 
         StringBuilder bld = new StringBuilder();
 
@@ -36,13 +39,12 @@ public class CSVManager {
 
     // Writes a string to a *.csv file
     public static void WriteNewCSVdata(File file, String data){
-
         try {
             PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
             out.print(data);
             out.close();
         } catch (IOException e) {
-            //exception handling left as an exercise for the reader
+            Log.e("exception", e.toString());
         }
 
     }

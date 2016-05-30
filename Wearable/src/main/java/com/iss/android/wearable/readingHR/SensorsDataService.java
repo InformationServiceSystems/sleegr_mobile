@@ -132,6 +132,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
             if (event.values.length == 1) {
                 AddNewData(UserID, event.sensor.getType(), GetTimeNow(), currentState, event.values[0], 0, 0);
+                Log.d("AddNewData", "called");
             } else {
                 AddNewData(UserID, event.sensor.getType(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2]);
             }
@@ -723,6 +724,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Log.d("SendCollectedData", "Called");
                 //mGoogleApiClient.blockingConnect(3000, TimeUnit.MILLISECONDS);
                 NodeApi.GetConnectedNodesResult result =
                         Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
@@ -803,15 +805,18 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     public void onMessageReceived(MessageEvent event) {
         LOGD(TAG, "onMessageReceived: " + event);
         byte[] data = event.getData();
+        Log.d("Got", "a message");
 
         if (data != null) {
             if (data[0] == 1) {
                 // send available data
                 SendCollectedData();
+                Log.d("Received request to", "send Data");
             }
 
             if (data[0] == 2) {
                 // send available data
+                Log.d("Received request to", "delete Data");
                 OutputEvent("Data saved");
                 alldata.clear();
 

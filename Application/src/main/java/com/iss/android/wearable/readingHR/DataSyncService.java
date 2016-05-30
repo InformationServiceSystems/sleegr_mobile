@@ -339,6 +339,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     public void RequestDataFromWatch() {
 
         OutputEvent("Requested data from the watch ... ");
+        Log.d("Requested", "data");
 
         new Thread(new Runnable() {
             @Override
@@ -352,6 +353,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                     for (int i = 0; i < nodes.size(); i++) {
                         nodeId = nodes.get(i).getId();
                         Wearable.MessageApi.sendMessage(mGoogleApiClient, nodeId, "Please send data", new byte[]{1});
+                        Log.d("Sent message", "");
                     }
                 }
             }
