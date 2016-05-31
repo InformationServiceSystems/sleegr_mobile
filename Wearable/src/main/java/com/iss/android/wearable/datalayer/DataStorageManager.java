@@ -248,12 +248,29 @@ public class DataStorageManager {
         } else if (mCursor.getCount() < 1) {
             // If the Cursor is empty, the provider found no matches
         } else {
+            int i = GetLastTransferredMeasurementID();
+            int j = 0;
             while (mCursor.moveToNext()) {
-                ISSMeasurement measurement = ISSDictionary.CursorToISSMeasurement(mCursor);
-                result.add(measurement);
+                j++;
+                if (j>i) {
+                    ISSMeasurement measurement = ISSDictionary.CursorToISSMeasurement(mCursor);
+                    result.add(measurement);
+                }
             }
+            SetLastTransferredMeasurementID(j);
         }
         return result;
+    }
+
+    private static void SetLastTransferredMeasurementID(int j) {
+        SharedPreferences.Editor editor = pref.edit();
+        Log.d("Set transferred id", "to" + String.valueOf(j));
+        editor.putInt("LastTransferredMeasurement", j);
+        editor.apply();
+    }
+
+    private static int GetLastTransferredMeasurementID() {
+        return pref.getInt("LastTransferredMeasurement", 0);
     }
 
     public static void SetLastMeasurementID(int measurementNumber) {
