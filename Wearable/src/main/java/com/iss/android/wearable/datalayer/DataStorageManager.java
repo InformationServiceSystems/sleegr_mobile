@@ -39,9 +39,9 @@ public class DataStorageManager {
                 {
                         ISSContentProvider._ID,
                         ISSContentProvider.USERID,
+                        ISSContentProvider.MEASUREMENT,
                         ISSContentProvider.DATE,
                         ISSContentProvider.TIMESTAMP,
-                        ISSContentProvider.MEASUREMENT,
                         ISSContentProvider.EXTRA,
                         ISSContentProvider.VALUE1,
                         ISSContentProvider.VALUE2,
@@ -72,6 +72,7 @@ public class DataStorageManager {
         } else {
             while (mCursor.moveToNext()) {
                 ISSRecordData record = ISSDictionary.CursorToISSRecordDate(mCursor);
+                Log.d("record caught", record.toString());
                 result.add(record);
             }
         }
@@ -86,6 +87,7 @@ public class DataStorageManager {
 
             // Defines an object to contain the new values to insert
             ContentValues mNewValues = new ContentValues();
+            Log.d("inserted date", data.Date);
 
             /*
              * Sets the values of each column and inserts the word. The arguments to the "put"
@@ -100,7 +102,7 @@ public class DataStorageManager {
             mNewValues.put(ISSContentProvider.VALUE3, data.Value3);
             mNewValues.put(ISSContentProvider.USERID, data.UserID);
             mNewValues.put(ISSContentProvider.MEASUREMENT_ID, data.measurementID);
-
+            Log.d("values", mNewValues.toString());
             mNewUri = MainActivity.getContext().getContentResolver().insert(
                     ISSContentProvider.RECORDS_CONTENT_URI,   // the user dictionary content URI
                     mNewValues                          // the values to insert
@@ -166,7 +168,7 @@ public class DataStorageManager {
         ArrayList<ISSRecordData> ISSRecords = GetAllFilesToUpload();
         ArrayList<ISSMeasurement> Measurements = GetAllMeasurements();
         ArrayList<ISSRPEAnswers> RPEAnswers = GetAllRPEAnswers();
-        byte [][] data = new byte[3][];
+        byte[][] data = new byte[3][];
 
         try {
             data[0] = Serializer.SerializeToBytes(ISSRecords);

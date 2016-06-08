@@ -343,6 +343,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 values.put(ISSContentProvider.VALUE1, row.Value1);
                 values.put(ISSContentProvider.VALUE2, row.Value2);
                 values.put(ISSContentProvider.VALUE3, row.Value3);
+                Log.d("values", values.toString());
                 resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, values);
             }
             for (ISSMeasurement row: Measurements) {
