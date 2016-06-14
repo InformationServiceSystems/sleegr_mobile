@@ -343,6 +343,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 values.put(ISSContentProvider.VALUE1, row.Value1);
                 values.put(ISSContentProvider.VALUE2, row.Value2);
                 values.put(ISSContentProvider.VALUE3, row.Value3);
+                values.put(ISSContentProvider.SENT, "false");
                 Log.d("values", values.toString());
                 resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, values);
             }
@@ -484,17 +485,21 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             ArrayList<ISSRecordData> alldata = new ArrayList<>();
             Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
 
-            String mSelectionClause = ISSContentProvider.DATE + " = ?, " + ISSContentProvider.SENT + " = false";
+            String mSelectionClause = ISSContentProvider.DATE + " = ? "+"AND " + ISSContentProvider.SENT + " = 'false'";
             String[] mSelectionArgs = {date};
-            String[] mProjection = {ISSContentProvider._ID,
-                    ISSContentProvider.DATE,
-                    ISSContentProvider.TIMESTAMP,
-                    ISSContentProvider.EXTRA,
-                    ISSContentProvider.VALUE1,
-                    ISSContentProvider.VALUE2,
-                    ISSContentProvider.VALUE3,
-                    ISSContentProvider.MEASUREMENT,
-                    ISSContentProvider.USERID};
+            String[] mProjection =
+                    {
+                            ISSContentProvider._ID,
+                            ISSContentProvider.USERID,
+                            ISSContentProvider.MEASUREMENT,
+                            ISSContentProvider.DATE,
+                            ISSContentProvider.TIMESTAMP,
+                            ISSContentProvider.EXTRA,
+                            ISSContentProvider.VALUE1,
+                            ISSContentProvider.VALUE2,
+                            ISSContentProvider.VALUE3,
+                            ISSContentProvider.MEASUREMENT_ID
+                    };
             String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
 
             // Does a query against the table and returns a Cursor object
@@ -513,6 +518,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             } else {
                 while (mCursor.moveToNext()) {
                     ISSRecordData record = ISSDictionary.CursorToISSRecordData(mCursor);
+                    Log.d("record", record.toString());
                     alldata.add(record);
                 }
             }
@@ -550,10 +556,27 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         }
 
+        updateAllRecords();
+
         // finally, upload sleep data
         UploadingManager.UploadUserFileToServer( Serializer.FileToBytes(DataStorageManager.sleepData), "sleep-export.csv", uploadUrl, UserID);
         OutputEvent("Sent data files to server");
 
+    }
+
+    private void updateAllRecords() {
+        ContentValues mUpdateValues = new ContentValues();
+        String mSelectionClause = ISSContentProvider.SENT +  "= 'false'";
+        String[] mSelectionArgs = {};
+        int mRowsUpdated = 0;
+        mUpdateValues.put(ISSContentProvider.SENT, "'true'");
+
+        mRowsUpdated = getContentResolver().update(
+                ISSContentProvider.RECORDS_CONTENT_URI,   // the user dictionary content URI
+                mUpdateValues,                       // the columns to update
+                mSelectionClause,                    // the column to select on
+                mSelectionArgs                      // the value to compare to
+        );
     }
 
     private ArrayList<String> createDateList() {

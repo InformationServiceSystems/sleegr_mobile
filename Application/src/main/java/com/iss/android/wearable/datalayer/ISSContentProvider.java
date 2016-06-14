@@ -74,17 +74,17 @@ public class ISSContentProvider extends ContentProvider {
     static final String RECORDS_TABLE_NAME = "records";
     static final String MEASUREMENTS_TABLE_NAME = "measurements";
     static final String RPE_TABLE_NAME = "RPESets";
-    static final int DATABASE_VERSION = 34;
+    static final int DATABASE_VERSION = 36;
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    SENT + " BOOLEAN NOT NULL, " +
                     USERID + " INTEGER NOT NULL, " +
                     MEASUREMENT + " INTEGER NOT NULL, " +
                     DATE + " TEXT NOT NULL, " +
                     TIMESTAMP + " TEXT NOT NULL, " +
                     EXTRA + " TEXT NOT NULL, " +
                     MEASUREMENT_ID + " INTEGER NOT NULL, " +
+                    SENT + " TEXT NOT NULL, " +
                     VALUE1 + " TEXT NOT NULL, " +
                     VALUE2 + " TEXT NOT NULL, " +
                     VALUE3 + " TEXT NOT NULL);";
@@ -98,6 +98,8 @@ public class ISSContentProvider extends ContentProvider {
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     MEASUREMENT_ID + " INTEGER NOT NULL, " +
                     RPE_ANSWERS + " BLOB);";
+
+
 
     /**
      * Helper class that actually creates and manages
@@ -135,6 +137,10 @@ public class ISSContentProvider extends ContentProvider {
          */
         db = dbHelper.getWritableDatabase();
         return (db != null);
+    }
+
+    public void updateAllRecords() {
+        db.execSQL("UPDATE "+ISSContentProvider.RECORDS_TABLE_NAME+" SET SENT = 'true'");
     }
 
     @Nullable
