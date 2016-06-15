@@ -14,13 +14,9 @@ import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToda
  */
 public class UserParameters {
 
-    Visualizations visualizations = null;
-
     public UserParameters(int timespan){
 
         // load RPE if available
-
-        visualizations = new Visualizations();
 
         // compute the timespan
         TimeSeries userRPE = new TimeSeries("User RPE");
@@ -61,28 +57,6 @@ public class UserParameters {
             }
 
         }
-
-        Visualizations.Subplot rpe = visualizations.AddGraph("RPE");
-        TimeSeries schedule = DataStorageManager.readUserSchedule();
-        userRPE.LineType = TimeSeries.SeriesLineTypes.Bar;
-        rpe.Add(userRPE, Color.RED);
-        rpe.Add(schedule, Color.GREEN);
-        rpe.Add(ComputeCompliences(schedule, userRPE,3), Color.WHITE);
-
-        Visualizations.Subplot alphaGrph = visualizations.AddGraph("Alpha value predictions");
-        alpha.LineType = TimeSeries.SeriesLineTypes.Bar;
-        alphaGrph.Add(alpha, Color.RED);
-        alphaGrph.Add(predictTimeSeries(schedule, userRPE, alpha, 0), Color.BLUE);
-
-        Visualizations.Subplot alphaPred = visualizations.AddGraph("Alpha 2 min value predictions");
-        alpha2min.LineType = TimeSeries.SeriesLineTypes.Bar;
-        alphaPred.Add(alpha2min, Color.RED);
-        alphaPred.Add(predictTimeSeries(schedule, userRPE, alpha2min, 0), Color.BLUE);
-
-        Visualizations.Subplot sleepGrph = visualizations.AddGraph("Deep sleep perc. predictions");
-        userDS.LineType = TimeSeries.SeriesLineTypes.Bar;
-        sleepGrph.Add(userDS, Color.RED);
-        sleepGrph.Add(predictTimeSeries(schedule, userRPE, userDS, 0), Color.BLUE);
 
         DataSyncService.OutputEventSq("Analysis finished");
 

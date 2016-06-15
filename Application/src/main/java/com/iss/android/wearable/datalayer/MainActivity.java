@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -51,6 +52,7 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -274,9 +276,6 @@ public class MainActivity extends FragmentActivity implements
                 return true;*/
             case R.id.averageValues:
                 onShowAverages();
-                return true;
-            case R.id.graphButton:
-                onGraphPlot();
                 return true;
             case R.id.registerUserMenu:
                 onRegisterUser();
@@ -529,36 +528,6 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    public void onGraphPlot() {
-        StartAnalysis();
-    }
-
-    public void onAnalysisClick(View view) {
-        StartAnalysis();
-    }
-
-    // computes the visualizations objects for the last 30 days
-    public void StartAnalysis() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-
-                    Visualizations vis = null;
-
-                    vis = (new UserParameters(30)).visualizations;
-
-                    Intent i = new Intent(MainActivity.this, IntensityStatisticsActivity.class);
-                    i.putExtra("visualizations", Serializer.SerializeToBytes(vis));
-                    startActivity(i);
-
-                } catch (Exception ex) {
-                    OutputEvent(ex.toString());
-                }
-            }
-        }).start();
-    }
-
     public void onSyncClick(View view) {
         onWatchSync();
     }
@@ -697,13 +666,7 @@ public class MainActivity extends FragmentActivity implements
             GraphView graph = (GraphView) v.findViewById(R.id.graphtoday);
             TextView text = (TextView) v.findViewById(R.id.textV1);
             new PlotGraphsTask(graph, text, v.getContext(), date.getTime()).execute(dailyData);
-            // I'll think about a solution with ASyncTask that will plot the graphs point for point.
-            // Currently ultralaggy.
-            GraphView[] graphs = {graph};
             TextView[] labels = new TextView[]{text};
-
-            // I create specific formatter inline. This is more general and java-ish :)
-
 
             // Fill the TextViews below with the appropriate data
             TextView intctr = (TextView) v.findViewById(R.id.intensityCtr);
@@ -743,6 +706,8 @@ public class MainActivity extends FragmentActivity implements
             this.text = argtext;
             this.context = argcontext;
             this.time = time;
+            Times = new ArrayList<>();
+            Values = new ArrayList<>();
         }
 
         protected Void doInBackground(DailyData... cooldown) {
@@ -753,16 +718,20 @@ public class MainActivity extends FragmentActivity implements
 
             String mSelectionClause = ISSContentProvider.DATE + " = ? AND " + ISSContentProvider.MEASUREMENT + " = 21";
             String[] mSelectionArgs = {date};
-            String[] mProjection = {ISSContentProvider._ID,
-                    ISSContentProvider.DATE,
-                    ISSContentProvider.TIMESTAMP,
-                    ISSContentProvider.EXTRA,
-                    ISSContentProvider.VALUE1,
-                    ISSContentProvider.VALUE2,
-                    ISSContentProvider.VALUE3,
-                    ISSContentProvider.MEASUREMENT,
-                    ISSContentProvider.USERID};
-            String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
+            String[] mProjection =
+                    {
+                            ISSContentProvider._ID,
+                            ISSContentProvider.USERID,
+                            ISSContentProvider.MEASUREMENT,
+                            ISSContentProvider.DATE,
+                            ISSContentProvider.TIMESTAMP,
+                            ISSContentProvider.EXTRA,
+                            ISSContentProvider.VALUE1,
+                            ISSContentProvider.VALUE2,
+                            ISSContentProvider.VALUE3,
+                            ISSContentProvider.MEASUREMENT_ID
+                    };
+            String mSortOrder = ISSContentProvider.TIMESTAMP + " ASC";
 
             // Does a query against the table and returns a Cursor object
             Cursor mCursor = MainActivity.getContext().getContentResolver().query(
@@ -781,13 +750,11 @@ public class MainActivity extends FragmentActivity implements
                 while (mCursor.moveToNext()) {
                     ISSRecordData record = ISSDictionary.CursorToISSRecordData(mCursor);
                     data.add(record);
-                    Log.d("Found", "value");
+                    Log.d("Found", record.toString());
                 }
             }
             for (ISSRecordData d: data){
                 Times.add(d.getTimestamp());
-            }
-            for (ISSRecordData d: data){
                 Values.add(d.Value1);
             }
             TextView[] labels = new TextView[]{text};
@@ -796,11 +763,21 @@ public class MainActivity extends FragmentActivity implements
 
         @Override
         protected void onPostExecute(Void result) {
-            if(Times != null) {
-                LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>();
+            graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(MainActivity.getContext()));
+            graph.getGridLabelRenderer().setNumHorizontalLabels(5);
+            if(Times != null && Times.size() > 0) {
+                LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
                 for (int i = 0; i < Times.size(); i++) {
-                    series.appendData(new DataPoint(Times.get(i), Values.get(i)), true, 10000);
+                    series.appendData(new DataPoint(Times.get(i), Values.get(i)), true, Times.size());
+                    Log.d(Times.get(i).toString(), Values.get(i).toString());
                 }
+                graph.getViewport().setMinX(Times.get(0).getTime());
+                graph.getViewport().setMaxX(Times.get(Times.size()-1).getTime());
+                graph.getViewport().setXAxisBoundsManual(true);
+                graph.getViewport().setYAxisBoundsManual(true);
+                graph.getViewport().setMinY(30);
+                graph.getViewport().setMaxY(200);
+                series.setColor(Color.BLUE);
                 graph.addSeries(series);
             }
         }

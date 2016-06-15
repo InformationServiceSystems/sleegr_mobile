@@ -43,6 +43,8 @@
     <string name="send_photo">Send Photo</string>
     <string name="title_activity_register_user">User ID</string>
 
+    <string name="google_app_id">690084333472</string>
+
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_choose_register_service">Registration</string>

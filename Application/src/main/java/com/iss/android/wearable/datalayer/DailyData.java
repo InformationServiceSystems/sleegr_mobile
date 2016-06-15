@@ -18,7 +18,6 @@ public class DailyData {
     private Double deepSleep;
     private Double morningHR;
     private Double eveningHR;
-    public Visualizations visualizations;
 
     public DailyData(Date time) {
         data = DatabaseManager.getData(time);
@@ -50,9 +49,5 @@ public class DailyData {
 
     public Double getEveningHR() {
         return eveningHR;
-    }
-
-    public Visualizations getVisualizations() {
-        return visualizations;
     }
 }

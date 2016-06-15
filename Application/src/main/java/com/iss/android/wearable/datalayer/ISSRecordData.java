@@ -73,15 +73,16 @@ public class ISSRecordData implements Serializable {
         Calendar time = Calendar.getInstance();
 
         try {
-            time.setTime(sdf.parse(this.Timestamp));
+            Log.d("Timestamp pre", this.Date + "_" + this.Timestamp);
+            time.setTime(sdf.parse(this.Date + "_" + this.Timestamp));
         }
         catch (ParseException e)
         {
 
         }
 
+        Log.d("Timestamp post", time.getTime().toString());
         return time.getTime();
-
     }
 
 

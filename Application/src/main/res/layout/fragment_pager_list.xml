@@ -1,6 +1,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_vertical|center_horizontal">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -22,7 +23,9 @@
         <com.jjoe64.graphview.GraphView
             android:layout_width="match_parent"
             android:layout_height="260dp"
-            android:id="@+id/graphtoday" />
+            android:id="@+id/graphtoday"
+            app:seriesType="line"
+            app:seriesColor="#ee0000"/>
 
         <TextView
             android:id="@+id/intensityCtr"
