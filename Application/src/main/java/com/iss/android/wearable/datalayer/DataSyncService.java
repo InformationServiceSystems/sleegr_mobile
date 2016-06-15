@@ -318,6 +318,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             // Okay this looks f'kin ugly, but there's no other way due to erasure of ArrayLists.
             // It's bs but there's no way around.
+            ContentResolver resolver = MainActivity.getContext().getContentResolver();
             for (ISSRPEAnswers row: RPEAnswers) {
 
                 ContentValues values = new ContentValues();
@@ -365,7 +366,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }
 
     }
-    static ContentResolver resolver = MainActivity.getContext().getContentResolver();
 
     // A method broadcasting a String, generally updates about the state of the app.
     public void OutputEvent(String str) {

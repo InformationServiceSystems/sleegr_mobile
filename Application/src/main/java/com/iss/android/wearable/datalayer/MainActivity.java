@@ -21,6 +21,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,6 +51,8 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -692,47 +696,14 @@ public class MainActivity extends FragmentActivity implements
             DailyData dailyData = new DailyData(date.getTime());
             GraphView graph = (GraphView) v.findViewById(R.id.graphtoday);
             TextView text = (TextView) v.findViewById(R.id.textV1);
-            new PlotGraphsTask(graph, text, v.getContext()).execute(dailyData);
+            new PlotGraphsTask(graph, text, v.getContext(), date.getTime()).execute(dailyData);
             // I'll think about a solution with ASyncTask that will plot the graphs point for point.
             // Currently ultralaggy.
             GraphView[] graphs = {graph};
             TextView[] labels = new TextView[]{text};
 
             // I create specific formatter inline. This is more general and java-ish :)
-            /*VisualizationsPlotter.Plot(dailyData.getVisualizations(), graphs, labels, new GraphStyler() {
-                @Override
-                public void styleGraph(GraphView graphView, Visualizations.Subplot subplot) {
 
-                    // set label formatting
-                    graphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
-                        @Override
-                        public String formatLabel(double value, boolean isValueX) {
-                            if (isValueX) {
-                                // show normal x values
-
-                                Calendar mCalendar = Calendar.getInstance();
-                                mCalendar.setTimeInMillis((long) value);
-                                String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
-
-                                return time;
-                            } else {
-                                // show currency for y values
-                                return super.formatLabel(value, isValueX);
-                            }
-                        }
-                    });
-
-                    // set number of labels on the horiz axis
-                    graphView.getGridLabelRenderer().setNumHorizontalLabels(5);
-
-                    graphView.getViewport().setYAxisBoundsManual(true);
-                    graphView.getViewport().setMinY(30);
-                    graphView.getViewport().setMaxY(200);
-
-                    subplot.setBounds(subplot.min_max_x());
-
-                }
-            });
 
             // Fill the TextViews below with the appropriate data
             TextView intctr = (TextView) v.findViewById(R.id.intensityCtr);
@@ -749,7 +720,6 @@ public class MainActivity extends FragmentActivity implements
             rpe.setText("RPE scale: " + formatDouble(dailyData.getRPE()));
             TextView sleep = (TextView) v.findViewById(R.id.sleep);
             sleep.setText("Deep Sleep Cycles: " + formatDouble(dailyData.getDeepSleep()));
-            */
             return v;
         }
 
@@ -764,18 +734,75 @@ public class MainActivity extends FragmentActivity implements
         public GraphView graph;
         public TextView text;
         public Context context;
+        public Date time;
+        public ArrayList<Date> Times;
+        public ArrayList<Float> Values;
 
-        public PlotGraphsTask(GraphView arggraph, TextView argtext, Context argcontext) {
+        public PlotGraphsTask(GraphView arggraph, TextView argtext, Context argcontext, Date time) {
             this.graph = arggraph;
             this.text = argtext;
             this.context = argcontext;
+            this.time = time;
         }
 
         protected Void doInBackground(DailyData... cooldown) {
-            /*GraphView[] graphs = {graph};
+            ArrayList<ISSRecordData> data = new ArrayList<ISSRecordData>();
+            Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
+            String date = ISSDictionary.dateToDayString(time);
+            Log.d("Time", date);
+
+            String mSelectionClause = ISSContentProvider.DATE + " = ? AND " + ISSContentProvider.MEASUREMENT + " = 21";
+            String[] mSelectionArgs = {date};
+            String[] mProjection = {ISSContentProvider._ID,
+                    ISSContentProvider.DATE,
+                    ISSContentProvider.TIMESTAMP,
+                    ISSContentProvider.EXTRA,
+                    ISSContentProvider.VALUE1,
+                    ISSContentProvider.VALUE2,
+                    ISSContentProvider.VALUE3,
+                    ISSContentProvider.MEASUREMENT,
+                    ISSContentProvider.USERID};
+            String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
+
+            // Does a query against the table and returns a Cursor object
+            Cursor mCursor = MainActivity.getContext().getContentResolver().query(
+                    CONTENT_URI,                       // The content URI of the database table
+                    mProjection,                       // The columns to return for each row
+                    mSelectionClause,                  // Either null, or the word the user entered
+                    mSelectionArgs,                    // Either empty, or the string the user entered
+                    mSortOrder);                       // The sort order for the returned rows
+
+            // Some providers return null if an error occurs, others throw an exception
+            if (null == mCursor) {
+                // If the Cursor is empty, the provider found no matches
+            } else if (mCursor.getCount() < 1) {
+                // If the Cursor is empty, the provider found no matches
+            } else {
+                while (mCursor.moveToNext()) {
+                    ISSRecordData record = ISSDictionary.CursorToISSRecordData(mCursor);
+                    data.add(record);
+                    Log.d("Found", "value");
+                }
+            }
+            for (ISSRecordData d: data){
+                Times.add(d.getTimestamp());
+            }
+            for (ISSRecordData d: data){
+                Values.add(d.Value1);
+            }
             TextView[] labels = new TextView[]{text};
-            VisualizationsPlotter.Plot(cooldown[0].visualizations, graphs, labels, context, "day");*/
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if(Times != null) {
+                LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>();
+                for (int i = 0; i < Times.size(); i++) {
+                    series.appendData(new DataPoint(Times.get(i), Values.get(i)), true, 10000);
+                }
+                graph.addSeries(series);
+            }
         }
     }
 
