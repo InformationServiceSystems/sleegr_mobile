@@ -716,7 +716,7 @@ public class MainActivity extends FragmentActivity implements
             String date = ISSDictionary.dateToDayString(time);
             Log.d("Time", date);
 
-            String mSelectionClause = ISSContentProvider.DATE + " = ? AND " + ISSContentProvider.MEASUREMENT + " = 21";
+            String mSelectionClause = ISSContentProvider.DATE + " = ? AND " + ISSContentProvider.MEASUREMENT + " = 21 AND " + ISSContentProvider.EXTRA + " = 'Cooldown'";
             String[] mSelectionArgs = {date};
             String[] mProjection =
                     {
@@ -763,7 +763,23 @@ public class MainActivity extends FragmentActivity implements
 
         @Override
         protected void onPostExecute(Void result) {
-            graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(MainActivity.getContext()));
+            graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                @Override
+                public String formatLabel(double value, boolean isValueX) {
+                    if (isValueX) {
+                        // show normal x values
+
+                        Calendar mCalendar = Calendar.getInstance();
+                        mCalendar.setTimeInMillis((long) value);
+                        String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
+
+                        return time;
+                    } else {
+                        // show currency for y values
+                        return super.formatLabel(value, isValueX);
+                    }
+                }
+            });
             graph.getGridLabelRenderer().setNumHorizontalLabels(5);
             if(Times != null && Times.size() > 0) {
                 LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
