@@ -16,6 +16,7 @@
 
 package com.iss.android.wearable.datalayer;
 
+import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,6 +32,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -350,6 +352,8 @@ public class MainActivity extends FragmentActivity implements
                 tv.setText(content);
             }
         });
+        if (cont.equals("Data saved. Clearing data on the watch")){
+        }
 
     }
 
@@ -691,6 +695,9 @@ public class MainActivity extends FragmentActivity implements
             super.onActivityCreated(savedInstanceState);
         }
 
+        public void refresh(){
+            newInstance(mNum);
+        }
     }
 
     private static class PlotGraphsTask extends AsyncTask<DailyData, Void, Void> {
@@ -717,6 +724,7 @@ public class MainActivity extends FragmentActivity implements
             Log.d("Time", date);
 
             String mSelectionClause = ISSContentProvider.DATE + " = ? AND " + ISSContentProvider.MEASUREMENT + " = 21 AND " + ISSContentProvider.EXTRA + " = 'Cooldown'";
+            Log.d("Selection Clause", mSelectionClause);
             String[] mSelectionArgs = {date};
             String[] mProjection =
                     {
@@ -800,7 +808,7 @@ public class MainActivity extends FragmentActivity implements
     }
 
     // Adapter for the Fragments
-    public static class MyAdapter extends FragmentPagerAdapter {
+    public static class MyAdapter extends FragmentStatePagerAdapter {
         public MyAdapter(FragmentManager fm) {
             super(fm);
         }
