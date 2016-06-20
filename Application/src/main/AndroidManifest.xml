@@ -136,6 +136,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.iss.android.wearable.datalayer.MainActivity" />
         </activity>
+        <activity
+            android:name=".MeasurementsActivity"
+            android:label="@string/title_activity_measurements"></activity>
     </application>
 
 </manifest>

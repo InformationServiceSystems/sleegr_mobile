@@ -16,9 +16,9 @@
         android:title="Graphs" />
 
 
-    <!--<item
+    <item
         android:id="@+id/button4"
-        android:title="Explore" />-->
+        android:title="Today's graphs" />
 
     <item
         android:id="@+id/averageValues"

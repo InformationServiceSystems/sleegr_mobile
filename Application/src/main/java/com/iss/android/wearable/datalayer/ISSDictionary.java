@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -49,6 +50,17 @@ public class ISSDictionary {
                         mCursor.getFloat(8),
                         mCursor.getInt(9));
         return record;
+    }
+
+    public static Date DateStringToDate(String string) {
+        DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzzzzzzzz yyyy");
+        Date date = new Date();
+        try {
+            date = format.parse(string);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
     }
 
     public static byte[] MapToByteArray(HashMap<String, Integer> answers) {

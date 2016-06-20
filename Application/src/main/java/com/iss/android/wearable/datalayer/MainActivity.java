@@ -273,9 +273,9 @@ public class MainActivity extends FragmentActivity implements
             case R.id.button3:
                 onWatchSync();
                 return true;
-            /*case R.id.button4:
-                onExploreData();
-                return true;*/
+            case R.id.button4:
+                onShowMeasurements();
+                return true;
             case R.id.averageValues:
                 onShowAverages();
                 return true;
@@ -291,6 +291,12 @@ public class MainActivity extends FragmentActivity implements
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void onShowMeasurements() {
+
+        final Intent ShowMeasurements = new Intent(this, MeasurementsActivity.class);
+        startActivity(ShowMeasurements);
     }
 
     private void testDatabase() {
