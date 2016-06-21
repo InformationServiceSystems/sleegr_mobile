@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -133,12 +134,14 @@ public class MeasurementsActivity extends ListActivity  {
             int p = getItem(position);
 
             if (p != 0) {
+                TextView measurementslist_TextView = (TextView) v.findViewById(R.id.measurementslist_TextView);
+                Log.d("Call", measurementslist_TextView.toString());
                 Calendar date = new GregorianCalendar();
                 // Fill the GraphView with data for the current date
                 DailyData dailyData = new DailyData(date.getTime());
                 Log.d("Requested view for", String.valueOf(p));
                 GraphView graph = (GraphView) v.findViewById(R.id.output);
-                new PlotGraphsTask(graph, v.getContext(), p).execute(dailyData);
+                new PlotGraphsTask(graph, v.getContext(), p, measurementslist_TextView).execute(dailyData);
             }
 
             return v;
@@ -150,13 +153,17 @@ public class MeasurementsActivity extends ListActivity  {
             public Integer MID;
             public ArrayList<Date> Times;
             public ArrayList<Float> Values;
+            public String measurementType;
+            public TextView measurementslist_TextView;
 
-            public PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p) {
+            public PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView measurementslist_TextView) {
+                Log.d("Receive", measurementslist_TextView.toString());
                 this.graph = arggraph;
                 this.context = argcontext;
                 this.MID = p;
                 Times = new ArrayList<>();
                 Values = new ArrayList<>();
+                this.measurementslist_TextView = measurementslist_TextView;
             }
 
             protected Void doInBackground(DailyData... cooldown) {
@@ -197,6 +204,7 @@ public class MeasurementsActivity extends ListActivity  {
                     while (mCursor.moveToNext()) {
                         ISSRecordData record = ISSDictionary.CursorToISSRecordData(mCursor);
                         data.add(record);
+                        measurementType = record.ExtraData;
                         Log.d("Found", record.toString());
                     }
                 }
@@ -209,6 +217,7 @@ public class MeasurementsActivity extends ListActivity  {
 
             @Override
             protected void onPostExecute(Void result) {
+                if (measurementType.equals("Cooldown") || measurementType.equals("Recovery") || measurementType.equals("EveningHR") || measurementType.equals("MorningHR")){
                 graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
                     @Override
                     public String formatLabel(double value, boolean isValueX) {
@@ -242,6 +251,15 @@ public class MeasurementsActivity extends ListActivity  {
                     series.setColor(Color.BLUE);
                     graph.addSeries(series);
                 }
+                    Log.d("Fill", measurementslist_TextView.toString());
+                    String text = measurementType + " measurement taken at: " + ISSDictionary.dateToTimeString(Times.get(0));
+                    this.measurementslist_TextView.setText(text);
+                }
+                else {
+                    String text = measurementType + " measurement";
+                    this.measurementslist_TextView.setText(text);
+                }
+
             }
         }
 

@@ -85,4 +85,9 @@ public class ISSDictionary {
         DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
         return df.format(date);
     }
+
+    public static String dateToTimeString(Date date) {
+        DateFormat df = new SimpleDateFormat("hh:mm:ss");
+        return df.format(date);
+    }
 }
