@@ -5,50 +5,37 @@ import java.util.ArrayList;
 /**
  * Created by Euler on 1/8/2016.
  */
-public class ExponentFitter {
-
-    public static double H = 150.0;
-
-    public static double fExp(double [] p, double x){
-        // double a = p[0], t = p[1], c = p[2];
-        return (H - p[2]) * Math.exp(-(x - p[1]) / p[0]) + p[2];
-    }
+public class ExponentFitter_Old {
 
     public static double [] computeFitGrd(double[] p, ArrayList<Double> X, ArrayList<Double> Y){
-        // the form of the curve as given in fExp
-        // to compute the derivatives of norm of differences, use
-        //          http://www.derivative-calculator.net/
 
         double log2 = 1;
         double norm = 0;
-        double Da = 0, Dt = 0, Dc = 0;
+        double Da = 0, Db = 0, Dc = 0;
 
         for (int i = 0; i < X.size(); i++) {
 
-            double a = p[0], t = p[1], c = p[2];
-            double x = X.get(i);
+            double a = p[0], b = p[1], c = p[2];
+            double p2xa = Math.exp( -X.get(i) / a);
+            double value_in_brackets = (b*p2xa - Y.get(i)+c);
 
-            double expValue = Math.exp(-(x-t)/a);
-            double diff = (H-c)*expValue + c - Y.get(i);
+            norm += value_in_brackets * value_in_brackets / X.size();
 
-            double da =  diff*(H-c)*(x-t)* expValue / (a*a);
-            double dt =  diff*(H-c)* expValue / a;
-            double dc =  diff*(1 - expValue);
+            double da = log2 * X.get(i) * b * p2xa * value_in_brackets / (a*a);
+            double db = log2 * p2xa * value_in_brackets;
+            double dc = value_in_brackets;
 
             Da += da;
-            Dt += dt;
+            Db += db;
             Dc += dc;
-
-            norm += diff * diff;
-
         }
 
         Da = Da / X.size();
-        Dt = Dt / X.size();
+        Db = Db / X.size();
         Dc = Dc / X.size();
         //norm = Da*Da + Db*Db + Dc*Dc;
 
-        return new double [] {Da, Dt, Dc, norm} ;
+        return new double [] {Da, Db, Dc, norm} ;
 
     }
 
@@ -70,6 +57,8 @@ public class ExponentFitter {
         }
 
     }
+
+
 
     public static double minval( ArrayList<Double> Y){
 
@@ -98,6 +87,7 @@ public class ExponentFitter {
         return mx;
 
     }
+
 
     public static double [] fitLowerExpGD(ArrayList<Double> Xr, ArrayList<Double> Yr){
 
@@ -137,13 +127,13 @@ public class ExponentFitter {
             return new double[]{1000.0,0.0,0.0};
         }
 
-        double [] result = new double [] {200.0, 0.0, 60.0 };
+        double [] result = new double [] {1000, 100, 50 };
         double [] grdscl = new double [] {1, 1, 1 };
 
         double norm = 100;
         double pval = 0;
 
-        int maxidx = 20000; // protects against convergence problems
+        int maxidx = 10000; // protects against convergence problems
 
         while(maxidx > 0){
             maxidx--;
