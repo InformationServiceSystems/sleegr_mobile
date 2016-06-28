@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -152,7 +151,8 @@ public class MeasurementsActivity extends ListActivity  {
             public Context context;
             public Integer MID;
             public ArrayList<Date> Times;
-            public ArrayList<Float> Values;
+            public ArrayList<Float> HRValues;
+            public ArrayList<Double> FittedCurve;
             public String measurementType;
             public TextView measurementslist_TextView;
 
@@ -162,7 +162,8 @@ public class MeasurementsActivity extends ListActivity  {
                 this.context = argcontext;
                 this.MID = p;
                 Times = new ArrayList<>();
-                Values = new ArrayList<>();
+                HRValues = new ArrayList<>();
+                FittedCurve = new ArrayList<>();
                 this.measurementslist_TextView = measurementslist_TextView;
             }
 
@@ -208,10 +209,18 @@ public class MeasurementsActivity extends ListActivity  {
                         Log.d("Found", record.toString());
                     }
                 }
+                double[] CDParams = DataProcessingManager.getCooldownParameters(data);
+                for (double i: CDParams) {
+                    Log.d("parameters", String.valueOf(i));
+                }
                 for (ISSRecordData d: data){
                     Times.add(d.getTimestamp());
-                    Values.add(d.Value1);
+                    HRValues.add(d.Value1);
+                    Log.d("x value", String.valueOf((d.getTimestamp().getTime() - Times.get(0).getTime())/1000));
+                    Log.d("y value", String.valueOf(ExponentFitter.fExp(CDParams, (d.getTimestamp().getTime() - Times.get(0).getTime())/1000)));
+                    FittedCurve.add(ExponentFitter.fExp(CDParams, (d.getTimestamp().getTime() - Times.get(0).getTime())/1000));
                 }
+
                 return null;
             }
 
@@ -239,19 +248,27 @@ public class MeasurementsActivity extends ListActivity  {
                 if(Times != null && Times.size() > 0) {
                     LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
                     for (int i = 0; i < Times.size(); i++) {
-                        series.appendData(new DataPoint(Times.get(i), Values.get(i)), true, Times.size());
-                        Log.d(Times.get(i).toString(), Values.get(i).toString());
+                        series.appendData(new DataPoint(Times.get(i), HRValues.get(i)), false, Times.size()+20);
+                        Log.d(Times.get(i).toString(), HRValues.get(i).toString());
                     }
+                    LineGraphSeries<DataPoint> FittedCurveSeries = new LineGraphSeries<>();
+                    for (int i = 0; i < Times.size(); i++) {
+                        FittedCurveSeries.appendData(new DataPoint(Times.get(i), FittedCurve.get(i)), false, Times.size()+20);
+                        Log.d(Times.get(i).toString(), String.valueOf(FittedCurve.get(i)));
+                    }
+                    Log.d("Graph Starting time", String.valueOf(Times.get(0).getTime()));
                     graph.getViewport().setMinX(Times.get(0).getTime());
+                    Log.d("Graph thinks min x is", String.valueOf(graph.getViewport().getMinX(true)));
                     graph.getViewport().setMaxX(Times.get(Times.size()-1).getTime());
                     graph.getViewport().setXAxisBoundsManual(true);
                     graph.getViewport().setYAxisBoundsManual(true);
-                    graph.getViewport().setMinY(30);
+                    graph.getViewport().setMinY(0);
                     graph.getViewport().setMaxY(200);
                     series.setColor(Color.BLUE);
+                    FittedCurveSeries.setColor(Color.GREEN);
+                    graph.addSeries(FittedCurveSeries);
                     graph.addSeries(series);
                 }
-                    Log.d("Fill", measurementslist_TextView.toString());
                     String text = measurementType + " measurement taken at: " + ISSDictionary.dateToTimeString(Times.get(0));
                     this.measurementslist_TextView.setText(text);
                 }

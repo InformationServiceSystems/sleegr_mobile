@@ -56,7 +56,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     public static String NEW_MESSAGE_AVAILABLE = "log the output";
 
 
-    String uploadUrl = "http://46.101.214.58:5001/upload2/";
+    String uploadUrl = "http://web01.iss.uni-saarland.de:81";
 
     // A method broadcasting a String.
     public static void OutputEventSq(String str) {

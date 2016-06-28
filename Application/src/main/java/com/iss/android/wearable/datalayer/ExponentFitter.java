@@ -1,5 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 /**
