@@ -677,6 +677,8 @@ public class MainActivity extends FragmentActivity implements
             TextView text = (TextView) v.findViewById(R.id.textV1);
             new PlotGraphsTask(graph, text, v.getContext(), date.getTime()).execute(dailyData);
             TextView[] labels = new TextView[]{text};
+            HashMap<String, Double[]> sleepData = CSVManager.ReadSleepData();
+            Log.d("Sleep data", sleepData.toString());
 
             // Fill the TextViews below with the appropriate data
             /*TextView intctr = (TextView) v.findViewById(R.id.intensityCtr);
