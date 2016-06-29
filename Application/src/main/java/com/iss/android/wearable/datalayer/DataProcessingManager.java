@@ -1,5 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
+import android.util.Log;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,14 +39,9 @@ public class DataProcessingManager {
     // A method returning parameters describing a curve fitting the measured cooldown heart rates
     public static double[] getCooldownParameters(ArrayList<ISSRecordData> data, double timeShift) {
 
-        Calendar startTime = Calendar.getInstance();
+        Calendar startTime = null;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
 
-        // get the first reference time
-        try {
-            startTime.setTime(sdf.parse(data.get(0).Timestamp));
-        } catch (ParseException e) {
-        }
 
         Calendar currentTime = Calendar.getInstance();
 
@@ -59,8 +56,18 @@ public class DataProcessingManager {
             }
 
             try {
-                currentTime.setTime(sdf.parse(record.Timestamp));
+                currentTime.setTime(sdf.parse(record.Date + "_" + record.Timestamp));
             } catch (ParseException e) {
+                Log.d("why?", e.toString());
+            }
+
+            if(startTime == null){
+                try {
+                    startTime = Calendar.getInstance();
+                    startTime.setTime(sdf.parse(record.Date + "_" + record.Timestamp));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
 
             double time = (currentTime.getTime().getTime() - startTime.getTime().getTime()) / 1000;
