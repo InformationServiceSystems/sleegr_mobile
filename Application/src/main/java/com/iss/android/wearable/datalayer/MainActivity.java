@@ -692,9 +692,9 @@ public class MainActivity extends FragmentActivity implements
             TextView dalda = (TextView) v.findViewById(R.id.dalda);
             dalda.setText("DALDA scale: " + formatDouble(dailyData.getDALDA()));
             TextView rpe = (TextView) v.findViewById(R.id.rpe);
-            rpe.setText("RPE scale: " + formatDouble(dailyData.getRPE()));*/
+            rpe.setText("RPE scale: " + formatDouble(dailyData.getRPE()));
             TextView sleep = (TextView) v.findViewById(R.id.sleep);
-            sleep.setText("Deep Sleep Cycles: " + formatDouble(dailyData.getDeepSleep()));
+            sleep.setText("Deep Sleep Cycles: " + formatDouble(dailyData.getDeepSleep()));*/
             return v;
         }
 

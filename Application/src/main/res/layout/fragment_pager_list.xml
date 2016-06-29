@@ -33,7 +33,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:gravity="center_vertical"
-            android:text="@string/hello_world"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
@@ -42,7 +41,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:gravity="center_vertical"
-            android:text="@string/hello_world"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
@@ -51,7 +49,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:gravity="center_vertical"
-            android:text="@string/hello_world"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
@@ -60,7 +57,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:gravity="center_vertical"
-            android:text="@string/hello_world"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
@@ -69,7 +65,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:gravity="center_vertical"
-            android:text="@string/hello_world"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
@@ -78,7 +73,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:gravity="center_vertical"
-            android:text="@string/hello_world"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
     </LinearLayout>
