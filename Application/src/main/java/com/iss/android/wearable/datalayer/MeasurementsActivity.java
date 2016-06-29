@@ -134,13 +134,16 @@ public class MeasurementsActivity extends ListActivity  {
 
             if (p != 0) {
                 TextView measurementslist_TextView = (TextView) v.findViewById(R.id.measurementslist_TextView);
+                TextView AValue = (TextView) v.findViewById(R.id.AValue);
+                TextView TValue = (TextView) v.findViewById(R.id.TValue);
+                TextView CValue = (TextView) v.findViewById(R.id.CValue);
                 Log.d("Call", measurementslist_TextView.toString());
                 Calendar date = new GregorianCalendar();
                 // Fill the GraphView with data for the current date
                 DailyData dailyData = new DailyData(date.getTime());
                 Log.d("Requested view for", String.valueOf(p));
                 GraphView graph = (GraphView) v.findViewById(R.id.output);
-                new PlotGraphsTask(graph, v.getContext(), p, measurementslist_TextView).execute(dailyData);
+                new PlotGraphsTask(graph, v.getContext(), p, measurementslist_TextView, AValue, TValue, CValue).execute(dailyData);
             }
 
             return v;
@@ -154,9 +157,13 @@ public class MeasurementsActivity extends ListActivity  {
             public ArrayList<Float> HRValues;
             public ArrayList<Double> FittedCurve;
             public String measurementType;
-            public TextView measurementslist_TextView;
+            private TextView measurementslist_TextView;
+            private TextView AValue;
+            private TextView TValue;
+            private TextView CValue;
+            double[] CDParams;
 
-            public PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView measurementslist_TextView) {
+            public PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView measurementslist_TextView, TextView AValue, TextView TValue, TextView CValue) {
                 Log.d("Receive", measurementslist_TextView.toString());
                 this.graph = arggraph;
                 this.context = argcontext;
@@ -165,6 +172,9 @@ public class MeasurementsActivity extends ListActivity  {
                 HRValues = new ArrayList<>();
                 FittedCurve = new ArrayList<>();
                 this.measurementslist_TextView = measurementslist_TextView;
+                this.AValue = AValue;
+                this.TValue = TValue;
+                this.CValue = CValue;
             }
 
             protected Void doInBackground(DailyData... cooldown) {
@@ -209,7 +219,7 @@ public class MeasurementsActivity extends ListActivity  {
                         Log.d("Found", record.toString());
                     }
                 }
-                double[] CDParams = DataProcessingManager.getCooldownParameters(data);
+                this.CDParams = DataProcessingManager.getCooldownParameters(data);
                 for (double i: CDParams) {
                     Log.d("parameters", String.valueOf(i));
                 }
@@ -271,6 +281,9 @@ public class MeasurementsActivity extends ListActivity  {
                 }
                     String text = measurementType + " measurement taken at: " + ISSDictionary.dateToTimeString(Times.get(0));
                     this.measurementslist_TextView.setText(text);
+                    this.AValue.setText("A: " + String.valueOf(CDParams[0]));
+                    this.AValue.setText("T: " + String.valueOf(CDParams[1]));
+                    this.AValue.setText("C: " + String.valueOf(CDParams[2]));
                 }
                 else {
                     String text = measurementType + " measurement";
