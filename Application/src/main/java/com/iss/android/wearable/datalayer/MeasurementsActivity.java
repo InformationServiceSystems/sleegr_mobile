@@ -137,13 +137,14 @@ public class MeasurementsActivity extends ListActivity  {
                 TextView AValue = (TextView) v.findViewById(R.id.AValue);
                 TextView TValue = (TextView) v.findViewById(R.id.TValue);
                 TextView CValue = (TextView) v.findViewById(R.id.CValue);
+                TextView Load= (TextView) v.findViewById(R.id.Load);
                 Log.d("Call", measurementslist_TextView.toString());
                 Calendar date = new GregorianCalendar();
                 // Fill the GraphView with data for the current date
                 DailyData dailyData = new DailyData(date.getTime());
                 Log.d("Requested view for", String.valueOf(p));
                 GraphView graph = (GraphView) v.findViewById(R.id.output);
-                new PlotGraphsTask(graph, v.getContext(), p, measurementslist_TextView, AValue, TValue, CValue).execute(dailyData);
+                new PlotGraphsTask(graph, v.getContext(), p, measurementslist_TextView, AValue, TValue, CValue, Load).execute(dailyData);
             }
 
             return v;
@@ -162,8 +163,9 @@ public class MeasurementsActivity extends ListActivity  {
             private TextView TValue;
             private TextView CValue;
             double[] CDParams;
+            private TextView Load;
 
-            public PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView measurementslist_TextView, TextView AValue, TextView TValue, TextView CValue) {
+            public PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView measurementslist_TextView, TextView AValue, TextView TValue, TextView CValue, TextView Load) {
                 Log.d("Receive", measurementslist_TextView.toString());
                 this.graph = arggraph;
                 this.context = argcontext;
@@ -175,6 +177,7 @@ public class MeasurementsActivity extends ListActivity  {
                 this.AValue = AValue;
                 this.TValue = TValue;
                 this.CValue = CValue;
+                this.Load = Load;
             }
 
             protected Void doInBackground(DailyData... cooldown) {
@@ -218,17 +221,16 @@ public class MeasurementsActivity extends ListActivity  {
                         measurementType = record.ExtraData;
                         Log.d("Found", record.toString());
                     }
-                }
-                this.CDParams = DataProcessingManager.getCooldownParameters(data);
-                for (double i: CDParams) {
-                    Log.d("parameters", String.valueOf(i));
-                }
-                for (ISSRecordData d: data){
-                    Times.add(d.getTimestamp());
-                    HRValues.add(d.Value1);
-                    Log.d("x value", String.valueOf((d.getTimestamp().getTime() - Times.get(0).getTime())/1000));
-                    Log.d("y value", String.valueOf(ExponentFitter.fExp(CDParams, (d.getTimestamp().getTime() - Times.get(0).getTime())/1000)));
-                    FittedCurve.add(ExponentFitter.fExp(CDParams, (d.getTimestamp().getTime() - Times.get(0).getTime())/1000));
+                    this.CDParams = DataProcessingManager.getCooldownParameters(data);
+                    if (CDParams != null) {
+                        for (ISSRecordData d : data) {
+                            Times.add(d.getTimestamp());
+                            HRValues.add(d.Value1);
+                            Log.d("x value", String.valueOf((d.getTimestamp().getTime() - Times.get(0).getTime()) / 1000));
+                            Log.d("y value", String.valueOf(ExponentFitter.fExp(CDParams, (d.getTimestamp().getTime() - Times.get(0).getTime()) / 1000)));
+                            FittedCurve.add(ExponentFitter.fExp(CDParams, (d.getTimestamp().getTime() - Times.get(0).getTime()) / 1000));
+                        }
+                    }
                 }
 
                 return null;
@@ -282,8 +284,9 @@ public class MeasurementsActivity extends ListActivity  {
                     String text = measurementType + " measurement taken at: " + ISSDictionary.dateToTimeString(Times.get(0));
                     this.measurementslist_TextView.setText(text);
                     this.AValue.setText("A: " + String.valueOf(CDParams[0]));
-                    this.AValue.setText("T: " + String.valueOf(CDParams[1]));
-                    this.AValue.setText("C: " + String.valueOf(CDParams[2]));
+                    this.TValue.setText("T: " + String.valueOf(CDParams[1]));
+                    this.CValue.setText("C: " + String.valueOf(CDParams[2]));
+                    this.Load.setText("Load: " + String.valueOf(CDParams[0]*CDParams[2]));
                 }
                 else {
                     String text = measurementType + " measurement";
