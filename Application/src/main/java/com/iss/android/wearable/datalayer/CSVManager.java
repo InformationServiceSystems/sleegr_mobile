@@ -140,7 +140,7 @@ public class CSVManager {
 
     // A method that reads sleepData from the file defined in DataStorageManager
     // and transcribes it into a HashMap
-    public static ArrayList<ISSRecordData> ReadSleepData2() {
+    public static ArrayList<ISSRecordData> ReadSleepDataISSREC() {
 
         ArrayList<ISSRecordData> result = new ArrayList<>();
 
@@ -173,7 +173,8 @@ public class CSVManager {
                 Double value = Double.parseDouble(split[12]);
                 Double length = Double.parseDouble(split[5]);
 
-
+                ISSRecordData d = new ISSRecordData(1,777, date, "01:01:01", "", value.floatValue() , 0.0f, length.floatValue(), 1);
+                result.add(d);
 
             }
 

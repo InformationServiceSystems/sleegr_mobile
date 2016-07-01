@@ -724,7 +724,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         // finally, upload sleep data
 
-        ArrayList<ISSRecordData> sleepData2 = CSVManager.ReadSleepData2();
+        ArrayList<ISSRecordData> sleepData2 = CSVManager.ReadSleepDataISSREC();
 
         if(sleepData2 != null){
             for(ISSRecordData record: sleepData2){
