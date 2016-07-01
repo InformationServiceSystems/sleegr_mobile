@@ -580,7 +580,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         JSONObject json = new JSONObject();
         try {
-            json.put("Id", tosend.UserID);
+            json.put("Id", DataSyncService.getUserID());
             json.put("type", tosend.MeasurementType);
             json.put("date", tosend.Timestamp);
             json.put("tag", tosend.ExtraData);
