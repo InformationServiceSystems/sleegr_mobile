@@ -1,0 +1,20 @@
+Below is example data stored in the csv format:
+
+UserID, TypeOfMeasurement, Timestamp, Tag, Value0, Value1, Value2
+0,21,2016.07.26_18:02:13,threeMinute,72.0,0.0,0.0
+0,1,2016.07.26_18:02:16,threeMinute,9.943181,0.7994758,1.469695
+0,4,2016.07.26_18:02:16,threeMinute,0.0,0.0,0.0
+0,21,2016.07.26_18:02:16,threeMinute,72.0,0.0,0.0
+0,4,2016.07.26_18:02:17,threeMinute,0.0,0.0,0.0
+0,1,2016.07.26_18:02:17,threeMinute,9.952756,0.7994758,1.469695
+0,21,2016.07.26_18:02:17,threeMinute,72.0,0.0,0.0
+0,1,2016.07.26_18:02:19,threeMinute,9.952756,0.7994758,1.4792696
+0,4,2016.07.26_18:02:19,threeMinute,0.0,0.0,0.0
+0,21,2016.07.26_18:02:19,threeMinute,72.0,0.0,0.0
+0,4,2016.07.26_18:02:22,threeMinute,0.0,0.0,0.0
+
+Ignore UserID field. 
+TypeOfMeasurement: 1 - accelerometer, 4 - gyroscope, 21 - heart rate value. 
+Timestamp: time when the measurement was taken
+Tag: denotes which button was pressed
+Value0 ... 2: contains values of measurement. For HR, only the first value is set to current BPM.

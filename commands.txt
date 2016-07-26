@@ -1,0 +1,7 @@
+Copy data from the SW, on Windows:
+* connect smartwatch to your pc via usb
+* Open Windows PowerShell
+* cd to_your_working_folder
+* adb pull sdcard/triathlon/
+Delete data on SW:
+* adb shell rm sdcard/triathlon/
