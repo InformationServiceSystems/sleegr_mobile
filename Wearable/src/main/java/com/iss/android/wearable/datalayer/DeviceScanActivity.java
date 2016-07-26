@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.iss.android.wearable.readingHR;
+package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
 import android.app.ListActivity;

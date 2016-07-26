@@ -1,4 +1,4 @@
-package com.iss.android.wearable.readingHR;
+package com.iss.android.wearable.datalayer;
 
 import android.os.Environment;
 import android.util.Log;
@@ -8,12 +8,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-
-import static com.iss.android.wearable.readingHR.DateTimeManager.getDayFromToday;
 
 /**
  * Created by Euler on 12/19/2015.
@@ -21,32 +20,22 @@ import static com.iss.android.wearable.readingHR.DateTimeManager.getDayFromToday
 public class DataStorageManager {
 
 
-    // a method responsible for creating the folders to write into
     public  static void InitializeTriathlonFolder(){
 
         if(!userDataFolder.exists()){
-            boolean result = userDataFolder.mkdir();
-            if (!result){
-                Log.d("Initialize", "failed");
-            }
+            userDataFolder.mkdir();
         }
 
     }
-
 
     // Environment.getDataDirectory().toString()
     // I use here external storage directory, as the previous versions of the
     // app use the external directory. In case ext. storage is not available, use
     // Environment.getDataDirectory().toString()
-
-    // I overwrote it so that it now takes Internal Storage, which is more fitting for in-app-data.
-    // All other methods wouldn't let me write when using the scheduled RPE values.
-    // static String dataFolder = MainActivity.getContext().getFilesDir().toString();
-    static File dataFolder = Environment.getExternalStorageDirectory();
-    static File sleepData = new File(dataFolder, "sleep-data/sleep-export.csv");
+    static String dataFolder = Environment.getExternalStorageDirectory().toString();
     static File userDataFolder = new File(dataFolder, "triathlon");
 
-    // A method that converts a file into a bytearray
+    // reads a file into a byte array
     public static byte[] FileToBytes(File file) {
 
         int size = (int) file.length();
@@ -67,7 +56,20 @@ public class DataStorageManager {
         return bytes;
     }
 
-    // A method that transcribes the UserID. Currently replaces "@" with "_at_"
+    // Computes the date given today and an offset
+    public static String getDayFromToday(int dayoffset){
+
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar cl = Calendar.getInstance();
+        cl.add(Calendar.HOUR_OF_DAY, -3);
+        cl.add(Calendar.DAY_OF_YEAR, -dayoffset);
+        String currentDateandTime = df.format(cl.getTime());
+
+        return currentDateandTime;
+
+    }
+
+    // Reformats the UserID (currently replaces only the "@" with "_at_"
     public static String getProperUserID(String UserID){
 
         return UserID.replace("@", "_at_");
@@ -81,7 +83,7 @@ public class DataStorageManager {
 
     }
 
-    // sub-method of getKey
+    // Submethod of getKey
     public static String getStateKey(String mark){
 
         int idx = mark.indexOf(":");
@@ -94,7 +96,7 @@ public class DataStorageManager {
 
     }
 
-    // A method that, together with getStateKey, returns the state, e.g. "resting", "idle" or "cooldown"
+    // Returns the type of the activity, e.g. resting, idle
     public static String getKey(ISSRecordData record){
 
         String mark = record.ExtraData;
@@ -107,7 +109,7 @@ public class DataStorageManager {
 
     }
 
-    // A method that stores a list of ISSRecordData belonging to the same type in a file.
+    // Stores all data accumalted in a *.csv file belonging to the user, given a certain activity type
     public static void SaveBinnedData(ArrayList<ISSRecordData> accumulator, String UserID, String activityType){
 
         // get date of first record
@@ -127,27 +129,22 @@ public class DataStorageManager {
         String folderName = folderFormat.format(cal.getTime());
 
         // create folder for the time, if not created already
-        File dayFolder = new File(userDataFolder, folderName + "/");
+        File dayFolder = new File( userDataFolder, folderName);
 
         if(!dayFolder.exists()){
-            boolean result = dayFolder.mkdirs();
-            if (!dayFolder.exists()){
-                Log.d("Dayfolder", "existiert immer noch nicht");
-            }
-            if (!result){
-                Log.d("dayFolder creation", "failed");
-            }
+            boolean result = dayFolder.mkdir();
             //DataSyncService.itself.OutputEvent("create folder: " + result);
         }
 
-        CSVManager.AppendStringToFile(
+        CSVManager.WriteNewCSVdata(
                 new File(dayFolder, getProperUserID(UserID) + "_" + folderName + "_" + activityType + ".csv"),
                 CSVManager.RecordsToCSV(accumulator).toString()
         );
 
     }
 
-    // A method that divides a list of ISSRecordData by type and makes them be stored seperately in SaveBinnedData
+    // Saves a list of ISSRecordData to the corresponding files using the UserID,
+    // the dates within the RecordData and the activity type
     public static void SaveNewDataToFile(ArrayList<ISSRecordData> data, String UserID) {
 
         try {
@@ -185,33 +182,26 @@ public class DataStorageManager {
 
     }
 
-    // A method that determines all the *.csv Files in a given timespan.
-    public static ArrayList<ArrayList<File>> GetAllFilesToUpload(String UserID, int timeSpan){
+    // Collectsall files within a given timespan to upload to the phone
+    public static ArrayList<File> GetAllFilesToUpload(String UserID, int timeSpan){
 
-        ArrayList<ArrayList<File>> result = new  ArrayList<>();
-        //result.add(sleepData);
+        ArrayList<File> result = new  ArrayList<File>();
 
         for (int i = 0; i < timeSpan; i++){
+
             File dayFolder = new File( userDataFolder, getDayFromToday(i));
             File[] files = dayFolder.listFiles();
 
-            ArrayList<File> day = new ArrayList<>();
-
             if (files != null){
                 for (File file : files) {
-
-                    if (!file.getName().contains(".csv")){
-                        continue;
-                    }
-
-                    day.add(file);
+                    Log.d("Gathered file", file.getName());
+                    result.add(file);
                 }
             }
-
-            result.add(day);
 
         }
 
         return result;
     }
+
 }

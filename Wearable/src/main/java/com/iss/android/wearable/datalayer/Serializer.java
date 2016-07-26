@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.iss.android.wearable.readingHR;
+package com.iss.android.wearable.datalayer;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -21,12 +21,11 @@ import java.io.ObjectOutputStream;
 
 /**
  * @author Iaroslav
- * WARNING: (DE)SERIALIZATION IS PERFORMED IN MEMORY FOR BETTER PERFORMANCE
+ *         WARNING: (DE)SERIALIZATION IS PERFORMED IN MEMORY FOR BETTER PERFORMANCE
  */
 public class Serializer {
 
-
-
+    // Serialises an object to a file
     public static void SerializeToFile(Object obj, File file) throws IOException {
 
         FileOutputStream fileOut;
@@ -36,25 +35,26 @@ public class Serializer {
         }
 
         fileOut = new FileOutputStream(file);
-        byte [] data = SerializeToBytes(obj);
+        byte[] data = SerializeToBytes(obj);
 
         fileOut.write(data);
         fileOut.close();
 
     }
 
-    // Creates an object deseriealized from a file
+    // Reads a file and constructs an object containing the contents of the file
     public static Object DeserializeFromFile(File file) throws IOException, ClassNotFoundException {
+
         FileInputStream fileIn;
 
         fileIn = new FileInputStream(file);
-        byte [] data = InputStreamToByte(fileIn);
+        byte[] data = InputStreamToByte(fileIn);
         fileIn.close();
 
         return DeserializeFromBytes(data);
     }
 
-    // Serializes an object to a byte array
+    // Serialises an object to a byte array
     public static byte[] SerializeToBytes(Object object) throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              ObjectOutput out = new ObjectOutputStream(bos)) {
@@ -63,7 +63,7 @@ public class Serializer {
         }
     }
 
-    // Creates an object from a bytearray
+    // deserialises an object from a byte array
     public static Object DeserializeFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
              ObjectInput in = new ObjectInputStream(bis)) {
@@ -71,8 +71,8 @@ public class Serializer {
         }
     }
 
-    // Creates a byte array from an inputstream
-    public static byte [] InputStreamToByte(InputStream is) throws IOException {
+    // transforms an inputstream to a byte array
+    public static byte[] InputStreamToByte(InputStream is) throws IOException {
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
@@ -89,7 +89,6 @@ public class Serializer {
 
     }
 
-    // Serializes a file to a byte array
     public static byte[] FileToBytes(File file) {
 
         int size = (int) file.length();

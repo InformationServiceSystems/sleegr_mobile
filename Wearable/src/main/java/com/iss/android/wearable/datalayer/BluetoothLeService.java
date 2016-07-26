@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.iss.android.wearable.readingHR;
+package com.iss.android.wearable.datalayer;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;

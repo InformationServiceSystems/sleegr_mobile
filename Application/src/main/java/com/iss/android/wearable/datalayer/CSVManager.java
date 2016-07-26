@@ -1,4 +1,4 @@
-package com.iss.android.wearable.readingHR;
+package com.iss.android.wearable.datalayer;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -1,4 +1,4 @@
-package com.iss.android.wearable.readingHR;
+package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
 import android.content.Intent;

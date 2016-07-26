@@ -1,4 +1,4 @@
-package com.iss.android.wearable.readingHR;
+package com.iss.android.wearable.datalayer;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
