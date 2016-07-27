@@ -127,13 +127,24 @@
         android:background="@color/white">
 
         <ImageButton
+            android:id="@+id/userMeasureTime"
+            android:layout_width="40dp"
+            android:layout_height="fill_parent"
+            android:background="@color/grey"
+            android:src="@drawable/ic_schedule_black_24dp"
+            android:onClick="onClicked"
+            android:layout_marginBottom="3dp"/>
+
+        <ImageButton
             android:id="@+id/threeMinute"
             android:layout_width="40dp"
             android:layout_height="fill_parent"
             android:background="@color/grey"
             android:src="@drawable/ic_ac_unit_black_24dp"
             android:onClick="onClicked"
-            android:layout_marginBottom="3dp"/>
+            android:layout_marginBottom="3dp"
+            android:layout_marginLeft="20dp"
+            android:layout_toRightOf="@+id/userMeasureTime"/>
 
 
         <ImageButton

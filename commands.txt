@@ -1,7 +1,9 @@
+For commands to work, you need to install Android Studio, and adb driver for sony SW 3:
+http://adbdriver.com/documentation/sony-smartwatch-3-usb-driver-android-wear.html
+If the link does not work, let me know
 Copy data from the SW, on Windows:
-* connect smartwatch to your pc via usb
-* Open Windows PowerShell
+Connect smartwatch to your pc via usb, open Windows PowerShell, and there
 * cd to_your_working_folder
 * adb pull sdcard/triathlon/
 Delete data on SW:
-* adb shell rm sdcard/triathlon/
+* adb shell rm -rf sdcard/triathlon/

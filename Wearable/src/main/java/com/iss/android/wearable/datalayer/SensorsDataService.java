@@ -452,6 +452,13 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    // adds record with id = 131 which marks a certain moment in time
+    // e.g. this record is added when user clicks button "time"
+    // which means that the user is feeling tired after some time of activity
+    public void RecordCurrentTime(){
+        AddNewData(UserID, 131, GetTimeNow(), currentState, 0, 0, 0);
+    }
+
     // Adds new data to a file somewhere to be stored
     public void AddNewData(int uid, int sensortype, String timenow, String extras, float v0, float v1, float v2) {
 

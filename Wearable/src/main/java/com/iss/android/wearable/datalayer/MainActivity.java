@@ -499,6 +499,14 @@ public class MainActivity extends Activity {
                     Log.e(TAG, ex.toString());
                 }
                 break;
+            case R.id.userMeasureTime:
+                try {
+                    SensorsDataService.itself.RecordCurrentTime();
+                    SensorsDataService.itself.outputVibration();
+                } catch (Exception ex) {
+                    Log.e(TAG, ex.toString());
+                }
+                break;
             default:
 
                 Log.e(TAG, "Unknown click event registered");

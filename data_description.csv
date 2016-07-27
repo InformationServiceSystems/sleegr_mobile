@@ -1,20 +1,31 @@
 Below is example data stored in the csv format:
 
 UserID, TypeOfMeasurement, Timestamp, Tag, Value0, Value1, Value2
-0,21,2016.07.26_18:02:13,threeMinute,72.0,0.0,0.0
-0,1,2016.07.26_18:02:16,threeMinute,9.943181,0.7994758,1.469695
-0,4,2016.07.26_18:02:16,threeMinute,0.0,0.0,0.0
-0,21,2016.07.26_18:02:16,threeMinute,72.0,0.0,0.0
-0,4,2016.07.26_18:02:17,threeMinute,0.0,0.0,0.0
-0,1,2016.07.26_18:02:17,threeMinute,9.952756,0.7994758,1.469695
-0,21,2016.07.26_18:02:17,threeMinute,72.0,0.0,0.0
-0,1,2016.07.26_18:02:19,threeMinute,9.952756,0.7994758,1.4792696
-0,4,2016.07.26_18:02:19,threeMinute,0.0,0.0,0.0
-0,21,2016.07.26_18:02:19,threeMinute,72.0,0.0,0.0
-0,4,2016.07.26_18:02:22,threeMinute,0.0,0.0,0.0
+0,21,2016.07.27_10:28:02,threeMinute,66.0,0.0,0.0
+0,4,2016.07.27_10:28:05,threeMinute,0.0,0.0,0.0
+0,1,2016.07.27_10:28:05,threeMinute,5.2516465,7.3771987,8.717637
+0,21,2016.07.27_10:28:05,threeMinute,66.0,0.0,0.0
+0,131,2016.07.27_10:28:05,threeMinute,0.0,0.0,0.0
+0,1,2016.07.27_10:28:08,threeMinute,3.4899273,7.635712,4.83994
+0,4,2016.07.27_10:28:08,threeMinute,0.0,0.0,0.0
+0,21,2016.07.27_10:28:08,threeMinute,63.0,0.0,0.0
+0,1,2016.07.27_10:28:09,threeMinute,3.4420545,7.4442205,4.9452605
+0,4,2016.07.27_10:28:09,threeMinute,0.0,0.0,0.0
+0,21,2016.07.27_10:28:09,threeMinute,61.0,0.0,0.0
+0,1,2016.07.27_10:28:11,threeMinute,3.6239712,7.3771987,5.0122824
+0,4,2016.07.27_10:28:11,threeMinute,0.0,0.0,0.0
+0,21,2016.07.27_10:28:11,threeMinute,60.0,0.0,0.0
+0,1,2016.07.27_10:28:14,threeMinute,2.9920502,8.018694,4.6771727
+0,4,2016.07.27_10:28:14,threeMinute,0.0,0.0,0.0
+0,21,2016.07.27_10:28:14,threeMinute,59.0,0.0,0.0
+0,1,2016.07.27_10:28:17,threeMinute,3.5473747,7.6452866,4.476107
+0,4,2016.07.27_10:28:17,threeMinute,0.0,0.0,0.0
+0,21,2016.07.27_10:28:17,threeMinute,59.0,0.0,0.0
+0,4,2016.07.27_10:28:20,threeMinute,0.0,0.0,0.0
+0,21,2016.07.27_10:28:20,threeMinute,60.0,0.0,0.0
 
 Ignore UserID field. 
-TypeOfMeasurement: 1 - accelerometer, 4 - gyroscope, 21 - heart rate value. 
+TypeOfMeasurement: 1 - accelerometer, 4 - gyroscope, 21 - heart rate value, 131 - denotes event when the time button was pressed. 
 Timestamp: time when the measurement was taken
 Tag: denotes which button was pressed
 Value0 ... 2: contains values of measurement. For HR, only the first value is set to current BPM.
