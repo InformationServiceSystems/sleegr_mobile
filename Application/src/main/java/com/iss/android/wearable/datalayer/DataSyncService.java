@@ -32,6 +32,8 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,12 +42,16 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class DataSyncService extends Service implements DataApi.DataListener,
         MessageApi.MessageListener, NodeApi.NodeListener, GoogleApiClient.ConnectionCallbacks,
@@ -574,9 +580,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // uploading json to server
     public static String send_record_as_json(ISSRecordData tosend) {
-        String uri = "http://web01.iss.uni-saarland.de:443";
+        String uri = "http://10.9.24.79:2345/test";
         HttpURLConnection urlConnection;
-        String url;
 
         JSONObject json = new JSONObject();
         try {
@@ -595,38 +600,37 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         String result = null;
         try {
-            //Connect
-            urlConnection = (HttpURLConnection) ((new URL(uri).openConnection()));
-            //urlConnection.setDoOutput(true);
-            urlConnection.setRequestProperty("Content-Type", "application/json");
-            urlConnection.setRequestProperty("Accept", "application/json");
-            urlConnection.setRequestMethod("POST");
-            urlConnection.connect();
 
-            //Write
-            OutputStream outputStream = urlConnection.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-            writer.write(data);
-            writer.close();
-            outputStream.close();
+            URL object=new URL(uri);
 
-            //Read
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
+            HttpURLConnection con = (HttpURLConnection) object.openConnection();
+            con.setDoOutput(true);
+            con.setDoInput(true);
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Accept", "application/json");
+            con.setRequestMethod("POST");
 
-            String line = null;
+            OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+            wr.write(json.toString());
+            wr.flush();
+
             StringBuilder sb = new StringBuilder();
-
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
+            int HttpResult = con.getResponseCode();
+            if (HttpResult == HttpURLConnection.HTTP_OK) {
+                BufferedReader br = new BufferedReader(
+                        new InputStreamReader(con.getInputStream(), "utf-8"));
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                br.close();
+                System.out.println("" + sb.toString());
+            } else {
+                System.out.println(con.getResponseMessage());
             }
 
-            bufferedReader.close();
-            result = sb.toString();
-
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
         }
         return result;
     }
@@ -638,8 +642,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     // I query only for the values of the last 30 days, but that's easily adjustable.
     public void ShareDataWithServer() {
 
-        /*ISSRecordData d = new ISSRecordData(1,1, "h", "e", "llo", 1.0f, 1.0f, 1.0f, 1);
-        send_record_as_json(d);*/
+        ISSRecordData d = new ISSRecordData(1,1, "h", "e", "llo", 1.0f, 1.0f, 1.0f, 1);
+        send_record_as_json(d);/**/
 
         ArrayList<String> dateList = createDateList();
 
