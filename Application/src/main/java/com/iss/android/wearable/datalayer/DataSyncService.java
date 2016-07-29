@@ -642,8 +642,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     // I query only for the values of the last 30 days, but that's easily adjustable.
     public void ShareDataWithServer() {
 
-        ISSRecordData d = new ISSRecordData(1,1, "h", "e", "llo", 1.0f, 1.0f, 1.0f, 1);
-        send_record_as_json(d);/**/
+        // example of how to send json below
+        /*ISSRecordData d = new ISSRecordData(1,1, "h", "e", "llo", 1.0f, 1.0f, 1.0f, 1);
+        send_record_as_json(d);*/
 
         ArrayList<String> dateList = createDateList();
 
