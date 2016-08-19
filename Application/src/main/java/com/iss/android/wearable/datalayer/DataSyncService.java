@@ -27,17 +27,31 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class DataSyncService extends Service implements DataApi.DataListener,
         MessageApi.MessageListener, NodeApi.NodeListener, GoogleApiClient.ConnectionCallbacks,
@@ -475,7 +489,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     // converts them to an ISSRecordData list, seperates them by measurement type
     // and sends them to the server using the UploadingManager class.
     // I query only for the values of the last 30 days, but that's easily adjustable.
-    public void ShareDataWithServer() {
+    public void ShareDataWithServer_CSV() {
         ArrayList<String> dateList = createDateList();
 
         for (String date : dateList) {
@@ -560,6 +574,170 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         // finally, upload sleep data
         UploadingManager.UploadUserFileToServer( Serializer.FileToBytes(DataStorageManager.sleepData), "sleep-export.csv", uploadUrl, UserID);
+        OutputEvent("Sent data files to server");
+
+    }
+
+    // uploading json to server
+    public static String send_record_as_json(ISSRecordData tosend) {
+        String uri = "http://10.9.24.79:2345/test";
+        HttpURLConnection urlConnection;
+
+        JSONObject json = new JSONObject();
+        try {
+            json.put("Id", DataSyncService.getUserID());
+            json.put("type", tosend.MeasurementType);
+            json.put("date", tosend.Timestamp);
+            json.put("tag", tosend.ExtraData);
+            json.put("val0", tosend.Value1);
+            json.put("val1", tosend.Value2);
+            json.put("val2", tosend.Value3);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        String data = json.toString();
+
+        String result = null;
+        try {
+
+            URL object=new URL(uri);
+
+            HttpURLConnection con = (HttpURLConnection) object.openConnection();
+            con.setDoOutput(true);
+            con.setDoInput(true);
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Accept", "application/json");
+            con.setRequestMethod("POST");
+
+            OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+            wr.write(json.toString());
+            wr.flush();
+
+            StringBuilder sb = new StringBuilder();
+            int HttpResult = con.getResponseCode();
+            if (HttpResult == HttpURLConnection.HTTP_OK) {
+                BufferedReader br = new BufferedReader(
+                        new InputStreamReader(con.getInputStream(), "utf-8"));
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                br.close();
+                System.out.println("" + sb.toString());
+            } else {
+                System.out.println(con.getResponseMessage());
+            }
+
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+        return result;
+    }
+
+
+    // A method that collects all files of the last week (see GetAllFilestoUpload),
+    // converts them to an ISSRecordData list, seperates them by measurement type
+    // and sends them to the server using the UploadingManager class.
+    // I query only for the values of the last 30 days, but that's easily adjustable.
+    public void ShareDataWithServer() {
+
+        // example of how to send json below
+        /*ISSRecordData d = new ISSRecordData(1,1, "h", "e", "llo", 1.0f, 1.0f, 1.0f, 1);
+        send_record_as_json(d);*/
+
+        ArrayList<String> dateList = createDateList();
+
+        for (String date : dateList) {
+
+            // get all data
+
+            ArrayList<ISSRecordData> alldata = new ArrayList<>();
+            Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
+
+            String mSelectionClause = ISSContentProvider.DATE + " = ? "+"AND " + ISSContentProvider.SENT + " = 'false'";
+            String[] mSelectionArgs = {date};
+            String[] mProjection =
+                    {
+                            ISSContentProvider._ID,
+                            ISSContentProvider.USERID,
+                            ISSContentProvider.MEASUREMENT,
+                            ISSContentProvider.DATE,
+                            ISSContentProvider.TIMESTAMP,
+                            ISSContentProvider.EXTRA,
+                            ISSContentProvider.VALUE1,
+                            ISSContentProvider.VALUE2,
+                            ISSContentProvider.VALUE3,
+                            ISSContentProvider.MEASUREMENT_ID
+                    };
+            String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
+
+            // Does a query against the table and returns a Cursor object
+            Cursor mCursor = MainActivity.getContext().getContentResolver().query(
+                    CONTENT_URI,                       // The content URI of the database table
+                    mProjection,                       // The columns to return for each row
+                    mSelectionClause,                  // Either null, or the word the user entered
+                    mSelectionArgs,                    // Either empty, or the string the user entered
+                    mSortOrder);                       // The sort order for the returned rows
+
+            // Some providers return null if an error occurs, others throw an exception
+            if (null == mCursor) {
+                // If the Cursor is empty, the provider found no matches
+            } else if (mCursor.getCount() < 1) {
+                // If the Cursor is empty, the provider found no matches
+            } else {
+                while (mCursor.moveToNext()) {
+                    ISSRecordData record = ISSDictionary.CursorToISSRecordData(mCursor);
+                    Log.d("record", record.toString());
+                    alldata.add(record);
+                }
+            }
+
+            // sort data in chronological order?
+
+            // separate channels, convert to string, upload to server
+
+            if (alldata.size() == 0)
+                continue;
+
+            // determine all measurement types
+            HashMap<Integer, ArrayList<ISSRecordData>> map = new HashMap<>();
+
+            for (ISSRecordData record : alldata) {
+                if (!map.containsKey(record.MeasurementType))
+                    map.put(record.MeasurementType, new ArrayList<ISSRecordData>());
+
+                map.get(record.MeasurementType).add(record);
+
+            }
+
+            // upload data separately for each measurement type
+
+            for (Integer measurementType : map.keySet()) {
+                String uploadingName = date + "-" + measurementType + ".csv";
+
+                ArrayList<ISSRecordData> measurementData = map.get(measurementType);
+
+                for(ISSRecordData record: measurementData){
+                    send_record_as_json(record);
+                }
+            }
+
+        }
+
+        updateAllRecords();
+
+        // finally, upload sleep data
+
+        ArrayList<ISSRecordData> sleepData2 = CSVManager.ReadSleepDataISSREC();
+
+        if(sleepData2 != null){
+            for(ISSRecordData record: sleepData2){
+                send_record_as_json(record);
+            }
+        }
+
+        //UploadingManager.UploadUserFileToServer( Serializer.FileToBytes(DataStorageManager.sleepData), "sleep-export.csv", uploadUrl, UserID);
         OutputEvent("Sent data files to server");
 
     }

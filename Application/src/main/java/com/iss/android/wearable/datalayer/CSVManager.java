@@ -138,4 +138,54 @@ public class CSVManager {
 
     }
 
+    // A method that reads sleepData from the file defined in DataStorageManager
+    // and transcribes it into a HashMap
+    public static ArrayList<ISSRecordData> ReadSleepDataISSREC() {
+
+        ArrayList<ISSRecordData> result = new ArrayList<>();
+
+        if (!DataStorageManager.sleepData.exists()) {
+            return result;
+        }
+        // read file line by line
+        try (BufferedReader br = new BufferedReader(new FileReader(DataStorageManager.sleepData))) {
+
+            String line;
+
+            // every second line contains data, other lines contain column names
+            boolean skip = false;
+            while ((line = br.readLine()) != null) {
+
+                skip = !skip;
+                if (skip)
+                    continue;
+
+                // split the line
+
+                String[] split = line.split("\",\"");
+                // Sometimes Google Sleep fucks up and inserts an extra line. Need this to rule that out
+                if (split.length<3 || split[3].length()<12){
+                    continue;
+                }
+                String date = split[3].substring(0, 12);
+                String[] date_split = date.split(". ");
+                date = date_split[2] + "-" + date_split[1] + "-" + date_split[0];
+                Double value = Double.parseDouble(split[12]);
+                Double length = Double.parseDouble(split[5]);
+
+                ISSRecordData d = new ISSRecordData(1,777, date, "01:01:01", "", value.floatValue() , 0.0f, length.floatValue(), 1);
+                result.add(d);
+
+            }
+
+        } catch (IOException e) {
+
+            System.out.print(e);
+
+        }
+
+        return result;
+
+    }
+
 }
