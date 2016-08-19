@@ -135,38 +135,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             OutputEvent(android_id);
 
             Log.d("ISS", "Android ID: " + android_id);
-
-            switch (android_id) {
-                case "144682d5efc12dcb":
-                    UserID = "1";
-                    break;
-                case "4b251c5e4f524b05":
-                    UserID = "2";
-                    break;
-                case "3622852bee38de73":
-                    UserID = "3";
-                    break;
-                case "7b1d96be4726dd22":
-                    UserID = "4";
-                    break;
-                case "847222e512faa744":
-                    UserID = "5";
-                    break;
-                case "867ee27023b1f8b7":
-                    UserID = "256";
-                    break;
-                case "65e9172b7bb0638d":
-                    UserID = "1024";
-                    break;
-                case "3032a1d80ae293bd ":
-                    UserID = "257";
-                    break;
-                default:
-                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-                    UserID = pref.getString("user_email", "unknown");
-                    OutputEvent("Welcome user " + UserID + "!");
-                    break;
-            }
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+            UserID = pref.getString("user_email", "unknown");
+            OutputEvent("Welcome user " + UserID + "!");
 
             DataStorageManager.InitializeTriathlonFolder();
 
@@ -580,14 +551,15 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // uploading json to server
     public static String send_record_as_json(ISSRecordData tosend) {
-        String uri = "http://10.9.24.79:2345/test";
+        String uri = "www.web01.iss.uni-saarland.de/post_json";
         HttpURLConnection urlConnection;
 
         JSONObject json = new JSONObject();
         try {
             json.put("Id", DataSyncService.getUserID());
             json.put("type", tosend.MeasurementType);
-            json.put("date", tosend.Timestamp);
+            json.put("date", tosend.Date);
+            json.put("time", tosend.Timestamp);
             json.put("tag", tosend.ExtraData);
             json.put("val0", tosend.Value1);
             json.put("val1", tosend.Value2);
