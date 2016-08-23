@@ -512,6 +512,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             if (action.equals(currentState)){
                 // stop recording cooling / resting prematurely
                 newState = "Idle";
+                DeleteLatestMeasurement();
             }
             else
             {
@@ -523,6 +524,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
 
         BringIntoState(newState);
+    }
+
+    private void DeleteLatestMeasurement() {
+
     }
 
     // starts sleep tracking

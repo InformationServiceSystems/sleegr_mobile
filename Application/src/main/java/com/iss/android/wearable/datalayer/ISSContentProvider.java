@@ -92,6 +92,7 @@ public class ISSContentProvider extends ContentProvider {
             " CREATE TABLE " + MEASUREMENTS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     TYPE + " TEXT NOT NULL, " +
+                    SENT + " TEXT NOT NULL, " +
                     TIMESTAMP + " TEXT NOT NULL);";
     static final String CREATE_RPE_DB_TABLE =
             " CREATE TABLE " + RPE_TABLE_NAME + " (" +

@@ -554,19 +554,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         String uri = "www.web01.iss.uni-saarland.de/post_json";
         HttpURLConnection urlConnection;
 
-        JSONObject json = new JSONObject();
-        try {
-            json.put("Id", DataSyncService.getUserID());
-            json.put("type", tosend.MeasurementType);
-            json.put("date", tosend.Date);
-            json.put("time", tosend.Timestamp);
-            json.put("tag", tosend.ExtraData);
-            json.put("val0", tosend.Value1);
-            json.put("val1", tosend.Value2);
-            json.put("val2", tosend.Value3);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        JSONObject json = JSONFactory.getJSON(tosend);
 
         String data = json.toString();
 
@@ -618,7 +606,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         /*ISSRecordData d = new ISSRecordData(1,1, "h", "e", "llo", 1.0f, 1.0f, 1.0f, 1);
         send_record_as_json(d);*/
 
-        ArrayList<String> dateList = createDateList();
+        /*ArrayList<String> dateList = createDateList();
 
         for (String date : dateList) {
 
@@ -708,10 +696,85 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 send_record_as_json(record);
             }
         }
+        */
+
+        Uri CONTENT_URI = ISSContentProvider.MEASUREMENT_CONTENT_URI;
+
+        String mSelectionClause = ISSContentProvider.SENT + " = 'false'";
+        String[] mSelectionArgs = {};
+        String[] mProjection =
+                {
+                        ISSContentProvider._ID,
+                        ISSContentProvider.TYPE,
+                        ISSContentProvider.TIMESTAMP
+                };
+        String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
+
+        // Does a query against the table and returns a Cursor object
+        Cursor mCursor = MainActivity.getContext().getContentResolver().query(
+                CONTENT_URI,                       // The content URI of the database table
+                mProjection,                       // The columns to return for each row
+                mSelectionClause,                  // Either null, or the word the user entered
+                mSelectionArgs,                    // Either empty, or the string the user entered
+                mSortOrder);                       // The sort order for the returned rows
+
+        // Some providers return null if an error occurs, others throw an exception
+        if (null == mCursor) {
+            // If the Cursor is empty, the provider found no matches
+        } else if (mCursor.getCount() < 1) {
+            // If the Cursor is empty, the provider found no matches
+        } else {
+            while (mCursor.moveToNext()) {
+                queryForRecordsOfMeasurement(mCursor);
+                Log.d("ID", String.valueOf(mCursor.getInt(0)));
+                Log.d("Timestamp", mCursor.getString(2));
+            }
+        }
 
         //UploadingManager.UploadUserFileToServer( Serializer.FileToBytes(DataStorageManager.sleepData), "sleep-export.csv", uploadUrl, UserID);
         OutputEvent("Sent data files to server");
 
+    }
+
+    private void queryForRecordsOfMeasurement(Cursor mCursor) {
+        ArrayList<ISSRecordData> records = new ArrayList<>();
+        Uri CONTENT_URI = ISSContentProvider.MEASUREMENT_CONTENT_URI;
+
+        String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = " + mCursor.getInt(0);
+        String[] mSelectionArgs = {};
+        String[] mProjection =
+                {
+                        ISSContentProvider._ID,
+                        ISSContentProvider.USERID,
+                        ISSContentProvider.MEASUREMENT,
+                        ISSContentProvider.DATE,
+                        ISSContentProvider.TIMESTAMP,
+                        ISSContentProvider.EXTRA,
+                        ISSContentProvider.VALUE1,
+                        ISSContentProvider.VALUE2,
+                        ISSContentProvider.VALUE3,
+                        ISSContentProvider.MEASUREMENT_ID
+                };
+        String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
+
+        // Does a query against the table and returns a Cursor object
+        Cursor innerCursor = MainActivity.getContext().getContentResolver().query(
+                CONTENT_URI,                       // The content URI of the database table
+                mProjection,                       // The columns to return for each row
+                mSelectionClause,                  // Either null, or the word the user entered
+                mSelectionArgs,                    // Either empty, or the string the user entered
+                mSortOrder);                       // The sort order for the returned rows
+
+        // Some providers return null if an error occurs, others throw an exception
+        if (null == innerCursor) {
+            // If the Cursor is empty, the provider found no matches
+        } else if (innerCursor.getCount() < 1) {
+            // If the Cursor is empty, the provider found no matches
+        } else {
+            while (innerCursor.moveToNext()) {
+                records.add(ISSDictionary.CursorToISSRecordData(innerCursor));
+            }
+        }
     }
 
     private void updateAllRecords() {
