@@ -341,6 +341,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                         row.timestamp);
                 values.put(ISSContentProvider.TYPE,
                         row.type);
+                values.put(ISSContentProvider.SENT,
+                        "false");
                 resolver.insert(ISSContentProvider.MEASUREMENT_CONTENT_URI, values);
             }
             ClearWatchData();
