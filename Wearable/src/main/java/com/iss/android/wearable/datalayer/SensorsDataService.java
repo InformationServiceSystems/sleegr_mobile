@@ -325,7 +325,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     int timerTimeout = 60 * 60 * 24;
     int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 3 min
 
-    // Checks if 5 minutes have passed since pressing the cooldown button.
+    // Checks if 3 minutes have passed since pressing the cooldown button.
     public void TimerEvent() {
         timerTime = timerTime + 1;
 
