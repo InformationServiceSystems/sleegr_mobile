@@ -359,6 +359,8 @@ public class MainActivity extends FragmentActivity implements
             }
         });
         if (cont.equals("Data saved. Clearing data on the watch")){
+            finish();
+            startActivity(getIntent());
         }
 
     }

@@ -186,8 +186,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         if (messageEvent.getPath().equals("Stop sleep tracking")) {
             StopSleepTracking();
-        } else {
-            SendHRtoServer(messageEvent.getPath());
         }
 
         //OutputEvent(messageEvent.getPath());
@@ -205,41 +203,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 e.printStackTrace();
             }
         }*/
-
-    }
-
-    // A method that sends a string containing the heart rate to the server and checks if the server got the message.
-    public void SendHRtoServer(String HR) {
-
-        try {
-            URL obj = new URL("http://46.101.214.58:5100/realtime?hrm=" + HR);
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("User-Agent", "Mozilla/5.0");
-            int responseCode = con.getResponseCode();
-            System.out.println("GET Response Code :: " + responseCode);
-            if (responseCode == HttpURLConnection.HTTP_OK) { // success
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        con.getInputStream()));
-                String inputLine;
-                StringBuffer response = new StringBuffer();
-
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-
-                in.close();
-
-                // print result
-                OutputEvent(response.toString());
-            } else {
-                OutputEvent("GET request not worked");
-            }
-        } catch (Exception ex) {
-
-            OutputEvent(ex.toString());
-
-        }
 
     }
 
@@ -438,7 +401,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // uploading json to server
     public static String send_record_as_json(JSONObject jsonForServer) {
-        String uri = "www.web01.iss.uni-saarland.de/post_json";
+        String uri = "http://web01.iss.uni-saarland.de/post_json";
         HttpURLConnection urlConnection;
 
         String data = jsonForServer.toString();
@@ -612,6 +575,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 JSONObject measurement = JSONFactory.constructMeasurement(mCursor, records);
                 arrayOfMeasurements.put(measurement);
             }
+            mCursor.close();
         }
 
         try {
