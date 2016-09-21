@@ -57,6 +57,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.formats.NativeAd;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.apache.commons.lang3.StringUtils;
@@ -228,11 +229,13 @@ public class MainActivity extends Activity {
         HashMap<String, Boolean> recordedActivities = SensorsDataService.getRecordedActivities();
 
         ImageButton morningHR = (ImageButton) findViewById(R.id.morningHR);
+        ImageButton trainingHR = (ImageButton) findViewById(R.id.trainingHR);
         ImageButton startCooldown = (ImageButton) findViewById(R.id.startCooldown);
         ImageButton continueCooldown = (ImageButton) findViewById(R.id.continueCooldown);
         ImageButton eveningHR = (ImageButton) findViewById(R.id.eveningHR);
 
         morningHR.setBackgroundColor(recordedActivities.containsKey("MorningHR") ? Color.GREEN : Color.GRAY);
+        trainingHR.setBackgroundColor(recordedActivities.containsKey("TrainingHR") ? Color.GREEN : Color.GRAY);
         startCooldown.setBackgroundColor(recordedActivities.containsKey("Cooldown") ? Color.GREEN : Color.GRAY);
         continueCooldown.setBackgroundColor(recordedActivities.containsKey("Recovery") ? Color.GREEN : Color.GRAY);
         eveningHR.setBackgroundColor(recordedActivities.containsKey("EveningHR") ? Color.GREEN : Color.GRAY);
@@ -241,6 +244,9 @@ public class MainActivity extends Activity {
 
         if (SensorsDataService.itself.currentState.equals("Cooldown")){
             startCooldown.setBackgroundColor(inProgressColor);
+        }
+        if (SensorsDataService.itself.currentState.equals("TrainingHR")){
+            trainingHR.setBackgroundColor(inProgressColor);
         }
         if (SensorsDataService.itself.currentState.equals("Recovery")){
             continueCooldown.setBackgroundColor(inProgressColor);
@@ -425,6 +431,15 @@ public class MainActivity extends Activity {
 
     public void onClicked(View view) {
         switch (view.getId()) {
+            case R.id.trainingHR:
+
+                if (SensorsDataService.itself != null) {
+
+                    if (!SensorsDataService.isNowASleepingHour())
+                        SensorsDataService.itself.SwitchSportsAction("TrainingHR");
+                }
+
+                break;
             case R.id.morningHR:
 
                 if (SensorsDataService.itself != null) {

@@ -324,6 +324,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     String currentState = "Idle";
     int timerTimeout = 60 * 60 * 24;
     int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 3 min
+    int TRAINING_MEASUREMENT_TIME = 60 * 60 * 2;
 
     // Checks if 3 minutes have passed since pressing the cooldown button.
     public void TimerEvent() {
@@ -573,7 +574,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             AskUserForFeedback("morning");
         }else if (state.equals("EveningHR")){
             timerTimeout = RESTING_MEASUREMENT_TIME;
-            AskUserForFeedback("evening");
+            AskUserForFeedback("evening");}
+        else if (state.equals("TrainingHR")) {
+            timerTimeout = TRAINING_MEASUREMENT_TIME;
         }else if (state.equals("Cooldown")) {
             timerTimeout = RESTING_MEASUREMENT_TIME;
         }else if (state.contains("Recovery")) {
