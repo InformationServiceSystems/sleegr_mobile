@@ -401,8 +401,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // uploading json to server
     public static String send_record_as_json(JSONObject jsonForServer) {
-        String uri = "http://web01.iss.uni-saarland.de/post_json";
+        String uri = "http://81.169.137.80:5000/post_json";//"http://web01.iss.uni-saarland.de/post_json";
         HttpURLConnection urlConnection;
+        Boolean server_transac_successful = false;
 
         String data = jsonForServer.toString();
 
@@ -433,12 +434,35 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 }
                 br.close();
                 System.out.println("" + sb.toString());
+                Log.d("message", sb.toString());
+                if (sb.toString().contains("{\"status\": \"success\"}")){
+                    server_transac_successful=true;
+                } else {
+                    server_transac_successful=false;
+                }
             } else {
                 System.out.println(con.getResponseMessage());
+                server_transac_successful=false;
             }
 
         } catch (Exception e) {
             Log.d("InputStream", e.getLocalizedMessage());
+        }
+
+        if (server_transac_successful) {
+            ContentValues mUpdateValues = new ContentValues();
+
+            int mRowsUpdated = 0;
+
+            mUpdateValues.put(ISSContentProvider.SENT, "TRUE");
+
+            mRowsUpdated = MainActivity.getContext().getContentResolver().update(
+                    ISSContentProvider.MEASUREMENT_CONTENT_URI,   // the user dictionary content URI
+                    mUpdateValues,                       // the columns to update
+                    null,                    // the column to select on
+                    null                     // the value to compare to
+            );
+            Log.d("Updated", mRowsUpdated + " Values");
         }
         return result;
     }
@@ -659,7 +683,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         mUpdateValues.put(ISSContentProvider.SENT, "'true'");
 
         mRowsUpdated = getContentResolver().update(
-                ISSContentProvider.RECORDS_CONTENT_URI,   // the user dictionary content URI
+                ISSContentProvider.MEASUREMENT_CONTENT_URI,   // the user dictionary content URI
                 mUpdateValues,                       // the columns to update
                 mSelectionClause,                    // the column to select on
                 mSelectionArgs                      // the value to compare to
