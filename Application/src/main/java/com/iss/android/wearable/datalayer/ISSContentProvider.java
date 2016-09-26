@@ -331,6 +331,14 @@ public class ISSContentProvider extends ContentProvider {
                 count = db.update(RECORDS_TABLE_NAME, values, _ID + " = " + uri.getPathSegments().get(1) +
                         (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
                 break;
+            case MEASUREMENTSTYPE:
+                count = db.update(MEASUREMENTS_TABLE_NAME, values, selection, selectionArgs);
+                break;
+
+            case MEASUREMENT_IDTYPE:
+                count = db.update(MEASUREMENTS_TABLE_NAME, values, _ID + " = " + uri.getPathSegments().get(1) +
+                        (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
+                break;
 
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
