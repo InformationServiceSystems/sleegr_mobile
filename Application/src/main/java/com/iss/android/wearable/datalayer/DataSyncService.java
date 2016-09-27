@@ -400,7 +400,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     }
 
     // uploading json to server
-    public static String send_record_as_json(JSONObject jsonForServer) {
+    public String send_record_as_json(JSONObject jsonForServer, ArrayList<Integer> arrayOfMeasurementIDs) {
         String uri = "http://81.169.137.80:5000/post_json";//"http://web01.iss.uni-saarland.de/post_json";
         HttpURLConnection urlConnection;
         Boolean server_transac_successful = false;
@@ -450,19 +450,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }
 
         if (server_transac_successful) {
-            ContentValues mUpdateValues = new ContentValues();
-
-            int mRowsUpdated = 0;
-
-            mUpdateValues.put(ISSContentProvider.SENT, "TRUE");
-
-            mRowsUpdated = MainActivity.getContext().getContentResolver().update(
-                    ISSContentProvider.MEASUREMENT_CONTENT_URI,   // the user dictionary content URI
-                    mUpdateValues,                       // the columns to update
-                    null,                    // the column to select on
-                    null                     // the value to compare to
-            );
-            Log.d("Updated", mRowsUpdated + " Values");
+            updateRecords(arrayOfMeasurementIDs);
+        } else {
+            //new DataSyncService().OutputEvent("Server not available. Please try again later.");
         }
         return result;
     }
@@ -474,6 +464,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         JSONObject jsonForServer = new JSONObject();
         JSONArray arrayOfMeasurements = new JSONArray();
+        ArrayList<Integer> arrayOfMeasurementIDs = new ArrayList<>();
 
         Uri CONTENT_URI = ISSContentProvider.MEASUREMENT_CONTENT_URI;
 
@@ -485,7 +476,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                         ISSContentProvider.TYPE,
                         ISSContentProvider.TIMESTAMP
                 };
-        String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
+        String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC " + " LIMIT 5";
 
         // Does a query against the table and returns a Cursor object
         Cursor mCursor = MainActivity.getContext().getContentResolver().query(
@@ -503,6 +494,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         } else {
             while (mCursor.moveToNext()) {
                 Log.d("ID", String.valueOf(mCursor.getInt(0)));
+                arrayOfMeasurementIDs.add(mCursor.getInt(0));
                 Log.d("Timestamp", mCursor.getString(2));
                 ArrayList<ISSRecordData> records = queryForRecordsOfMeasurement(mCursor);
                 JSONObject measurement = JSONFactory.constructMeasurement(mCursor, records);
@@ -517,14 +509,12 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             e.printStackTrace();
         }
 
-        send_record_as_json(jsonForServer);
+        send_record_as_json(jsonForServer, arrayOfMeasurementIDs);
         try {
             Log.d("Final JSON", jsonForServer.toString(2));
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        //updateAllRecords();
 
         // TODO: Upload Sleep Data
 
@@ -535,10 +525,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 send_record_as_json(record);
             }
         }*/
-
-        //UploadingManager.UploadUserFileToServer( Serializer.FileToBytes(DataStorageManager.sleepData), "sleep-export.csv", uploadUrl, UserID);
-        OutputEvent("Sent data files to server");
-
     }
 
     private ArrayList<ISSRecordData> queryForRecordsOfMeasurement(Cursor mCursor) {
@@ -584,19 +570,28 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         return records;
     }
 
-    private void updateAllRecords() {
+    private void updateRecords(ArrayList<Integer> arrayOfMeasurementIDs) {
         ContentValues mUpdateValues = new ContentValues();
-        String mSelectionClause = ISSContentProvider.SENT +  "= 'false'";
-        String[] mSelectionArgs = {};
-        int mRowsUpdated = 0;
-        mUpdateValues.put(ISSContentProvider.SENT, "'true'");
+        //new DataSyncService().OutputEvent("Sent data files to server");
 
-        mRowsUpdated = getContentResolver().update(
+        int mRowsUpdated;
+        StringBuilder stringBuilder = new StringBuilder();
+        String or = "";
+        for (Integer i: arrayOfMeasurementIDs) {
+            stringBuilder.append(or + ISSContentProvider._ID + " = " + i);
+            or = " OR ";
+        }
+        String mSelectionClause = stringBuilder.toString();
+
+        mUpdateValues.put(ISSContentProvider.SENT, "TRUE");
+
+        mRowsUpdated = MainActivity.getContext().getContentResolver().update(
                 ISSContentProvider.MEASUREMENT_CONTENT_URI,   // the user dictionary content URI
                 mUpdateValues,                       // the columns to update
                 mSelectionClause,                    // the column to select on
-                mSelectionArgs                      // the value to compare to
+                null                     // the value to compare to
         );
+        Log.d("Updated", mRowsUpdated + " Values");
     }
 
     private ArrayList<String> createDateList() {
