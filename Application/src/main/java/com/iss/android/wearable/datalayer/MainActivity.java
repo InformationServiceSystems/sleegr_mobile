@@ -380,7 +380,7 @@ public class MainActivity extends FragmentActivity implements
     // A method starting the RegisterUserActivity if no view is supplied.
     public void onRegisterUser() {
 
-        final Intent registerUser = new Intent(this, RegisterUserActivity.class);
+        final Intent registerUser = new Intent(this, Auth0Activity.class);
         startActivity(registerUser);
 
     }

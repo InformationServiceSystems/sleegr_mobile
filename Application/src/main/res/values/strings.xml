@@ -73,6 +73,8 @@
     <string name="sleeplength">Sleep Length</string>
     <string name="title_activity_check_database">CheckDatabaseActivity</string>
     <string name="title_activity_measurements">MeasurementsActivity</string>
+    <string name="auth0_client_id">12345</string>
+    <string name="auth0_domain">67890</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 
@@ -162,5 +164,6 @@
         "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
         "when a user tries to pick up one of cards.\n\n"
     </string>
+    <string name="auth0_preferences">AUTH0_SHARED_PREFERENCES_KEY</string>
 
 </resources>

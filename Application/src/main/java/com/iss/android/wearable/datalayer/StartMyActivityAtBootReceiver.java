@@ -13,7 +13,7 @@ public class StartMyActivityAtBootReceiver extends BroadcastReceiver {
 
         if ("android.intent.action.BOOT_COMPLETED".equals(intent.getAction())) {
 
-            Intent myStarterIntent = new Intent(context, ChooseRegisterServiceActivity.class);
+            Intent myStarterIntent = new Intent(context, Auth0Activity.class);
             myStarterIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(myStarterIntent);
 

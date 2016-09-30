@@ -30,6 +30,7 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -103,26 +104,13 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-
-        <activity android:name="com.auth0.android.lock.provider.WebViewActivity"/>
+        <activity android:name="com.auth0.android.lock.provider.WebViewActivity" />
 
         <service
             android:name=".DataSyncService"
             android:enabled="true"
             android:exported="true" />
 
-        <activity
-            android:name=".RegisterUserActivity"
-            android:label="@string/title_activity_register_user" />
-        <activity
-            android:name=".ChooseRegisterServiceActivity"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".SetScheduleActivity"
             android:label="@string/title_activity_set_schedule"
@@ -163,6 +151,13 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.iss.android.wearable.datalayer.MainActivity" />
+        </activity>
+        <activity android:name=".Auth0Activity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 
