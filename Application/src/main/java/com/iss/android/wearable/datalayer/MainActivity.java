@@ -28,6 +28,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -35,6 +37,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,6 +50,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
@@ -280,9 +284,6 @@ public class MainActivity extends FragmentActivity implements
             case R.id.setSchedule:
                 onsetSchedule();
                 return true;
-            case R.id.testDatabase:
-                testDatabase();
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -292,12 +293,6 @@ public class MainActivity extends FragmentActivity implements
 
         final Intent ShowMeasurements = new Intent(this, MeasurementsActivity.class);
         startActivity(ShowMeasurements);
-    }
-
-    private void testDatabase() {
-
-        final Intent CheckDatabase = new Intent(this, CheckDatabaseActivity.class);
-        startActivity(CheckDatabase);
     }
 
     // A method which starts the SetScheduleActivity
@@ -809,7 +804,7 @@ public class MainActivity extends FragmentActivity implements
                 graph.getViewport().setYAxisBoundsManual(true);
                 graph.getViewport().setMinY(30);
                 graph.getViewport().setMaxY(200);
-                series.setColor(Color.BLUE);
+                series.setColor(Color.parseColor("#3b5998"));
                 graph.addSeries(series);
             }
         }

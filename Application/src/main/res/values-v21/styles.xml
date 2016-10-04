@@ -4,5 +4,19 @@
     <style name="Material.Light.custom" parent="android:Theme.Material.Light" >
         <item name="android:colorAccent">@color/accent_material_light</item>
         <item name="android:colorPrimary">@color/primary_material_light</item>
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
     </style>
+
+    <style name="MyActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@color/actionbar_background_color</item>
+        <item name="android:titleTextStyle">@style/myTheme.ActionBar.Text</item>
+        <item name="android:logo">@android:color/transparent</item>
+    </style>
+
+    <style name="myTheme.ActionBar.Text" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/actionbar_text_color</item>
+    </style>
+
+    <color name="actionbar_text_color">#FFFFFF</color>
+    <color name="actionbar_background_color">#3b5998</color>
 </resources>

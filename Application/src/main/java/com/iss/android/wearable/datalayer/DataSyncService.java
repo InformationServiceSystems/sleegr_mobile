@@ -1,8 +1,10 @@
 package com.iss.android.wearable.datalayer;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -400,7 +402,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // uploading json to server
     public String send_record_as_json(JSONObject jsonForServer, ArrayList<Integer> arrayOfMeasurementIDs) {
-        String uri = "http://10.9.28.27:5000/post_json";//"http://web01.iss.uni-saarland.de/post_json";
+        String uri = "http://web01.iss.uni-saarland.de/post_json";
         HttpURLConnection urlConnection;
         Boolean server_transac_successful = false;
 
@@ -441,10 +443,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 Log.d("message", sb.toString());
                 if (sb.toString().contains("{\"status\": \"success\"}")){
                     server_transac_successful=true;
-                    Toast.makeText(MainActivity.getContext(), "Sync successful", Toast.LENGTH_SHORT).show();
                 } else {
                     server_transac_successful=false;
-                    Toast.makeText(MainActivity.getContext(), "Sync failed. Please wait and try again later.", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 System.out.println(con.getResponseMessage());
@@ -456,11 +456,26 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }
 
         if (server_transac_successful) {
+            Log.d("hit", "successful");
             updateRecords(arrayOfMeasurementIDs);
+            showToast(getApplicationContext(), "Sync successful", Toast.LENGTH_SHORT);
+            DataSyncService.OutputEventSq("");
         } else {
-            //new DataSyncService().OutputEvent("Server not available. Please try again later.");
+            Log.d("hit", "failed");
+            showToast(getApplicationContext(), "Sync failed. Please wait and try again later.", Toast.LENGTH_SHORT);
+            DataSyncService.OutputEventSq("");
         }
         return result;
+    }
+
+    private void showToast(final Context context, final String message, final int length) {
+        Activity mActivity = (Activity) MainActivity.itself;
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, message, length).show();
+            }
+        });
     }
 
 
@@ -579,7 +594,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             // If the Cursor is empty, the provider found no matches
         } else {
             while (innerCursor.moveToNext()) {
-                Log.d("Found", ISSDictionary.CursorToISSRecordData(innerCursor).toString());
                 records.add(ISSDictionary.CursorToISSRecordData(innerCursor));
             }
         }

@@ -3,11 +3,6 @@
 
 
     <item
-        android:id="@+id/graphButton"
-        android:title="Graphs" />
-
-
-    <item
         android:id="@+id/button4"
         android:title="Today's graphs" />
 
@@ -16,16 +11,12 @@
         android:title="Averages" />
 
     <item
-        android:id="@+id/logout"
-        android:title="Logout" />
-
-    <item
         android:id="@+id/setSchedule"
         android:title="Set Schedule" />
 
     <item
-        android:id="@+id/testDatabase"
-        android:title="Test Database" />
+        android:id="@+id/logout"
+        android:title="Logout" />
 
 
 </menu>

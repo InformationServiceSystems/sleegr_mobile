@@ -65,16 +65,6 @@
                 <action android:name="com.iss.android.wearable.datalayer.ALARM" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".StartMyActivityAtBootReceiver"
-            android:enabled="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
 
         <activity
             android:name="com.facebook.FacebookActivity"
@@ -131,14 +121,6 @@
         <activity
             android:name=".AverageActivity"
             android:label="@string/title_activity_average"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.iss.android.wearable.datalayer.MainActivity" />
-        </activity>
-        <activity
-            android:name=".CheckDatabaseActivity"
-            android:label="@string/title_activity_check_database"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

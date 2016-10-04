@@ -40,16 +40,6 @@
             android:onClick="onServerSync"
             android:id="@+id/buttonServer"
             android:background="@drawable/serverbutton"
-            android:layout_toStartOf="@+id/buttonAnalysis"
-            android:layout_margin="5dp"
-            android:layout_marginStart="0dp" />
-
-        <ImageButton
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:onClick="onAnalysisClick"
-            android:id="@+id/buttonAnalysis"
-            android:background="@drawable/statbutton"
             android:layout_alignParentEnd="true"
             android:layout_margin="5dp"
             android:layout_marginStart="0dp" />
