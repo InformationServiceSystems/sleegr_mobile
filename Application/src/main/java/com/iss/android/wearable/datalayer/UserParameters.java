@@ -29,7 +29,8 @@ public class UserParameters {
 
             try {
 
-                DataSyncService.OutputEventSq("Processing day " + i + " / " + timespan + " ...");
+                int percent = i * 100 / timespan;
+                DataSyncService.OutputEventSq(percent + "%");
 
                 Date date = getDateFromToday(i);
                 DailyData dailyData = new DailyData(date);
@@ -56,9 +57,9 @@ public class UserParameters {
                 DataSyncService.OutputEventSq(ex.toString());
             }
 
-        }
+            DataSyncService.OutputEventSq("100%");
 
-        DataSyncService.OutputEventSq("Analysis finished");
+        }
 
     }
 

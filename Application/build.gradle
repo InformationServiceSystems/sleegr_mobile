@@ -47,6 +47,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+    dexOptions {
+        javaMaxHeapSize "8g"
+    }
     sourceSets {
         main {
             dirs.each { dir ->

@@ -13,7 +13,10 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.auth0.android.result.Credentials;
+import com.google.android.gms.auth.api.credentials.Credential;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Asset;
@@ -26,6 +29,7 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -134,11 +138,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
             OutputEvent(android_id);
-
-            Log.d("ISS", "Android ID: " + android_id);
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-            UserID = pref.getString("user_email", "unknown");
-            OutputEvent("Welcome user " + UserID + "!");
 
             DataStorageManager.InitializeTriathlonFolder();
 
@@ -401,7 +400,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // uploading json to server
     public String send_record_as_json(JSONObject jsonForServer, ArrayList<Integer> arrayOfMeasurementIDs) {
-        String uri = "http://81.169.137.80:5000/post_json";//"http://web01.iss.uni-saarland.de/post_json";
+        String uri = "http://10.9.28.27:5000/post_json";//"http://web01.iss.uni-saarland.de/post_json";
         HttpURLConnection urlConnection;
         Boolean server_transac_successful = false;
 
@@ -412,11 +411,16 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             URL object=new URL(uri);
 
+            String header = "bearer ";
+            String Token = CredentialsManager.getCredentials(MainActivity.getContext()).getIdToken();
+            header += Token;
+
             HttpURLConnection con = (HttpURLConnection) object.openConnection();
             con.setDoOutput(true);
             con.setDoInput(true);
             con.setRequestProperty("Content-Type", "application/json");
             con.setRequestProperty("Accept", "application/json");
+            con.setRequestProperty("Authorization", header);
             con.setRequestMethod("POST");
 
             OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
@@ -437,8 +441,10 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 Log.d("message", sb.toString());
                 if (sb.toString().contains("{\"status\": \"success\"}")){
                     server_transac_successful=true;
+                    Toast.makeText(MainActivity.getContext(), "Sync successful", Toast.LENGTH_SHORT).show();
                 } else {
                     server_transac_successful=false;
+                    Toast.makeText(MainActivity.getContext(), "Sync failed. Please wait and try again later.", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 System.out.println(con.getResponseMessage());
@@ -465,6 +471,12 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         JSONObject jsonForServer = new JSONObject();
         JSONArray arrayOfMeasurements = new JSONArray();
         ArrayList<Integer> arrayOfMeasurementIDs = new ArrayList<>();
+
+        try {
+            jsonForServer.put("Token", CredentialsManager.getCredentials(MainActivity.getContext()).getIdToken());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         Uri CONTENT_URI = ISSContentProvider.MEASUREMENT_CONTENT_URI;
 
@@ -503,17 +515,21 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             mCursor.close();
         }
 
-        try {
-            jsonForServer.put("arrayOfMeasurements", arrayOfMeasurements);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        if (arrayOfMeasurementIDs.size()>0) {
+            // This if clause guarantees, that if there are no new records, transmitting to the server will stop.
 
-        send_record_as_json(jsonForServer, arrayOfMeasurementIDs);
-        try {
-            Log.d("Final JSON", jsonForServer.toString(2));
-        } catch (JSONException e) {
-            e.printStackTrace();
+            try {
+                jsonForServer.put("arrayOfMeasurements", arrayOfMeasurements);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            send_record_as_json(jsonForServer, arrayOfMeasurementIDs);
+            try {
+                Log.d("Final JSON", jsonForServer.toString(2));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         // TODO: Upload Sleep Data
@@ -592,6 +608,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 null                     // the value to compare to
         );
         Log.d("Updated", mRowsUpdated + " Values");
+
+        // After we've updated the newest measurements that we have transferred, start anew to check if there are some left
+        ShareDataWithServer();
     }
 
     private ArrayList<String> createDateList() {

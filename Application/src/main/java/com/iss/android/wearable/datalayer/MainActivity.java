@@ -52,6 +52,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
@@ -267,20 +268,14 @@ public class MainActivity extends FragmentActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.button2:
-                onServerSync();
-                return true;
-            case R.id.button3:
-                onWatchSync();
-                return true;
             case R.id.button4:
                 onShowMeasurements();
                 return true;
             case R.id.averageValues:
                 onShowAverages();
                 return true;
-            case R.id.registerUserMenu:
-                onRegisterUser();
+            case R.id.logout:
+                onLogout();
                 return true;
             case R.id.setSchedule:
                 onsetSchedule();
@@ -378,10 +373,10 @@ public class MainActivity extends FragmentActivity implements
     }
 
     // A method starting the RegisterUserActivity if no view is supplied.
-    public void onRegisterUser() {
+    public void onLogout() {
 
-        final Intent registerUser = new Intent(this, Auth0Activity.class);
-        startActivity(registerUser);
+        CredentialsManager.deleteCredentials(getContext());
+        startActivity(new Intent(this, Auth0Activity.class));
 
     }
 
@@ -681,6 +676,9 @@ public class MainActivity extends FragmentActivity implements
             TextView[] labels = new TextView[]{text};
             HashMap<String, Double[]> sleepData = CSVManager.ReadSleepData();
             Log.d("Sleep data", sleepData.toString());
+            Log.d("Access Token", CredentialsManager.getCredentials(getContext()).getAccessToken());
+            Log.d("ID Token", CredentialsManager.getCredentials(getContext()).getIdToken());
+            Log.d("Refresh Token", CredentialsManager.getCredentials(getContext()).getRefreshToken());
 
             // Fill the TextViews below with the appropriate data
             /*TextView intctr = (TextView) v.findViewById(R.id.intensityCtr);
