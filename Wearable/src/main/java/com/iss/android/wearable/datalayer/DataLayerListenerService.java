@@ -36,14 +36,19 @@ import java.util.concurrent.TimeUnit;
  */
 public class DataLayerListenerService extends WearableListenerService {
 
-    private static final String TAG = "DataLayerListenerServic";
-
-    private static final String START_ACTIVITY_PATH = "/start-activity";
-    public static String DATA_ITEM_RECEIVED_PATH = "ID: 1, Heartbeat: 9, Steps: 1001 ";
     public static final String COUNT_PATH = "/count";
     public static final String IMAGE_PATH = "/image";
     public static final String IMAGE_KEY = "photo";
+    private static final String TAG = "DataLayerListenerServic";
+    private static final String START_ACTIVITY_PATH = "/start-activity";
+    public static String DATA_ITEM_RECEIVED_PATH = "ID: 1, Heartbeat: 9, Steps: 1001 ";
     GoogleApiClient mGoogleApiClient;
+
+    public static void LOGD(final String tag, String message) {
+        if (Log.isLoggable(tag, Log.DEBUG)) {
+            Log.d(tag, message);
+        }
+    }
 
     @Override
     public void onCreate() {
@@ -105,11 +110,5 @@ public class DataLayerListenerService extends WearableListenerService {
     @Override
     public void onPeerDisconnected(Node peer) {
         LOGD(TAG, "onPeerDisconnected: " + peer);
-    }
-
-    public static void LOGD(final String tag, String message) {
-        if (Log.isLoggable(tag, Log.DEBUG)) {
-            Log.d(tag, message);
-        }
     }
 }

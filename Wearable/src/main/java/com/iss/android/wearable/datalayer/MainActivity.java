@@ -49,15 +49,10 @@ import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.SimpleCursorAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.android.gms.ads.formats.NativeAd;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.apache.commons.lang3.StringUtils;
@@ -86,12 +81,12 @@ public class MainActivity extends Activity {
     private static final int REQUEST_FINE_LOCATION = 1;
     private static final String[] PERMISSIONS_LOCATION = {
             Manifest.permission.ACCESS_FINE_LOCATION};
+    private static final String TAG = "MainActivity";
+    public static MainActivity itself;
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
-    private static final String TAG = "MainActivity";
-    public static MainActivity itself;
     int current_time = 0;
     PendingIntent pendingInt = null;
     float heartbeat = 10;
@@ -240,21 +235,21 @@ public class MainActivity extends Activity {
         continueCooldown.setBackgroundColor(recordedActivities.containsKey("Recovery") ? Color.GREEN : Color.GRAY);
         eveningHR.setBackgroundColor(recordedActivities.containsKey("EveningHR") ? Color.GREEN : Color.GRAY);
 
-        int inProgressColor = Color.argb(255,255,165,0);
+        int inProgressColor = Color.argb(255, 255, 165, 0);
 
-        if (SensorsDataService.itself.currentState.equals("Cooldown")){
+        if (SensorsDataService.itself.currentState.equals("Cooldown")) {
             startCooldown.setBackgroundColor(inProgressColor);
         }
-        if (SensorsDataService.itself.currentState.equals("TrainingHR")){
+        if (SensorsDataService.itself.currentState.equals("TrainingHR")) {
             trainingHR.setBackgroundColor(inProgressColor);
         }
-        if (SensorsDataService.itself.currentState.equals("Recovery")){
+        if (SensorsDataService.itself.currentState.equals("Recovery")) {
             continueCooldown.setBackgroundColor(inProgressColor);
         }
-        if (SensorsDataService.itself.currentState.equals("MorningHR") ) {
+        if (SensorsDataService.itself.currentState.equals("MorningHR")) {
             morningHR.setBackgroundColor(inProgressColor);
         }
-        if (SensorsDataService.itself.currentState.equals("EveningHR") ) {
+        if (SensorsDataService.itself.currentState.equals("EveningHR")) {
             eveningHR.setBackgroundColor(inProgressColor);
         }
     }

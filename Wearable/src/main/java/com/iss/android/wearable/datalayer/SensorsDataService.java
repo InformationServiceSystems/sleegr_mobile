@@ -41,9 +41,6 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -81,12 +78,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                     UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb"),
             Battery_Level_UUID =
                     UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
-
-    String UserHRM = "";
     public static SensorsDataService itself;
+    private static HashMap<String, Boolean> recordedActivities = new HashMap<String, Boolean>();
     private final BluetoothGattCallback mGattCallback;
     public ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
-
+    public boolean needToShowRPE = false;
+    String UserHRM = "";
     int[] sensorIDs = new int[]{Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE, Sensor.TYPE_STEP_COUNTER};//,
     PowerManager.WakeLock wakeLock = null;
     // this wakes CPU for sensor measuring
@@ -100,8 +97,25 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     BluetoothGattCharacteristic heartRateCharacteristic = null;
     BluetoothGattService batteryLevelService = null;
     BluetoothGattCharacteristic batteryLevelCharacteristic = null;
-
     boolean SleepTrackingStopped = false;
+    int timerTime = 0;
+    String currentState = "Idle";
+    int timerTimeout = 60 * 60 * 24;
+    int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 3 min
+    int TRAINING_MEASUREMENT_TIME = 60 * 60 * 2;
+    String[] rpeValues = new String[]{
+            "0 Rest",
+            "1 Very easy",
+            "2 Easy",
+            "3 Moderate",
+            "4 Somewhat hard",
+            "5 Hard",
+            "6 Harder",
+            "7 Very hard",
+            "8 Very very hard",
+            "9 Very very very hard",
+            "10 Maximal"
+    };
     private int SamplingRate = 3; // in secs
     private long TrainingStart;
     private int UserID = 0;
@@ -111,6 +125,37 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     private Handler mHandler;
     // map below allows to reduce amount of collected data
     private Map<Integer, Integer> recordedSensorTypes = new HashMap<Integer, Integer>();
+    private BluetoothAdapter mBluetoothAdapter;
+    private boolean isInitialising = true;
+    private boolean hrmDisconnected = true;
+    // Device scan callback.
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            // already found the hrm
+                            if (hrmDevice != null) {
+                                return;
+                            }
+
+                            String name = device.getAddress();
+
+                            if (name.equals(UserHRM)) {
+                                hrmDevice = device;
+                                connectDevice(device);
+                            }
+
+                        }
+                    }).run();
+                }
+            };
+    private String USERID_FORDATASTORAGE = "smartwatch";
+    private int measurementNumber = 0;
     SensorEventListener sensorEventListener = new SensorEventListener() {
 
         @Override
@@ -145,39 +190,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         }
     };
-    private BluetoothAdapter mBluetoothAdapter;
-    private boolean isInitialising = true;
-    private boolean hrmDisconnected = true;
-    // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
-
-                @Override
-                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            // already found the hrm
-                            if (hrmDevice != null) {
-                                return;
-                            }
-
-                            String name = device.getAddress();
-
-                            if (name.equals(UserHRM)) {
-                                hrmDevice = device;
-                                connectDevice(device);
-                            }
-
-                        }
-                    }).run();
-                }
-            };
-    public boolean needToShowRPE = false;
-    private String USERID_FORDATASTORAGE = "smartwatch";
-    private static HashMap<String, Boolean> recordedActivities = new HashMap<String, Boolean>();
-    private int measurementNumber = 0;
 
     {
         mGattCallback = new BluetoothGattCallback() {
@@ -272,6 +284,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         return recordedActivities;
     }
 
+    static boolean isNowASleepingHour() {
+
+        Calendar clnd = Calendar.getInstance();
+        return (clnd.get(Calendar.HOUR_OF_DAY) >= 13);
+    }
+
     @Override
     public void onCreate() {
 
@@ -317,12 +335,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
-    int timerTime = 0;
-    String currentState = "Idle";
-    int timerTimeout = 60 * 60 * 24;
-    int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 3 min
-    int TRAINING_MEASUREMENT_TIME = 60 * 60 * 2;
-
     // Checks if 3 minutes have passed since pressing the cooldown button.
     public void TimerEvent() {
         timerTime = timerTime + 1;
@@ -343,32 +355,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             boolean sleepMode = currentState.equals("eveningHR");
             BringIntoState("Idle");
 
-            if (sleepMode){
+            if (sleepMode) {
                 startSleeping();
             }
         }
         OutputCurrentState();
     }
-
-    static boolean isNowASleepingHour(){
-
-        Calendar clnd = Calendar.getInstance();
-        return (clnd.get(Calendar.HOUR_OF_DAY) >= 13);
-    }
-
-    String[] rpeValues = new String[]{
-            "0 Rest",
-            "1 Very easy",
-            "2 Easy",
-            "3 Moderate",
-            "4 Somewhat hard",
-            "5 Hard",
-            "6 Harder",
-            "7 Very hard",
-            "8 Very very hard",
-            "9 Very very very hard",
-            "10 Maximal"
-    };
 
     // Opens the feedback dialog asking the user about the training in form of some radio buttons
     private void AskUserForFeedback(String time) {
@@ -507,13 +499,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         if (!currentState.equals("Idle")) {
 
-            if (action.equals(currentState)){
+            if (action.equals(currentState)) {
                 // stop recording cooling / resting prematurely
                 newState = "Idle";
                 DeleteLatestMeasurement();
-            }
-            else
-            {
+            } else {
                 newState = action;
             }
         } else { // switch from idle state to measurement
@@ -529,7 +519,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     // starts sleep tracking
-    private void startSleeping(){
+    private void startSleeping() {
         Intent intent = new Intent(this, SensorsDataService.class);
         stopService(intent);
 
@@ -543,11 +533,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     // vibrates for 0.2 seconds, 0.2 seconds silence, 4 times.
-    void outputVibration(){
+    void outputVibration() {
 
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         long length = 200;
-        v.vibrate( new long[]{length,length,  length,length,  length,length,  length,length}, -1 );
+        v.vibrate(new long[]{length, length, length, length, length, length, length, length}, -1);
 
     }
 
@@ -569,14 +559,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             // stop recording cooling / resting prematurely
             timerTimeout = RESTING_MEASUREMENT_TIME;
             AskUserForFeedback("morning");
-        }else if (state.equals("EveningHR")){
+        } else if (state.equals("EveningHR")) {
             timerTimeout = RESTING_MEASUREMENT_TIME;
-            AskUserForFeedback("evening");}
-        else if (state.equals("TrainingHR")) {
+            AskUserForFeedback("evening");
+        } else if (state.equals("TrainingHR")) {
             timerTimeout = TRAINING_MEASUREMENT_TIME;
-        }else if (state.equals("Cooldown")) {
+        } else if (state.equals("Cooldown")) {
             timerTimeout = RESTING_MEASUREMENT_TIME;
-        }else if (state.contains("Recovery")) {
+        } else if (state.contains("Recovery")) {
             timerTimeout = RESTING_MEASUREMENT_TIME; // needed to recover the state of the app properly
             Intent myIntent = new Intent(this, TrainingStartTimeActivity.class);
             myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

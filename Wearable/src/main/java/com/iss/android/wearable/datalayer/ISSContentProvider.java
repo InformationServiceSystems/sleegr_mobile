@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -43,32 +42,13 @@ public class ISSContentProvider extends ContentProvider {
     static final String MEASUREMENT_ID = "measurement_id";
     static final String RPE_ANSWERS = "rpe_answers";
     static final String TYPE = "type";
-
-    private static HashMap<String, String> RECORDS_PROJECTION_MAP;
-
     static final int RECORDSTYPE = 1;
     static final int RECORD_IDTYPE = 2;
     static final int MEASUREMENTSTYPE = 3;
     static final int MEASUREMENT_IDTYPE = 4;
     static final int RPESTYPE = 5;
     static final int RPE_IDTYPE = 6;
-
     static final UriMatcher uriMatcher;
-
-    static {
-        uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(PROVIDER_NAME, "records", RECORDSTYPE);
-        uriMatcher.addURI(PROVIDER_NAME, "records/#", RECORD_IDTYPE);
-        uriMatcher.addURI(PROVIDER_NAME, "measurement", MEASUREMENTSTYPE);
-        uriMatcher.addURI(PROVIDER_NAME, "measurement/#", MEASUREMENT_IDTYPE);
-        uriMatcher.addURI(PROVIDER_NAME, "rpeanswers", RPESTYPE);
-        uriMatcher.addURI(PROVIDER_NAME, "rpeanswers/#", RPE_IDTYPE);
-    }
-
-    /**
-     * Database specific constant declarations
-     */
-    private static SQLiteDatabase db;
     static final String DATABASE_NAME = "ISSRecordData";
     static final String RECORDS_TABLE_NAME = "records";
     static final String MEASUREMENTS_TABLE_NAME = "measurements";
@@ -96,6 +76,21 @@ public class ISSContentProvider extends ContentProvider {
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     MEASUREMENT_ID + " INTEGER NOT NULL, " +
                     RPE_ANSWERS + " BLOB);";
+    private static HashMap<String, String> RECORDS_PROJECTION_MAP;
+    /**
+     * Database specific constant declarations
+     */
+    private static SQLiteDatabase db;
+
+    static {
+        uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        uriMatcher.addURI(PROVIDER_NAME, "records", RECORDSTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "records/#", RECORD_IDTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "measurement", MEASUREMENTSTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "measurement/#", MEASUREMENT_IDTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "rpeanswers", RPESTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "rpeanswers/#", RPE_IDTYPE);
+    }
 
     public static void clear() {
         db.execSQL("DELETE FROM " + ISSContentProvider.RECORDS_TABLE_NAME + "; " +
@@ -105,38 +100,11 @@ public class ISSContentProvider extends ContentProvider {
         Cursor mcursor = db.rawQuery(count, null);
         mcursor.moveToFirst();
         int icount = mcursor.getInt(0);
-        if(icount>0){
+        if (icount > 0) {
             Log.d("Deleted", "not everything");
-        }
-        else{
+        } else {
             Log.d("Deleted", "everything");
             // test
-        }
-    }
-
-    /**
-     * Helper class that actually creates and manages
-     * the provider's underlying data repository.
-     */
-    private static class DatabaseHelper extends SQLiteOpenHelper {
-        DatabaseHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            db.execSQL(CREATE_RECORDS_DB_TABLE);
-            db.execSQL(CREATE_MEASUREMENT_DB_TABLE);
-            db.execSQL(CREATE_RPE_DB_TABLE);
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.d("updated", "now");
-            db.execSQL("DROP TABLE IF EXISTS " + RECORDS_TABLE_NAME);
-            db.execSQL("DROP TABLE IF EXISTS " + MEASUREMENTS_TABLE_NAME);
-            db.execSQL("DROP TABLE IF EXISTS " + RPE_TABLE_NAME);
-            onCreate(db);
         }
     }
 
@@ -250,7 +218,7 @@ public class ISSContentProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         long rowID;
-        switch (uriMatcher.match(uri)){
+        switch (uriMatcher.match(uri)) {
             case RECORDSTYPE:
                 /**
                  * Add a new ISS record
@@ -349,5 +317,31 @@ public class ISSContentProvider extends ContentProvider {
         }
         getContext().getContentResolver().notifyChange(uri, null);
         return count;
+    }
+
+    /**
+     * Helper class that actually creates and manages
+     * the provider's underlying data repository.
+     */
+    private static class DatabaseHelper extends SQLiteOpenHelper {
+        DatabaseHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL(CREATE_RECORDS_DB_TABLE);
+            db.execSQL(CREATE_MEASUREMENT_DB_TABLE);
+            db.execSQL(CREATE_RPE_DB_TABLE);
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.d("updated", "now");
+            db.execSQL("DROP TABLE IF EXISTS " + RECORDS_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + MEASUREMENTS_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + RPE_TABLE_NAME);
+            onCreate(db);
+        }
     }
 }

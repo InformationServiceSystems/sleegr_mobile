@@ -6,7 +6,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.NumberPicker;
-import android.widget.TimePicker;
 
 import java.util.Calendar;
 
@@ -55,7 +54,7 @@ public class TrainingStartTimeActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void onSubmit(View view){
+    public void onSubmit(View view) {
         NumberPicker hourPicker = (NumberPicker) findViewById(R.id.hourPicker);
         NumberPicker minutePicker = (NumberPicker) findViewById(R.id.minutePicker);
 

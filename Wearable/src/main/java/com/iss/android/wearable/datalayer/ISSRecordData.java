@@ -11,6 +11,7 @@ import java.util.Date;
  */
 public class ISSRecordData implements Serializable {
 
+    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
     static final long serialVersionUID = 1L;
     public int UserID;
     public int MeasurementType;
@@ -21,6 +22,20 @@ public class ISSRecordData implements Serializable {
     public float Value2;
     public float Value3;
     public int measurementID;
+
+    public ISSRecordData(int UID, int MType, String date, String timestamp, String extraData, float v1, float v2, float v3, int measurementNumber) {
+
+        UserID = UID;
+        MeasurementType = MType;
+        Date = date;
+        Timestamp = timestamp;
+        ExtraData = extraData;
+        Value1 = v1;
+        Value2 = v2;
+        Value3 = v3;
+        measurementID = measurementNumber;
+
+    }
 
     public static ISSRecordData fromString(String str) {
 
@@ -51,22 +66,6 @@ public class ISSRecordData implements Serializable {
         return UserID + sep + MeasurementType + sep + Date + sep + Timestamp + sep + ExtraData + sep + Value1 + sep + Value2 + sep + Value3 + sep + measurementID;
 
     }
-
-    public ISSRecordData(int UID, int MType, String date, String timestamp, String extraData, float v1, float v2, float v3, int measurementNumber) {
-
-        UserID = UID;
-        MeasurementType = MType;
-        Date = date;
-        Timestamp = timestamp;
-        ExtraData = extraData;
-        Value1 = v1;
-        Value2 = v2;
-        Value3 = v3;
-        measurementID = measurementNumber;
-
-    }
-
-    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
 
     public Date getTimestamp() {
 

@@ -1,27 +1,14 @@
 package com.iss.android.wearable.datalayer;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.Blob;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 
 /**
@@ -32,7 +19,7 @@ public class DataStorageManager {
     static SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
 
     // Collects all ISSRecordDatas in the database that haven't been sent to the smartphone yet
-    public static ArrayList<ISSRecordData> GetAllFilesToUpload(){
+    public static ArrayList<ISSRecordData> GetAllFilesToUpload() {
         ArrayList<ISSRecordData> result = new ArrayList<>();
         // A "projection" defines the columns that will be returned for each row
         String[] mProjection =
@@ -254,7 +241,7 @@ public class DataStorageManager {
             int j = 0;
             while (mCursor.moveToNext()) {
                 j++;
-                if (j>i) {
+                if (j > i) {
                     ISSMeasurement measurement = ISSDictionary.CursorToISSMeasurement(mCursor);
                     result.add(measurement);
                 }

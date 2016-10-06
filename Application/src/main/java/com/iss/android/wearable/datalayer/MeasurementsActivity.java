@@ -260,16 +260,12 @@ public class MeasurementsActivity extends ListActivity {
                         LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
                         for (int i = 0; i < Times.size(); i++) {
                             series.appendData(new DataPoint(Times.get(i), HRValues.get(i)), false, Times.size() + 20);
-                            Log.d(Times.get(i).toString(), HRValues.get(i).toString());
                         }
                         LineGraphSeries<DataPoint> FittedCurveSeries = new LineGraphSeries<>();
                         for (int i = 0; i < Times.size(); i++) {
                             FittedCurveSeries.appendData(new DataPoint(Times.get(i), FittedCurve.get(i)), false, Times.size() + 20);
-                            Log.d(Times.get(i).toString(), String.valueOf(FittedCurve.get(i)));
                         }
-                        Log.d("Graph Starting time", String.valueOf(Times.get(0).getTime()));
                         graph.getViewport().setMinX(Times.get(0).getTime());
-                        Log.d("Graph thinks min x is", String.valueOf(graph.getViewport().getMinX(true)));
                         graph.getViewport().setMaxX(Times.get(Times.size() - 1).getTime());
                         graph.getViewport().setXAxisBoundsManual(true);
                         graph.getViewport().setYAxisBoundsManual(true);
