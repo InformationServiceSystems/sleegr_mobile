@@ -6,9 +6,9 @@
         android:id="@+id/button4"
         android:title="Today's graphs" />
 
-    <item
+    <!--<item
         android:id="@+id/averageValues"
-        android:title="Averages" />
+        android:title="Averages" />-->
 
     <item
         android:id="@+id/setSchedule"

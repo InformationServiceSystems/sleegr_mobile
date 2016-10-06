@@ -76,8 +76,6 @@ import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToda
  */
 public class MainActivity extends FragmentActivity implements
         ManageDateFragment.OnFragmentInteractionListener {
-
-    static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int NUM_ITEMS = 30;
     private static final String TAG = "MainActivity";
     public static android.content.Context itself;
@@ -85,8 +83,6 @@ public class MainActivity extends FragmentActivity implements
     ViewPager mPager;
     int mCurrentTabPosition = 30;
     PendingIntent pendingInt = null;
-    private GoogleApiClient mGoogleApiClient;
-    private Button watchSyncButton;
     private ListView mDataItemList;
     private DataItemAdapter mDataItemListAdapter;
     private Handler mHandler;
@@ -109,15 +105,6 @@ public class MainActivity extends FragmentActivity implements
 
         NumberFormat formatter = new DecimalFormat("#0.00");
         return formatter.format(value);
-    }
-
-    /**
-     * As simple wrapper around Log.d
-     */
-    private static void LOGD(final String tag, String message) {
-        if (Log.isLoggable(tag, Log.DEBUG)) {
-            Log.d(tag, message);
-        }
     }
 
     public static Context getContext() {
@@ -173,31 +160,6 @@ public class MainActivity extends FragmentActivity implements
 
         //noinspection WrongConstant
         pendingInt = PendingIntent.getActivity(this, 0, new Intent(getIntent()), getIntent().getFlags());
-
-        // This is a method to fill in the database to test the IntelXDK app.
-
-        /*AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                Databasetestclass.fillWithData();
-            }
-        });*/
-
-
-        // start handler which starts pending-intent after Application-Crash
-        // That stuff may be cool for end users, but for developers it's nasty
-        // Iaroslav: sorry, I uncomment sometimes this (and forget to comment it back) to check what exception crashed the app.
-       /*  Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-           @Override
-           public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
-
-               AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-               mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 2000, pendingInt);
-               System.exit(2);
-
-           }
-       }); */
-
     }
 
     // A method which determines the current position of the ViewPager.
@@ -268,9 +230,9 @@ public class MainActivity extends FragmentActivity implements
             case R.id.button4:
                 onShowMeasurements();
                 return true;
-            case R.id.averageValues:
+            /*case R.id.averageValues:
                 onShowAverages();
-                return true;
+                return true;*/
             case R.id.logout:
                 onLogout();
                 return true;
@@ -302,11 +264,6 @@ public class MainActivity extends FragmentActivity implements
 
     // A method handling the click on the Server Sync button.
     public void onServerSync(View view) {
-        RecomputeSynchronize();
-    }
-
-    // A method handling the click on the server sync button.
-    public void onServerSync() {
         RecomputeSynchronize();
     }
 
@@ -344,20 +301,9 @@ public class MainActivity extends FragmentActivity implements
         if (cont.equals("Data saved. Clearing data on the watch")) {
             finish();
             startActivity(getIntent());
+            this.overridePendingTransition(0, 0);
         }
 
-    }
-
-    private Collection<String> getNodes() {
-        HashSet<String> results = new HashSet<>();
-        NodeApi.GetConnectedNodesResult nodes =
-                Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-
-        for (Node node : nodes.getNodes()) {
-            results.add(node.getId());
-        }
-
-        return results;
     }
 
     // A method starting the RegisterUserActivity if no view is supplied.
@@ -382,26 +328,6 @@ public class MainActivity extends FragmentActivity implements
         if (DataSyncService.itself != null) {
             DataSyncService.itself.RequestDataFromWatch();
         }
-
-    }
-
-    public TimeSeries randomRPEReq(int past, int future) {
-
-        TimeSeries requirements = new TimeSeries("RPE schedule");
-
-        for (int i = 0; i < past; i++) {
-            long round = Math.round(Math.random() * 10);
-            Date date = getDateFromToday(i);
-            requirements.AddFirstValue(date, round);
-        }
-
-        for (int i = 0; i < future; i++) {
-            long round = Math.round(Math.random() * 10);
-            Date date = getDateFromToday(-i - 1);
-            requirements.AddValue(date, round);
-        }
-
-        return requirements;
 
     }
 
@@ -610,15 +536,6 @@ public class MainActivity extends FragmentActivity implements
         }
 
         return result;
-
-    }
-
-    public void onExploreData() {
-
-        /*Intent i = new Intent(MainActivity.this, SelectAvailableData.class);
-        startActivity(i);*/
-
-        UserParameters params = new UserParameters(30);
 
     }
 

@@ -50,6 +50,7 @@ public class Auth0Activity extends Activity {
         //Request a refresh token along with the id token.
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("scope", "openid offline_access");
+        parameters.put("primaryColor", "#3b5998");
         mLock = Lock.newBuilder(auth0, mCallback)
                 .withAuthenticationParameters(parameters)
                 //Add parameters to the build
