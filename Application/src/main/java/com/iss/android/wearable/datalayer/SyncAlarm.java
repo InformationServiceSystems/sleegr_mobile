@@ -9,14 +9,12 @@ import android.content.Intent;
 /**
  * Created by Euler on 10/15/2015.
  */
-public class SyncAlarm extends BroadcastReceiver
-{
+public class SyncAlarm extends BroadcastReceiver {
 
     boolean serverSync = false;
 
     @Override
-    public void onReceive(Context context, Intent intent)
-    {
+    public void onReceive(Context context, Intent intent) {
         /*PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
         wl.acquire();
@@ -30,9 +28,8 @@ public class SyncAlarm extends BroadcastReceiver
     }
 
     // Wakes up the system every now and then. Costs battery
-    public void SetAlarm(Context context)
-    {
-        AlarmManager am =( AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+    public void SetAlarm(Context context) {
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, SyncAlarm.class);
         intent.setAction("com.example.android.wearable.datalayer.ALARM");
         PendingIntent broadcast = PendingIntent.getBroadcast(context, 0, intent, 0);
@@ -45,8 +42,7 @@ public class SyncAlarm extends BroadcastReceiver
 
     }
 
-    public void CancelAlarm(Context context)
-    {
+    public void CancelAlarm(Context context) {
         Intent intent = new Intent(context, SyncAlarm.class);
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

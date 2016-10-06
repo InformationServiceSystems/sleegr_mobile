@@ -16,7 +16,6 @@
 
 package com.iss.android.wearable.datalayer;
 
-import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,16 +27,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -50,7 +45,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
@@ -59,7 +53,6 @@ import com.google.android.gms.wearable.Wearable;
 import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -348,7 +341,7 @@ public class MainActivity extends FragmentActivity implements
                 tv.setText(content);
             }
         });
-        if (cont.equals("Data saved. Clearing data on the watch")){
+        if (cont.equals("Data saved. Clearing data on the watch")) {
             finish();
             startActivity(getIntent());
         }
@@ -630,7 +623,7 @@ public class MainActivity extends FragmentActivity implements
     }
 
     public void onShowAverages() {
-        Intent i = new Intent (MainActivity.this, AverageActivity.class);
+        Intent i = new Intent(MainActivity.this, AverageActivity.class);
         startActivity(i);
     }
 
@@ -698,7 +691,7 @@ public class MainActivity extends FragmentActivity implements
             super.onActivityCreated(savedInstanceState);
         }
 
-        public void refresh(){
+        public void refresh() {
             newInstance(mNum);
         }
     }
@@ -764,7 +757,7 @@ public class MainActivity extends FragmentActivity implements
                     Log.d("Found", record.toString());
                 }
             }
-            for (ISSRecordData d: data){
+            for (ISSRecordData d : data) {
                 Times.add(d.getTimestamp());
                 Values.add(d.Value1);
             }
@@ -792,14 +785,14 @@ public class MainActivity extends FragmentActivity implements
                 }
             });
             graph.getGridLabelRenderer().setNumHorizontalLabels(5);
-            if(Times != null && Times.size() > 0) {
+            if (Times != null && Times.size() > 0) {
                 LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
                 for (int i = 0; i < Times.size(); i++) {
                     series.appendData(new DataPoint(Times.get(i), Values.get(i)), true, Times.size());
                     Log.d(Times.get(i).toString(), Values.get(i).toString());
                 }
                 graph.getViewport().setMinX(Times.get(0).getTime());
-                graph.getViewport().setMaxX(Times.get(Times.size()-1).getTime());
+                graph.getViewport().setMaxX(Times.get(Times.size() - 1).getTime());
                 graph.getViewport().setXAxisBoundsManual(true);
                 graph.getViewport().setYAxisBoundsManual(true);
                 graph.getViewport().setMinY(30);

@@ -28,7 +28,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-public class MeasurementsActivity extends ListActivity  {
+public class MeasurementsActivity extends ListActivity {
 
     TextView content;
 
@@ -93,10 +93,10 @@ public class MeasurementsActivity extends ListActivity  {
         super.onListItemClick(l, v, position, id);
 
         // ListView Clicked item index
-        int itemPosition     = position;
+        int itemPosition = position;
 
         // ListView Clicked item value
-        String  itemValue    = (String) l.getItemAtPosition(position);
+        String itemValue = (String) l.getItemAtPosition(position);
 
         // content.setText("Click : \n  Position :"+itemPosition+"  \n  ListItem : " +itemValue);
 
@@ -113,8 +113,7 @@ public class MeasurementsActivity extends ListActivity  {
         }
 
         @Override
-        public Integer getItem(int position)
-        {
+        public Integer getItem(int position) {
             Log.d("Requested item", String.valueOf(position));
             return items[position];
         }
@@ -137,7 +136,7 @@ public class MeasurementsActivity extends ListActivity  {
                 TextView AValue = (TextView) v.findViewById(R.id.AValue);
                 TextView TValue = (TextView) v.findViewById(R.id.TValue);
                 TextView CValue = (TextView) v.findViewById(R.id.CValue);
-                TextView Load= (TextView) v.findViewById(R.id.Load);
+                TextView Load = (TextView) v.findViewById(R.id.Load);
                 Log.d("Call", measurementslist_TextView.toString());
                 Calendar date = new GregorianCalendar();
                 // Fill the GraphView with data for the current date
@@ -158,11 +157,11 @@ public class MeasurementsActivity extends ListActivity  {
             public ArrayList<Float> HRValues;
             public ArrayList<Double> FittedCurve;
             public String measurementType;
+            double[] CDParams;
             private TextView measurementslist_TextView;
             private TextView AValue;
             private TextView TValue;
             private TextView CValue;
-            double[] CDParams;
             private TextView Load;
 
             public PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView measurementslist_TextView, TextView AValue, TextView TValue, TextView CValue, TextView Load) {
@@ -184,7 +183,7 @@ public class MeasurementsActivity extends ListActivity  {
                 ArrayList<ISSRecordData> data = new ArrayList<ISSRecordData>();
                 Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
 
-                String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = "+MID+" AND " + ISSContentProvider.MEASUREMENT + " = 21";
+                String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = " + MID + " AND " + ISSContentProvider.MEASUREMENT + " = 21";
                 String[] mSelectionArgs = {};
                 String[] mProjection =
                         {
@@ -238,57 +237,56 @@ public class MeasurementsActivity extends ListActivity  {
 
             @Override
             protected void onPostExecute(Void result) {
-                if (measurementType.equals("Cooldown") || measurementType.equals("Recovery") || measurementType.equals("EveningHR") || measurementType.equals("MorningHR")){
-                graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
-                    @Override
-                    public String formatLabel(double value, boolean isValueX) {
-                        if (isValueX) {
-                            // show normal x values
+                if (measurementType.equals("Cooldown") || measurementType.equals("Recovery") || measurementType.equals("EveningHR") || measurementType.equals("MorningHR")) {
+                    graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                        @Override
+                        public String formatLabel(double value, boolean isValueX) {
+                            if (isValueX) {
+                                // show normal x values
 
-                            Calendar mCalendar = Calendar.getInstance();
-                            mCalendar.setTimeInMillis((long) value);
-                            String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
+                                Calendar mCalendar = Calendar.getInstance();
+                                mCalendar.setTimeInMillis((long) value);
+                                String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
 
-                            return time;
-                        } else {
-                            // show currency for y values
-                            return super.formatLabel(value, isValueX);
+                                return time;
+                            } else {
+                                // show currency for y values
+                                return super.formatLabel(value, isValueX);
+                            }
                         }
+                    });
+                    graph.getGridLabelRenderer().setNumHorizontalLabels(5);
+                    if (Times != null && Times.size() > 0) {
+                        LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
+                        for (int i = 0; i < Times.size(); i++) {
+                            series.appendData(new DataPoint(Times.get(i), HRValues.get(i)), false, Times.size() + 20);
+                            Log.d(Times.get(i).toString(), HRValues.get(i).toString());
+                        }
+                        LineGraphSeries<DataPoint> FittedCurveSeries = new LineGraphSeries<>();
+                        for (int i = 0; i < Times.size(); i++) {
+                            FittedCurveSeries.appendData(new DataPoint(Times.get(i), FittedCurve.get(i)), false, Times.size() + 20);
+                            Log.d(Times.get(i).toString(), String.valueOf(FittedCurve.get(i)));
+                        }
+                        Log.d("Graph Starting time", String.valueOf(Times.get(0).getTime()));
+                        graph.getViewport().setMinX(Times.get(0).getTime());
+                        Log.d("Graph thinks min x is", String.valueOf(graph.getViewport().getMinX(true)));
+                        graph.getViewport().setMaxX(Times.get(Times.size() - 1).getTime());
+                        graph.getViewport().setXAxisBoundsManual(true);
+                        graph.getViewport().setYAxisBoundsManual(true);
+                        graph.getViewport().setMinY(0);
+                        graph.getViewport().setMaxY(200);
+                        series.setColor(Color.parseColor("#3b5998"));
+                        FittedCurveSeries.setColor(Color.GREEN);
+                        graph.addSeries(FittedCurveSeries);
+                        graph.addSeries(series);
                     }
-                });
-                graph.getGridLabelRenderer().setNumHorizontalLabels(5);
-                if(Times != null && Times.size() > 0) {
-                    LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
-                    for (int i = 0; i < Times.size(); i++) {
-                        series.appendData(new DataPoint(Times.get(i), HRValues.get(i)), false, Times.size()+20);
-                        Log.d(Times.get(i).toString(), HRValues.get(i).toString());
-                    }
-                    LineGraphSeries<DataPoint> FittedCurveSeries = new LineGraphSeries<>();
-                    for (int i = 0; i < Times.size(); i++) {
-                        FittedCurveSeries.appendData(new DataPoint(Times.get(i), FittedCurve.get(i)), false, Times.size()+20);
-                        Log.d(Times.get(i).toString(), String.valueOf(FittedCurve.get(i)));
-                    }
-                    Log.d("Graph Starting time", String.valueOf(Times.get(0).getTime()));
-                    graph.getViewport().setMinX(Times.get(0).getTime());
-                    Log.d("Graph thinks min x is", String.valueOf(graph.getViewport().getMinX(true)));
-                    graph.getViewport().setMaxX(Times.get(Times.size()-1).getTime());
-                    graph.getViewport().setXAxisBoundsManual(true);
-                    graph.getViewport().setYAxisBoundsManual(true);
-                    graph.getViewport().setMinY(0);
-                    graph.getViewport().setMaxY(200);
-                    series.setColor(Color.BLUE);
-                    FittedCurveSeries.setColor(Color.GREEN);
-                    graph.addSeries(FittedCurveSeries);
-                    graph.addSeries(series);
-                }
                     String text = measurementType + " measurement taken at: " + ISSDictionary.dateToTimeString(Times.get(0));
                     this.measurementslist_TextView.setText(text);
                     this.AValue.setText("A: " + String.valueOf(CDParams[0]));
                     this.TValue.setText("T: " + String.valueOf(CDParams[1]));
                     this.CValue.setText("C: " + String.valueOf(CDParams[2]));
-                    this.Load.setText("Load: " + String.valueOf(CDParams[0]*CDParams[2]));
-                }
-                else {
+                    this.Load.setText("Load: " + String.valueOf(CDParams[0] * CDParams[2]));
+                } else {
                     String text = measurementType + " measurement";
                     this.measurementslist_TextView.setText(text);
                 }

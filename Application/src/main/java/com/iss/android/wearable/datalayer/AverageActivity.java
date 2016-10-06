@@ -1,19 +1,14 @@
 package com.iss.android.wearable.datalayer;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Activity;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -98,33 +93,33 @@ public class AverageActivity extends Activity {
             Double[] valueLength = sleepData.get(relevantDayString);
             if (valueLength != null) {
                 Log.d("Sleep lengths are", String.valueOf(valueLength[0]) + "," + String.valueOf(valueLength[1]));
-                if (valueLength[0]>0){
-                    deepSleepHours[i]=valueLength[0];
+                if (valueLength[0] > 0) {
+                    deepSleepHours[i] = valueLength[0];
                 } else {
-                    deepSleepHours[i]=0;
+                    deepSleepHours[i] = 0;
                 }
-                if (valueLength[1]>0){
-                    sleepHours[i]=valueLength[1];
+                if (valueLength[1] > 0) {
+                    sleepHours[i] = valueLength[1];
                 } else {
-                    sleepHours[i]=0;
+                    sleepHours[i] = 0;
                 }
             } else {
-                deepSleepHours[i]=0;
-                sleepHours[i]=0;
+                deepSleepHours[i] = 0;
+                sleepHours[i] = 0;
             }
         }
 
         private void sortIn(Date date, Double value, int i) {
             try {
-                if (date.before(dateFormat.parse("12:00:00")) && date.after(dateFormat.parse("03:00:00"))){
+                if (date.before(dateFormat.parse("12:00:00")) && date.after(dateFormat.parse("03:00:00"))) {
                     morningMeasures[i]++;
-                    morningHR[i]+=value;
-                } else if (date.before(dateFormat.parse("21:00:00")) && date.after(dateFormat.parse("12:00:00"))){
+                    morningHR[i] += value;
+                } else if (date.before(dateFormat.parse("21:00:00")) && date.after(dateFormat.parse("12:00:00"))) {
                     dayMeasures[i]++;
-                    dayHR[i]+=value;
-                } else if (date.before(dateFormat.parse("03:00:00")) && date.after(dateFormat.parse("21:00:00"))){
+                    dayHR[i] += value;
+                } else if (date.before(dateFormat.parse("03:00:00")) && date.after(dateFormat.parse("21:00:00"))) {
                     eveningMeasures[i]++;
-                    eveningHR[i]+=value;
+                    eveningHR[i] += value;
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -136,10 +131,10 @@ public class AverageActivity extends Activity {
             // Writes all the retrieved data into the table. Headers are declared manually,
             // the rest is filled in programmatically.
             DecimalFormat df = new DecimalFormat("#0.##");
-            TableLayout table = (TableLayout)findViewById(R.id.tableLayout);
+            TableLayout table = (TableLayout) findViewById(R.id.tableLayout);
 
 
-            for (int i = 0; i<30; i++){
+            for (int i = 0; i < 30; i++) {
                 String date = getDayFromToday(i);
                 date = reformat(date);
 
@@ -176,10 +171,12 @@ public class AverageActivity extends Activity {
         }
 
         @Override
-        protected void onPreExecute() {}
+        protected void onPreExecute() {
+        }
 
         @Override
-        protected void onProgressUpdate(Void... values) {}
+        protected void onProgressUpdate(Void... values) {
+        }
     }
 
 }

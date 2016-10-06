@@ -35,7 +35,7 @@ public class JSONFactory {
         JSONObject mainObject = new JSONObject();
 
         JSONArray values = new JSONArray();
-        for (ISSRecordData record: records){
+        for (ISSRecordData record : records) {
             JSONObject recordJson = getJSON(record);
             values.put(recordJson);
         }

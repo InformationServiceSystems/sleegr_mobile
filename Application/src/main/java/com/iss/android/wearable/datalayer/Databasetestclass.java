@@ -21,12 +21,12 @@ public class Databasetestclass {
     public static void fillWithData() {
 
         final Timer timer = new Timer();
-        TimerTask timerTask = new TimerTask () {
+        TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
                 i++;
                 resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, generateValues());
-                if (i>1000){
+                if (i > 1000) {
                     this.cancel();
                     timer.cancel();
                     timer.purge();

@@ -3,20 +3,12 @@ package com.iss.android.wearable.datalayer;
 import android.os.Environment;
 import android.util.Log;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-
-import static com.iss.android.wearable.datalayer.DateTimeManager.getDayFromToday;
 
 /**
  * Created by Euler on 12/19/2015.
@@ -24,17 +16,29 @@ import static com.iss.android.wearable.datalayer.DateTimeManager.getDayFromToday
 public class DataStorageManager {
 
 
-    // a method responsible for creating the folders to write into
-    public  static void InitializeTriathlonFolder(){
+    // I overwrote it so that it now takes Internal Storage, which is more fitting for in-app-data.
+    // All other methods wouldn't let me write when using the scheduled RPE values.
+    // static String dataFolder = MainActivity.getContext().getFilesDir().toString();
+    static String dataFolder = Environment.getExternalStorageDirectory().getAbsolutePath();
+    static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
 
-        if(!userDataFolder.exists()){
+
+    // I use here external storage directory, as the previous versions of the
+    // app use the external directory. In case ext. storage is not available, use
+    // Environment.getDataDirectory().toString()
+    static File userDataFolder = new File(dataFolder + "/triathlon");
+
+    // a method responsible for creating the folders to write into
+    public static void InitializeTriathlonFolder() {
+
+        if (!userDataFolder.exists()) {
             userDataFolder.mkdir();
         }
 
     }
 
     // A method reading the schedule.csv file and parsing it to TimeSeries
-    public static TimeSeries readUserSchedule(){
+    public static TimeSeries readUserSchedule() {
 
         TimeSeries result = new TimeSeries("RPE required");
 
@@ -55,7 +59,7 @@ public class DataStorageManager {
                 Date date = dateFormat.parse(dateStr);
                 Double value = Double.parseDouble(contents);
 
-                result.AddValue(date,value);
+                result.AddValue(date, value);
 
             }
         } catch (Exception e) {
@@ -66,31 +70,19 @@ public class DataStorageManager {
 
     }
 
-
-    // I use here external storage directory, as the previous versions of the
-    // app use the external directory. In case ext. storage is not available, use
-    // Environment.getDataDirectory().toString()
-
-    // I overwrote it so that it now takes Internal Storage, which is more fitting for in-app-data.
-    // All other methods wouldn't let me write when using the scheduled RPE values.
-    // static String dataFolder = MainActivity.getContext().getFilesDir().toString();
-    static String dataFolder = Environment.getExternalStorageDirectory().getAbsolutePath();
-    static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
-    static File userDataFolder = new File(dataFolder + "/triathlon");
-
     // A method that transcribes the UserID. Currently replaces "@" with "_at_"
-    public static String getProperUserID(String UserID){
+    public static String getProperUserID(String UserID) {
 
         return UserID.replace("@", "_at_");
 
     }
 
     // sub-method of getKey
-    public static String getStateKey(String mark){
+    public static String getStateKey(String mark) {
 
         int idx = mark.indexOf(":");
 
-        if (idx < 0){
+        if (idx < 0) {
             return mark;
         }
 
@@ -99,15 +91,15 @@ public class DataStorageManager {
     }
 
     // A method that, together with getStateKey, returns the state, e.g. "resting", "idle" or "cooldown"
-    public static String getKey(ISSRecordData record){
+    public static String getKey(ISSRecordData record) {
 
         String mark = record.ExtraData;
 
-        if (mark == null){
+        if (mark == null) {
             return null;
         }
 
-        return  getStateKey(mark);
+        return getStateKey(mark);
 
     }
 

@@ -3,7 +3,6 @@ package com.iss.android.wearable.datalayer;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -16,7 +15,7 @@ public class UploadingManager {
 
 
     // a simple wrapper around UploadFileToServer
-    public static void UploadUserFileToServer(byte[] content, String name, String uploadUrl, String UserID){
+    public static void UploadUserFileToServer(byte[] content, String name, String uploadUrl, String UserID) {
         String completeUrl = uploadUrl + UserID;
         UploadFileToServer(content, name, completeUrl);
     }
@@ -24,7 +23,7 @@ public class UploadingManager {
     // Returns String which is a server response
     public static void UploadFileToServer(byte[] content, String name, String uploadUrl) {
 
-        final byte [] filecontents = content;
+        final byte[] filecontents = content;
         final String attachmentFileName = name;
         final String serverurl = uploadUrl;
 

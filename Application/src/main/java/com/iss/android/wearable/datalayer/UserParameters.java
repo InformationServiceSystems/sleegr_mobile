@@ -1,7 +1,5 @@
 package com.iss.android.wearable.datalayer;
 
-import android.graphics.Color;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,7 +12,7 @@ import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToda
  */
 public class UserParameters {
 
-    public UserParameters(int timespan){
+    public UserParameters(int timespan) {
 
         // load RPE if available
 
@@ -25,7 +23,7 @@ public class UserParameters {
         TimeSeries alpha2min = new TimeSeries("Alpha, 2 min training");
         TimeSeries userDS = new TimeSeries("Deep sleep");
 
-        for (int i = 0; i < timespan; i++){
+        for (int i = 0; i < timespan; i++) {
 
             try {
 
@@ -53,7 +51,7 @@ public class UserParameters {
                     userDS.AddFirstValue(date, dailyData.getDeepSleep());
                 }
 
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 DataSyncService.OutputEventSq(ex.toString());
             }
 
@@ -65,19 +63,19 @@ public class UserParameters {
 
 
     // Deletes values in bins where counts is <=0
-    public void smoothenBins(double [] bins, double [] counts){
+    public void smoothenBins(double[] bins, double[] counts) {
 
         double cv = 0;
 
-        for (int i= 0;i < bins.length; i++){
-            if (counts[i] > 0){
+        for (int i = 0; i < bins.length; i++) {
+            if (counts[i] > 0) {
                 cv = bins[i];
             }
             bins[i] = cv;
         }
 
-        for (int i=  bins.length-1;i >= 0; i--){
-            if (counts[i] > 0){
+        for (int i = bins.length - 1; i >= 0; i--) {
+            if (counts[i] > 0) {
                 cv = bins[i];
             }
             bins[i] = cv;
@@ -86,7 +84,7 @@ public class UserParameters {
     }
 
     // Another method which only computes the date given a certain date and an offset.
-    public Date offsetDate(Date input, int offset){
+    public Date offsetDate(Date input, int offset) {
 
         Calendar clnd = Calendar.getInstance();
         clnd.setTime(input);
@@ -96,19 +94,19 @@ public class UserParameters {
     }
 
     // Produces a predictive TimeSeries given actual timeseries.
-    public TimeSeries predictTimeSeries(TimeSeries xReq, TimeSeries xActual, TimeSeries yActual, int offset){
+    public TimeSeries predictTimeSeries(TimeSeries xReq, TimeSeries xActual, TimeSeries yActual, int offset) {
 
-        TimeSeries result = new TimeSeries(yActual.name+", pred.");
+        TimeSeries result = new TimeSeries(yActual.name + ", pred.");
 
-        for (int i = 0; i < xReq.Values.size()-offset; i++){
+        for (int i = 0; i < xReq.Values.size() - offset; i++) {
 
-            Date date  = xReq.Values.get(i).x;
-            Double val  = xReq.Values.get(i).y;
+            Date date = xReq.Values.get(i).x;
+            Double val = xReq.Values.get(i).y;
 
             TimeSeries xActBefore = xActual.beforeDate(date);
             TimeSeries yActBefore = yActual.beforeDate(date);
 
-            if (xActBefore.Values.size() == 0){
+            if (xActBefore.Values.size() == 0) {
                 continue;
             }
 
@@ -118,12 +116,12 @@ public class UserParameters {
             ArrayList<Double> yvalues = new ArrayList<>();
 
             // generate training set
-            for (int j = 0; j < xActBefore.Values.size(); j++){
+            for (int j = 0; j < xActBefore.Values.size(); j++) {
 
-                Date locdate = offsetDate( xActBefore.Values.get(j).x, offset);
+                Date locdate = offsetDate(xActBefore.Values.get(j).x, offset);
                 double x = xActBefore.Values.get(j).y;
 
-                if (!predValues.containsKey( TimeSeries.formatData(locdate) )){
+                if (!predValues.containsKey(TimeSeries.formatData(locdate))) {
                     continue;
                 }
 
@@ -143,24 +141,24 @@ public class UserParameters {
     }
 
     // Predicts the recovery rate from history values.
-    public double predictRecovery(ArrayList<Double> pastX, ArrayList<Double> pastY, Double futureX){
+    public double predictRecovery(ArrayList<Double> pastX, ArrayList<Double> pastY, Double futureX) {
 
 
         double result = -1;
 
         // collect values of past records into bins
 
-        double [] bins = new double[11];
-        double [] counts = new double[11];
+        double[] bins = new double[11];
+        double[] counts = new double[11];
 
-        for (int i = 0; i < 11; i++){
+        for (int i = 0; i < 11; i++) {
             bins[i] = 0;
             counts[i] = 0;
         }
 
-        for (int i = 0; i < pastY.size(); i++){
+        for (int i = 0; i < pastY.size(); i++) {
 
-            if (pastX.get(i) <0){
+            if (pastX.get(i) < 0) {
                 continue;
             }
 
@@ -168,8 +166,8 @@ public class UserParameters {
             counts[((int) Math.round(pastX.get(i)))] += 1;
         }
 
-        for (int i = 0; i < 11; i++){
-            if(counts[i] == 0){
+        for (int i = 0; i < 11; i++) {
+            if (counts[i] == 0) {
                 continue;
             }
             bins[i] = bins[i] / counts[i];
@@ -188,7 +186,7 @@ public class UserParameters {
 
         TimeSeries result = new TimeSeries(values.name + ", avg. divergence");
 
-        for (int i = 0; i < requirements.Values.size(); i++){
+        for (int i = 0; i < requirements.Values.size(); i++) {
 
             Date x = requirements.Values.get(i).x;
 
@@ -201,28 +199,28 @@ public class UserParameters {
             // construct data
             HashMap<String, Double> reqVals = req.toDictionary();
 
-            for (int j = 0; j < vals.Values.size(); j++){
+            for (int j = 0; j < vals.Values.size(); j++) {
 
                 int last = vals.Values.size() - j - 1;
 
                 Date d = vals.Values.get(last).x;
 
-                if (!reqVals.containsKey( TimeSeries.formatData(d) ))
+                if (!reqVals.containsKey(TimeSeries.formatData(d)))
                     continue;
 
                 Double yp = reqVals.get(TimeSeries.formatData(d));
                 Double y = vals.Values.get(last).y;
 
-                seq1.add(0,yp);
+                seq1.add(0, yp);
                 seq2.add(0, y);
 
-                if (seq1.size() >= timewindow){
+                if (seq1.size() >= timewindow) {
                     break;
                 }
 
             }
 
-            if (seq1.size() == 0){
+            if (seq1.size() == 0) {
                 result.AddValue(x, -1);
                 continue;
             }
@@ -240,8 +238,8 @@ public class UserParameters {
 
         double result = 0;
 
-        for (int i = 0; i < seq1.size(); i++){
-            result += Math.abs( seq1.get(i) - seq2.get(i) ) / seq1.size();
+        for (int i = 0; i < seq1.size(); i++) {
+            result += Math.abs(seq1.get(i) - seq2.get(i)) / seq1.size();
         }
 
         return result;

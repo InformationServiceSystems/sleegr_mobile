@@ -5,23 +5,16 @@ import android.util.Log;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToday;
-import static com.iss.android.wearable.datalayer.DateTimeManager.getDayFromToday;
 
 /**
  * Created by Euler on 1/7/2016.
  */
 public class DataProcessingManager {
 
-    public static  String [] GetAllStates(){
+    public static String[] GetAllStates() {
 
-        return new String[] {
+        return new String[]{
                 "Resting",
                 "Swimming",
                 "Cycling",
@@ -33,7 +26,7 @@ public class DataProcessingManager {
 
     // Wrapper for when there is no timeshift
     public static double[] getCooldownParameters(ArrayList<ISSRecordData> data) {
-        return  getCooldownParameters(data, 0);
+        return getCooldownParameters(data, 0);
     }
 
     // A method returning parameters describing a curve fitting the measured cooldown heart rates
@@ -61,7 +54,7 @@ public class DataProcessingManager {
                 Log.d("why?", e.toString());
             }
 
-            if(startTime == null){
+            if (startTime == null) {
                 try {
                     startTime = Calendar.getInstance();
                     startTime.setTime(sdf.parse(record.Date + "_" + record.Timestamp));
@@ -92,11 +85,11 @@ public class DataProcessingManager {
     }
 
     // A method calculating the sum of double values in a list
-    public static double sum(ArrayList<Double> v){
+    public static double sum(ArrayList<Double> v) {
 
         double result = 0;
 
-        for (int i = 0; i < v.size(); i++){
+        for (int i = 0; i < v.size(); i++) {
             result += v.get(i);
         }
 
@@ -105,11 +98,11 @@ public class DataProcessingManager {
     }
 
     // A method calculating the dot product of two vectors.
-    public static double dot(ArrayList<Double> a, ArrayList<Double> b){
+    public static double dot(ArrayList<Double> a, ArrayList<Double> b) {
 
         double result = 0;
 
-        for (int i = 0; i < b.size(); i++){
+        for (int i = 0; i < b.size(); i++) {
             result += a.get(i) * b.get(i);
         }
 
@@ -117,11 +110,11 @@ public class DataProcessingManager {
 
     }
 
-    public static double min(ArrayList<Double> arr){
+    public static double min(ArrayList<Double> arr) {
 
         double result = arr.get(0);
 
-        for (int i = 0; i < arr.size(); i ++){
+        for (int i = 0; i < arr.size(); i++) {
             if (arr.get(i) < result)
                 result = arr.get(i);
         }
@@ -130,7 +123,7 @@ public class DataProcessingManager {
 
     }
 
-    public static  double [] fitExponent(ArrayList<Double> X, ArrayList<Double> Y) {
+    public static double[] fitExponent(ArrayList<Double> X, ArrayList<Double> Y) {
 
         double minBias = 60; //min(Y) - 0.5;
         double bestObj = 1e+10;
@@ -138,7 +131,7 @@ public class DataProcessingManager {
 
         for (int iter = 0; iter < 1; iter++) {
 
-            double bias = minBias - iter*2;
+            double bias = minBias - iter * 2;
 
             ArrayList<Double> x = new ArrayList<>(X);
             ArrayList<Double> yl = new ArrayList<>();
@@ -198,7 +191,7 @@ public class DataProcessingManager {
                 obj += diff * diff;
             }
 
-            if (obj < bestObj){
+            if (obj < bestObj) {
                 bestObj = obj;
                 globalSolution[0] = solution[0];
                 globalSolution[1] = solution[1];
@@ -212,26 +205,26 @@ public class DataProcessingManager {
     }
 
     // A method checking if a given matrix' diagonal is zero.
-    public static  boolean TestZerosDiag(double[][] A) {
+    public static boolean TestZerosDiag(double[][] A) {
         return A[0][0] == 0 || A[1][1] == 0;
     }
 
     // A method normalising the rows of a given matrix
     // (or I'd guess so from the name, although I memorise normalising differently)
-    public static  void NormalizeRows(double[][] A, double[] b) {
+    public static void NormalizeRows(double[][] A, double[] b) {
 
-        A[0][1]=A[0][1]/A[0][0];
-        b[0]=b[0]/A[0][0];
-        A[0][0]=1;
+        A[0][1] = A[0][1] / A[0][0];
+        b[0] = b[0] / A[0][0];
+        A[0][0] = 1;
 
-        A[1][0]=A[1][0]/A[1][1];
-        b[1]=b[1]/A[1][1];
-        A[1][1]=1;
+        A[1][0] = A[1][0] / A[1][1];
+        b[1] = b[1] / A[1][1];
+        A[1][1] = 1;
 
     }
 
     // Maybe it's better you describe these methods
-    public static  void TurnToIdentity(double[][] A, double[] b) {
+    public static void TurnToIdentity(double[][] A, double[] b) {
         A[0][0] = A[0][0] - A[1][0] * A[0][1];
         A[0][1] = 0;
         b[0] = b[0] - b[1] * A[0][1]; //Isn't this multiplication superfluous since it's always 0?
@@ -241,10 +234,10 @@ public class DataProcessingManager {
         b[1] = b[1] - b[0] * A[1][0]; //dito
     }
 
-    public static  double [] Solve2d(double[][] A, double[] b) {
+    public static double[] Solve2d(double[][] A, double[] b) {
 
         if (TestZerosDiag(A))
-            A = new double [][] { A[1], A[0] };
+            A = new double[][]{A[1], A[0]};
 
         if (TestZerosDiag(A))
             return null;
@@ -252,34 +245,32 @@ public class DataProcessingManager {
         NormalizeRows(A, b);
         TurnToIdentity(A, b);
 
-        double [] result = new double[] { b[0] / A[0][0], b[1] / A[1][1] };
+        double[] result = new double[]{b[0] / A[0][0], b[1] / A[1][1]};
 
         return result;
     }
 
 
-
-
-    static ArrayList<ISSRecordData> extractLastCooldown(ArrayList<ISSRecordData> lastActivity){
+    static ArrayList<ISSRecordData> extractLastCooldown(ArrayList<ISSRecordData> lastActivity) {
 
         int i = lastActivity.size() - 1;
 
-        while(!lastActivity.get(i).ExtraData.contains("Cooling")){
+        while (!lastActivity.get(i).ExtraData.contains("Cooling")) {
             i--;
-            if (i < 0){
+            if (i < 0) {
                 return null;
             }
         }
 
-        if (i < 0){
-            return null ;
+        if (i < 0) {
+            return null;
         }
 
         // get all the cooling measurements
 
         ArrayList<ISSRecordData> accumulator = new ArrayList<>();
 
-        while(lastActivity.get(i).ExtraData.contains("Cooling")){
+        while (lastActivity.get(i).ExtraData.contains("Cooling")) {
             accumulator.add(0, lastActivity.get(i));
             i--;
         }
@@ -288,13 +279,13 @@ public class DataProcessingManager {
 
     }
 
-    static ArrayList<ISSRecordData> extractFirstTraining(ArrayList<ISSRecordData> lastActivity){
+    static ArrayList<ISSRecordData> extractFirstTraining(ArrayList<ISSRecordData> lastActivity) {
 
         int i = 0;
 
-        while(lastActivity.get(i).ExtraData.contains("Cooling")){
+        while (lastActivity.get(i).ExtraData.contains("Cooling")) {
             i++;
-            if (i == lastActivity.size()){
+            if (i == lastActivity.size()) {
                 return null;
             }
 
@@ -304,8 +295,8 @@ public class DataProcessingManager {
 
         ArrayList<ISSRecordData> accumulator = new ArrayList<>();
 
-        while(i < lastActivity.size() && !lastActivity.get(i).ExtraData.contains("Cooling")){
-            accumulator.add( lastActivity.get(i));
+        while (i < lastActivity.size() && !lastActivity.get(i).ExtraData.contains("Cooling")) {
+            accumulator.add(lastActivity.get(i));
             i++;
         }
 
@@ -313,23 +304,23 @@ public class DataProcessingManager {
 
     }
 
-    static ArrayList<ISSRecordData> extractLastTraining(ArrayList<ISSRecordData> lastActivity){
+    static ArrayList<ISSRecordData> extractLastTraining(ArrayList<ISSRecordData> lastActivity) {
 
         int i = lastActivity.size() - 1;
 
-        while(lastActivity.get(i).ExtraData.contains("Cooling")){
+        while (lastActivity.get(i).ExtraData.contains("Cooling")) {
             i--;
         }
 
-        if (i < 0){
-            return null ;
+        if (i < 0) {
+            return null;
         }
 
         // get training measures
 
         ArrayList<ISSRecordData> accumulator = new ArrayList<>();
 
-        while(i >= 0 && !lastActivity.get(i).ExtraData.contains("Cooling")){
+        while (i >= 0 && !lastActivity.get(i).ExtraData.contains("Cooling")) {
             accumulator.add(0, lastActivity.get(i));
             i--;
         }
@@ -338,10 +329,10 @@ public class DataProcessingManager {
 
     }
 
-    public static double getRPErating(ArrayList<ISSRecordData> data){
+    public static double getRPErating(ArrayList<ISSRecordData> data) {
 
-        for (ISSRecordData recordData: data){
-            if (recordData.MeasurementType == 1024){
+        for (ISSRecordData recordData : data) {
+            if (recordData.MeasurementType == 1024) {
                 return recordData.Value1;
             }
         }
@@ -350,18 +341,18 @@ public class DataProcessingManager {
 
     }
 
-    public static double [] getAVGHR(ArrayList<ISSRecordData> lastTraining) {
+    public static double[] getAVGHR(ArrayList<ISSRecordData> lastTraining) {
 
         double sum = 0;
         double count = 0;
 
-        for (ISSRecordData record: lastTraining){
+        for (ISSRecordData record : lastTraining) {
 
             if (record.MeasurementType != 21)
                 continue;
 
             sum += record.Value1;
-            count ++;
+            count++;
 
         }
 
@@ -370,31 +361,31 @@ public class DataProcessingManager {
         double dev = 0;
         count = 0;
 
-        for (ISSRecordData record: lastTraining){
+        for (ISSRecordData record : lastTraining) {
 
             if (record.MeasurementType != 21)
                 continue;
 
             dev += (record.Value1 - avg);
-            count ++;
+            count++;
 
         }
 
         dev = dev / count;
 
-        return new double [] {avg, dev};
+        return new double[]{avg, dev};
 
     }
 
-    public static TimeSeries ComputeExponent(double [] p, TimeSeries series){
+    public static TimeSeries ComputeExponent(double[] p, TimeSeries series) {
 
         long start = series.Values.get(0).x.getTime();
         TimeSeries result = new TimeSeries(series.name + ", exp. fit");
 
-        for (int i =0; i < series.Values.size(); i++){
+        for (int i = 0; i < series.Values.size(); i++) {
 
-            double x = (series.Values.get(i).x.getTime()  - start) / 1000.0;
-            double y = Math.exp(-x / p[0]) *p[1] + p[2];
+            double x = (series.Values.get(i).x.getTime() - start) / 1000.0;
+            double y = Math.exp(-x / p[0]) * p[1] + p[2];
 
             result.AddValue(series.Values.get(i).x, y);
 

@@ -23,6 +23,25 @@ import java.util.Map;
 
 public class Auth0Activity extends Activity {
 
+    private final LockCallback mCallback = new AuthenticationCallback() {
+        @Override
+        public void onAuthentication(Credentials credentials) {
+            Toast.makeText(getApplicationContext(), "Log In - Success", Toast.LENGTH_SHORT).show();
+            CredentialsManager.saveCredentials(getApplicationContext(), credentials);
+            startActivity(new Intent(Auth0Activity.this, MainActivity.class));
+            finish();
+        }
+
+        @Override
+        public void onCanceled() {
+            Toast.makeText(getApplicationContext(), "Log In - Cancelled", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onError(LockException error) {
+            Toast.makeText(getApplicationContext(), "Log In - Error Occurred", Toast.LENGTH_SHORT).show();
+        }
+    };
     private Lock mLock;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,25 +94,5 @@ public class Auth0Activity extends Activity {
         mLock.onDestroy(this);
         mLock = null;
     }
-
-    private final LockCallback mCallback = new AuthenticationCallback() {
-        @Override
-        public void onAuthentication(Credentials credentials) {
-            Toast.makeText(getApplicationContext(), "Log In - Success", Toast.LENGTH_SHORT).show();
-            CredentialsManager.saveCredentials(getApplicationContext(), credentials);
-            startActivity(new Intent(Auth0Activity.this, MainActivity.class));
-            finish();
-        }
-
-        @Override
-        public void onCanceled() {
-            Toast.makeText(getApplicationContext(), "Log In - Cancelled", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onError(LockException error) {
-            Toast.makeText(getApplicationContext(), "Log In - Error Occurred", Toast.LENGTH_SHORT).show();
-        }
-    };
 
 }

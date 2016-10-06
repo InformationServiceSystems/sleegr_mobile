@@ -6,19 +6,15 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.auth0.android.result.Credentials;
-import com.google.android.gms.auth.api.credentials.Credential;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Asset;
@@ -38,46 +34,32 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.HttpsURLConnection;
 
 public class DataSyncService extends Service implements DataApi.DataListener,
         MessageApi.MessageListener, NodeApi.NodeListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    public static DataSyncService itself = null;
-    public boolean serverSync = false;
-    public static String Message = "";
-
     private static final String TAG = "MainActivity";
-
+    public static DataSyncService itself = null;
+    public static String Message = "";
+    public static String NEW_MESSAGE_AVAILABLE = "log the output";
+    public boolean serverSync = false;
+    public String UserID = "userID";
+    String uploadUrl = "www.web01.iss.uni-saarland.de/post_json";
+    SyncAlarm alarm = new SyncAlarm();
     private GoogleApiClient mGoogleApiClient;
     private boolean mResolvingError = false;
     private Handler mHandler;
-
-    public static String NEW_MESSAGE_AVAILABLE = "log the output";
-
-
-    String uploadUrl = "www.web01.iss.uni-saarland.de/post_json";
 
     // A method broadcasting a String.
     public static void OutputEventSq(String str) {
@@ -93,6 +75,12 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         return DataStorageManager.getProperUserID(itself.UserID);
         //return "1024";
+    }
+
+    private static void LOGD(final String tag, String message) {
+        if (Log.isLoggable(tag, Log.DEBUG)) {
+            Log.d(tag, message);
+        }
     }
 
     @Override
@@ -125,10 +113,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     }
 
-    SyncAlarm alarm = new SyncAlarm();
-
-    public String UserID = "userID";
-
     // a method called after the service is started, that is responsible for the service not shutting down.
     // It also tries to get the UserID and welcomes the user.
     @Override
@@ -143,7 +127,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             DataStorageManager.InitializeTriathlonFolder();
 
-        }catch (Exception ex){
+        } catch (Exception ex) {
 
         }
         return START_STICKY;
@@ -269,7 +253,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             // Okay this looks f'kin ugly, but there's no other way due to erasure of ArrayLists.
             // It's bs but there's no way around.
             ContentResolver resolver = MainActivity.getContext().getContentResolver();
-            for (ISSRPEAnswers row: RPEAnswers) {
+            for (ISSRPEAnswers row : RPEAnswers) {
 
                 ContentValues values = new ContentValues();
                 values.put(ISSContentProvider.MEASUREMENT_ID,
@@ -278,7 +262,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                         ISSDictionary.MapToByteArray(row.Answers));
                 resolver.insert(ISSContentProvider.RPE_CONTENT_URI, values);
             }
-            for (ISSRecordData row: ISSRecords) {
+            for (ISSRecordData row : ISSRecords) {
                 Log.d("measurement id", String.valueOf(row.measurementID));
                 ContentValues values = new ContentValues();
                 values.put(ISSContentProvider.SENT, false);
@@ -298,7 +282,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 Log.d("values", values.toString());
                 resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, values);
             }
-            for (ISSMeasurement row: Measurements) {
+            for (ISSMeasurement row : Measurements) {
                 Log.d("tries to insert", String.valueOf(row._ID));
                 ContentValues values = new ContentValues();
                 values.put(ISSContentProvider._ID, row._ID);
@@ -327,7 +311,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         sendBroadcast(intent);
 
     }
-
 
     // A method that connects to the Smartwatch and asks it to send data it has stored.
     public void RequestDataFromWatch() {
@@ -411,7 +394,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         String result = null;
         try {
 
-            URL object=new URL(uri);
+            URL object = new URL(uri);
 
             String header = "bearer ";
             String Token = CredentialsManager.getCredentials(MainActivity.getContext()).getIdToken();
@@ -441,14 +424,14 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 br.close();
                 System.out.println("" + sb.toString());
                 Log.d("message", sb.toString());
-                if (sb.toString().contains("{\"status\": \"success\"}")){
-                    server_transac_successful=true;
+                if (sb.toString().contains("{\"status\": \"success\"}")) {
+                    server_transac_successful = true;
                 } else {
-                    server_transac_successful=false;
+                    server_transac_successful = false;
                 }
             } else {
                 System.out.println(con.getResponseMessage());
-                server_transac_successful=false;
+                server_transac_successful = false;
             }
 
         } catch (Exception e) {
@@ -468,6 +451,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         return result;
     }
 
+
+    // A method querying for all records that have not been sent yet, and sends them to the server.
+
     private void showToast(final Context context, final String message, final int length) {
         Activity mActivity = (Activity) MainActivity.itself;
         mActivity.runOnUiThread(new Runnable() {
@@ -477,9 +463,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             }
         });
     }
-
-
-    // A method querying for all records that have not been sent yet, and sends them to the server.
 
     public void ShareDataWithServer() {
 
@@ -530,7 +513,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             mCursor.close();
         }
 
-        if (arrayOfMeasurementIDs.size()>0) {
+        if (arrayOfMeasurementIDs.size() > 0) {
             // This if clause guarantees, that if there are no new records, transmitting to the server will stop.
 
             try {
@@ -607,7 +590,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         int mRowsUpdated;
         StringBuilder stringBuilder = new StringBuilder();
         String or = "";
-        for (Integer i: arrayOfMeasurementIDs) {
+        for (Integer i : arrayOfMeasurementIDs) {
             stringBuilder.append(or + ISSContentProvider._ID + " = " + i);
             or = " OR ";
         }
@@ -630,9 +613,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     private ArrayList<String> createDateList() {
         ArrayList<String> dateList = new ArrayList<String>();
         Calendar cal = Calendar.getInstance();
-        for (int i = 0; i < 30; i++){
+        for (int i = 0; i < 30; i++) {
             Date date = cal.getTime();
-            cal.add(Calendar.DATE,-1);
+            cal.add(Calendar.DATE, -1);
             String dateAsString = ISSDictionary.dateToDayString(date);
             dateList.add(dateAsString);
         }
@@ -663,12 +646,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             Wearable.DataApi.removeListener(mGoogleApiClient, this);
             Wearable.MessageApi.removeListener(mGoogleApiClient, this);
             Wearable.NodeApi.removeListener(mGoogleApiClient, this);
-        }
-    }
-
-    private static void LOGD(final String tag, String message) {
-        if (Log.isLoggable(tag, Log.DEBUG)) {
-            Log.d(tag, message);
         }
     }
 

@@ -1,15 +1,9 @@
 package com.iss.android.wearable.datalayer;
 
-import android.content.ContentValues;
-import android.net.Uri;
-import android.util.Log;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -116,7 +110,7 @@ public class CSVManager {
 
                 String[] split = line.split("\",\"");
                 // Sometimes Google Sleep fucks up and inserts an extra line. Need this to rule that out
-                if (split.length<3 || split[3].length()<12){
+                if (split.length < 3 || split[3].length() < 12) {
                     continue;
                 }
                 String date = split[3].substring(0, 12);
@@ -164,7 +158,7 @@ public class CSVManager {
 
                 String[] split = line.split("\",\"");
                 // Sometimes Google Sleep fucks up and inserts an extra line. Need this to rule that out
-                if (split.length<3 || split[3].length()<12){
+                if (split.length < 3 || split[3].length() < 12) {
                     continue;
                 }
                 String date = split[3].substring(0, 12);
@@ -173,7 +167,7 @@ public class CSVManager {
                 Double value = Double.parseDouble(split[12]);
                 Double length = Double.parseDouble(split[5]);
 
-                ISSRecordData d = new ISSRecordData(1,777, date, "01:01:01", "", value.floatValue() , 0.0f, length.floatValue(), 1);
+                ISSRecordData d = new ISSRecordData(1, 777, date, "01:01:01", "", value.floatValue(), 0.0f, length.floatValue(), 1);
                 result.add(d);
 
             }

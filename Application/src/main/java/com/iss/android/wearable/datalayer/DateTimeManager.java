@@ -8,11 +8,10 @@ import java.util.Date;
 /**
  * Created by Euler on 1/29/2016.
  */
-public class DateTimeManager
-{
+public class DateTimeManager {
 
     // A method that determines the date as a string given a certain offset from today.
-    public static String getDayFromToday(int dayoffset){
+    public static String getDayFromToday(int dayoffset) {
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cl = Calendar.getInstance();
@@ -38,7 +37,7 @@ public class DateTimeManager
     }
 
     // A method that retrieves the date from today +- a certain offset.
-    public static Date getDateFromToday(int dayoffset){
+    public static Date getDateFromToday(int dayoffset) {
 
         Calendar cl = Calendar.getInstance();
         cl.add(Calendar.DAY_OF_YEAR, -dayoffset);

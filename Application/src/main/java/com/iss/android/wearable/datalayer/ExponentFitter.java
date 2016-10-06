@@ -1,7 +1,5 @@
 package com.iss.android.wearable.datalayer;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 
 /**
@@ -11,12 +9,12 @@ public class ExponentFitter {
 
     public static double H = 150.0;
 
-    public static double fExp(double [] p, double x){
+    public static double fExp(double[] p, double x) {
         // double a = p[0], t = p[1], c = p[2];
         return (H - p[2]) * Math.exp(-(x - p[1]) / p[0]) + p[2];
     }
 
-    public static double [] computeFitGrd(double[] p, ArrayList<Double> X, ArrayList<Double> Y){
+    public static double[] computeFitGrd(double[] p, ArrayList<Double> X, ArrayList<Double> Y) {
         // the form of the curve as given in fExp
         // to compute the derivatives of norm of differences, use
         //          http://www.derivative-calculator.net/
@@ -30,12 +28,12 @@ public class ExponentFitter {
             double a = p[0], t = p[1], c = p[2];
             double x = X.get(i);
 
-            double expValue = Math.exp(-(x-t)/a);
-            double diff = (H-c)*expValue + c - Y.get(i);
+            double expValue = Math.exp(-(x - t) / a);
+            double diff = (H - c) * expValue + c - Y.get(i);
 
-            double da =  diff*(H-c)*(x-t)* expValue / (a*a);
-            double dt =  diff*(H-c)* expValue / a;
-            double dc =  diff*(1 - expValue);
+            double da = diff * (H - c) * (x - t) * expValue / (a * a);
+            double dt = diff * (H - c) * expValue / a;
+            double dc = diff * (1 - expValue);
 
             Da += da;
             Dt += dt;
@@ -50,11 +48,11 @@ public class ExponentFitter {
         Dc = Dc / X.size();
         //norm = Da*Da + Db*Db + Dc*Dc;
 
-        return new double [] {Da, Dt, Dc, norm} ;
+        return new double[]{Da, Dt, Dc, norm};
 
     }
 
-    public static double vect_norm(double [] vector){
+    public static double vect_norm(double[] vector) {
         double result = 0;
 
         for (int i = 0; i < vector.length; i++) {
@@ -64,16 +62,16 @@ public class ExponentFitter {
         return result;
     }
 
-    public static void applyAdam(double [] p, double alpha, double [] gr, double [] gn){
+    public static void applyAdam(double[] p, double alpha, double[] gr, double[] gn) {
 
         for (int i = 0; i < p.length; i++) {
-            gn[i] = gn[i] * 0.9 + gr[i]*gr[i] * 0.1;
-            p[i] = p[i] - alpha * gr[i] / Math.sqrt( gn[i] + 1e-10 );
+            gn[i] = gn[i] * 0.9 + gr[i] * gr[i] * 0.1;
+            p[i] = p[i] - alpha * gr[i] / Math.sqrt(gn[i] + 1e-10);
         }
 
     }
 
-    public static double minval( ArrayList<Double> Y){
+    public static double minval(ArrayList<Double> Y) {
 
         double min = Y.get(0);
 
@@ -87,7 +85,7 @@ public class ExponentFitter {
 
     }
 
-    public static double maxval( ArrayList<Double> Y){
+    public static double maxval(ArrayList<Double> Y) {
 
         double mx = Y.get(0);
 
@@ -101,15 +99,14 @@ public class ExponentFitter {
 
     }
 
-    public static double [] fitLowerExpGD(ArrayList<Double> Xr, ArrayList<Double> Yr){
+    public static double[] fitLowerExpGD(ArrayList<Double> Xr, ArrayList<Double> Yr) {
 
 
-        if (Xr.size() == 0){
-            return new double[]{1000.0,0.0,0.0};
+        if (Xr.size() == 0) {
+            return new double[]{1000.0, 0.0, 0.0};
         }
 
         // start with the maximum value in the data; this allows to reduce initial HR "heating" artifact
-
 
 
         double maxY = maxval(Yr);
@@ -119,7 +116,7 @@ public class ExponentFitter {
         ArrayList<Double> X = new ArrayList<>();
         ArrayList<Double> Y = new ArrayList<>();
 
-        for (int i = 0 ; i < Xr.size(); i++){
+        for (int i = 0; i < Xr.size(); i++) {
 
             if (Yr.get(i) == maxY)
                 afterMax = true;
@@ -127,7 +124,7 @@ public class ExponentFitter {
             if (i > 30)
                 afterMax = true; // we assume that heating up takes around two minutes
 
-            if (afterMax){
+            if (afterMax) {
                 X.add(Xr.get(i));
                 Y.add(Yr.get(i));
             }
@@ -135,19 +132,19 @@ public class ExponentFitter {
         }
 
         // check if there is nothing but noise ....
-        if (X.size() == 0){
-            return new double[]{1000.0,0.0,0.0};
+        if (X.size() == 0) {
+            return new double[]{1000.0, 0.0, 0.0};
         }
 
-        double [] result = new double [] {200.0, 0.0, 60.0 };
-        double [] grdscl = new double [] {1, 1, 1 };
+        double[] result = new double[]{200.0, 0.0, 60.0};
+        double[] grdscl = new double[]{1, 1, 1};
 
         double norm = 100;
         double pval = 0;
 
         int maxidx = 20000; // protects against convergence problems
 
-        while(maxidx > 0){
+        while (maxidx > 0) {
             maxidx--;
             double[] grad = computeFitGrd(result, X, Y);
             double alpha = 1;
