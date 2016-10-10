@@ -146,7 +146,7 @@
             android:layout_width="30dp"
             android:layout_height="fill_parent"
             android:background="@color/grey"
-            android:src="@drawable/ic_ac_unit_black_24dp"
+            android:src="@drawable/ic_directions_run_black_24dp"
             android:onClick="onClicked (MainActivity)"
             android:layout_marginBottom="3dp"
             android:layout_marginLeft="5dp"
