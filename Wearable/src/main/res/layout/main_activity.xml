@@ -14,6 +14,7 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -38,17 +39,6 @@
 
 
         <TextView
-            android:id="@+id/timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="3dp"
-            android:layout_marginRight="3dp"
-            android:layout_toEndOf="@+id/searchForHRM"
-            android:text="0:00"
-            android:textColor="@color/black" />
-
-        <TextView
             android:id="@+id/messageLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,20 +48,35 @@
             android:textColor="@color/black" />
 
         <TextView
-            android:id="@+id/SWbatteryLabel"
+            android:id="@+id/timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/batteryLabel"
-            android:text="SW:"
-            android:textColor="@color/black" />
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:text="0:00"
+            android:textColor="@color/black"
+            android:layout_alignTop="@+id/searchForHRM"
+            android:layout_toEndOf="@+id/searchForHRM" />
 
         <TextView
             android:id="@+id/batteryLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
             android:text="HRM:"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            android:layout_alignBaseline="@+id/SWbatteryLabel"
+            android:layout_alignBottom="@+id/SWbatteryLabel"
+            android:layout_alignParentEnd="true" />
+
+        <TextView
+            android:id="@+id/SWbatteryLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SW:"
+            android:textColor="@color/black"
+            android:layout_alignBaseline="@+id/timer"
+            android:layout_alignBottom="@+id/timer"
+            android:layout_toStartOf="@+id/batteryLabel" />
 
 
     </RelativeLayout>
@@ -142,10 +147,11 @@
             android:layout_height="fill_parent"
             android:background="@color/grey"
             android:src="@drawable/ic_ac_unit_black_24dp"
-            android:onClick="onClicked"
+            android:onClick="onClicked (MainActivity)"
             android:layout_marginBottom="3dp"
             android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@+id/morningHR"/>
+            android:layout_toRightOf="@+id/morningHR"
+            tools:src="@drawable/ic_directions_run_black_24dp" />
 
 
         <ImageButton

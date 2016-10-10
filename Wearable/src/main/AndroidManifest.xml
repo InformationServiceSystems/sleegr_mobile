@@ -92,8 +92,7 @@
         </activity>
         <activity
             android:name=".DeviceScanActivity"
-            android:enabled="true"
-            android:label="hello" >
+            android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
