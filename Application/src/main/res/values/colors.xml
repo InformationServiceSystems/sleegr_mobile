@@ -11,7 +11,7 @@
     <color name="darkorange" type="color">#FFFF8800</color>
     <color name="darkred" type="color">#FFCC0000</color>
     <color name="white" type="color">#FFFFFFFF</color>
-    <color name="black" type="color">#FF000000</color>
+    <color name="black" type="color">#202020</color>
     <color name="grey" type="color">#FF777777</color>
     <color name="accent_material_light_1">#563dfe</color>
     <color name="accent_material_dark_1">#FF536DFE</color>

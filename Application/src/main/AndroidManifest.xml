@@ -84,17 +84,18 @@
             android:theme="@style/MyLockStyle">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="YOUR_NAMESPACE"
-                    android:pathPrefix="/android/YOUR_APP_PACKAGE_NAME/callback"
+                    android:host="ISS"
+                    android:pathPrefix="/android/com.iss.android.wearable.datalayer/callback"
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity android:name="com.auth0.android.lock.provider.WebViewActivity" />
+        <activity
+            android:name="com.auth0.android.provider.WebAuthActivity"
+            android:theme="@style/MyLockStyle" />
 
         <service
             android:name=".DataSyncService"

@@ -29,20 +29,22 @@
             android:layout_height="30dp"
             android:onClick="onSyncClick"
             android:id="@+id/buttonSync"
-            android:background="@drawable/syncbutton"
+            android:background="@android:drawable/stat_notify_sync"
             android:layout_toStartOf="@+id/buttonServer"
             android:layout_margin="5dp"
-            android:layout_marginStart="0dp" />
+            android:layout_marginStart="0dp"
+            android:backgroundTint="@color/black" />
 
         <ImageButton
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:onClick="onServerSync"
             android:id="@+id/buttonServer"
-            android:background="@drawable/serverbutton"
+            android:background="@android:drawable/stat_sys_upload"
             android:layout_alignParentEnd="true"
             android:layout_margin="5dp"
-            android:layout_marginStart="0dp" />
+            android:layout_marginStart="0dp"
+            android:backgroundTint="@color/black" />
 
     </RelativeLayout>
 
