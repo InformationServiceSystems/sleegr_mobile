@@ -80,8 +80,7 @@ public class DataStorageManager {
              * Sets the values of each column and inserts the word. The arguments to the "put"
              * method are "column name" and "value"
              */
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
-            String sensorname = pref.getString(String.valueOf(R.string.device_name), "dummy sensor");
+            String sensorname = pref.getString(MainActivity.getContext().getString(R.string.device_name), "dummy sensor");
             Log.d("sensorname", sensorname);
             mNewValues.put(ISSContentProvider.DATE, data.Date);
             mNewValues.put(ISSContentProvider.TIMESTAMP, data.Timestamp);
