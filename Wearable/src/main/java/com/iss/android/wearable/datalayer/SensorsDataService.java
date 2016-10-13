@@ -170,10 +170,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             }
 
             if (event.values.length == 1) {
-                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], 0, 0, measurementNumber);
+                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], 0, 0, PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext()).getString(getString(R.string.device_name), "dummy sensor"), measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             } else {
-                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2], measurementNumber);
+                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2], "Samsung Wear", measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             }
 
@@ -268,7 +268,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
                     int result = ReadHeartRateData(characteristic);
 
-                    ISSRecordData data = new ISSRecordData(UserID, Sensor.TYPE_HEART_RATE, GetDateNow(), GetTimeNow(), currentState, result, 0, 0, measurementNumber);
+                    ISSRecordData data = new ISSRecordData(UserID, Sensor.TYPE_HEART_RATE, GetDateNow(), GetTimeNow(), currentState, result, 0, 0, PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext()).getString(getString(R.string.device_name), "dummy sensor"), measurementNumber);
                     DataStorageManager.insertISSRecordData(data);
 
                     sendHR(result);

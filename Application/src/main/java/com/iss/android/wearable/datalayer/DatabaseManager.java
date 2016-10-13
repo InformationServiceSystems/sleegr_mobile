@@ -29,6 +29,7 @@ public class DatabaseManager {
                 ISSContentProvider.VALUE1,
                 ISSContentProvider.VALUE2,
                 ISSContentProvider.VALUE3,
+                ISSContentProvider.SENSOR,
                 ISSContentProvider.MEASUREMENT,
                 ISSContentProvider.USERID};
         String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";

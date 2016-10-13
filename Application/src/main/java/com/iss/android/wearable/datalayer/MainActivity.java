@@ -650,6 +650,7 @@ public class MainActivity extends FragmentActivity implements
                             ISSContentProvider.VALUE1,
                             ISSContentProvider.VALUE2,
                             ISSContentProvider.VALUE3,
+                            ISSContentProvider.SENSOR,
                             ISSContentProvider.MEASUREMENT_ID
                     };
             String mSortOrder = ISSContentProvider.TIMESTAMP + " ASC";

@@ -39,9 +39,10 @@ public class ISSRecordData implements Serializable {
     public float Value1;
     public float Value2;
     public float Value3;
+    public String Sensor;
     public int measurementID;
 
-    public ISSRecordData(int UID, int MType, String date, String timestamp, String extraData, float v1, float v2, float v3, int measurementNumber) {
+    public ISSRecordData(int UID, int MType, String date, String timestamp, String extraData, float v1, float v2, float v3, String sensor, int measurementNumber) {
 
         UserID = UID;
         MeasurementType = MType;
@@ -51,6 +52,7 @@ public class ISSRecordData implements Serializable {
         Value1 = v1;
         Value2 = v2;
         Value3 = v3;
+        Sensor = sensor;
         measurementID = measurementNumber;
 
     }
@@ -77,23 +79,5 @@ public class ISSRecordData implements Serializable {
 
         Log.d("Timestamp post", time.getTime().toString());
         return time.getTime();
-    }
-
-
-    public void saveToContentProvider() {
-        ISSContentProvider provider = new ISSContentProvider();
-        ContentValues values = new ContentValues();
-        values.put(ISSContentProvider.USERID, UserID);
-        values.put(ISSContentProvider.MEASUREMENT, MeasurementType);
-        values.put(ISSContentProvider.DATE, Date);
-        values.put(ISSContentProvider.TIMESTAMP, Timestamp);
-        values.put(ISSContentProvider.EXTRA, ExtraData);
-        values.put(ISSContentProvider.VALUE1, Value1);
-        values.put(ISSContentProvider.VALUE2, Value2);
-        values.put(ISSContentProvider.VALUE3, Value3);
-
-        resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, values);
-
-        Log.d("Inserting", "a value");
     }
 }

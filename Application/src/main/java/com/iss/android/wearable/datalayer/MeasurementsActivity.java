@@ -196,6 +196,7 @@ public class MeasurementsActivity extends ListActivity {
                                 ISSContentProvider.VALUE1,
                                 ISSContentProvider.VALUE2,
                                 ISSContentProvider.VALUE3,
+                                ISSContentProvider.SENSOR,
                                 ISSContentProvider.MEASUREMENT_ID
                         };
                 String mSortOrder = ISSContentProvider.TIMESTAMP + " ASC";

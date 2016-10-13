@@ -48,7 +48,8 @@ public class ISSDictionary {
                 mCursor.getFloat(6),
                 mCursor.getFloat(7),
                 mCursor.getFloat(8),
-                mCursor.getInt(9));
+                mCursor.getString(9),
+                mCursor.getInt(10));
         return record;
     }
 

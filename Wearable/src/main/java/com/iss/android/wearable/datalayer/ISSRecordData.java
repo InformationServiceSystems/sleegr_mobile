@@ -21,9 +21,10 @@ public class ISSRecordData implements Serializable {
     public float Value1;
     public float Value2;
     public float Value3;
+    public String Sensor;
     public int measurementID;
 
-    public ISSRecordData(int UID, int MType, String date, String timestamp, String extraData, float v1, float v2, float v3, int measurementNumber) {
+    public ISSRecordData(int UID, int MType, String date, String timestamp, String extraData, float v1, float v2, float v3, String sensor, int measurementNumber) {
 
         UserID = UID;
         MeasurementType = MType;
@@ -33,6 +34,7 @@ public class ISSRecordData implements Serializable {
         Value1 = v1;
         Value2 = v2;
         Value3 = v3;
+        Sensor = sensor;
         measurementID = measurementNumber;
 
     }
@@ -53,9 +55,10 @@ public class ISSRecordData implements Serializable {
         float v1 = Float.parseFloat(split[5]);
         float v2 = Float.parseFloat(split[6]);
         float v3 = Float.parseFloat(split[7]);
-        int measurementNumber = Integer.parseInt(split[8]);
+        String sensor = split[8];
+        int measurementNumber = Integer.parseInt(split[9]);
 
-        return new ISSRecordData(UID, MType, date, timestamp, extraData, v1, v2, v3, measurementNumber);
+        return new ISSRecordData(UID, MType, date, timestamp, extraData, v1, v2, v3, sensor, measurementNumber);
 
     }
 

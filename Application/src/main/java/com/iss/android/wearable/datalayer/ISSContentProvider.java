@@ -38,6 +38,7 @@ public class ISSContentProvider extends ContentProvider {
     static final String VALUE1 = "value1";
     static final String VALUE2 = "value2";
     static final String VALUE3 = "value3";
+    static final String SENSOR = "sensor";
     static final String MEASUREMENT = "measurement";
     static final String MEASUREMENT_ID = "measurement_id";
     static final String RPE_ANSWERS = "rpe_answers";
@@ -54,7 +55,7 @@ public class ISSContentProvider extends ContentProvider {
     static final String RECORDS_TABLE_NAME = "records";
     static final String MEASUREMENTS_TABLE_NAME = "measurements";
     static final String RPE_TABLE_NAME = "RPESets";
-    static final int DATABASE_VERSION = 39;
+    static final int DATABASE_VERSION = 40;
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -64,6 +65,7 @@ public class ISSContentProvider extends ContentProvider {
                     TIMESTAMP + " TEXT NOT NULL, " +
                     EXTRA + " TEXT NOT NULL, " +
                     MEASUREMENT_ID + " INTEGER NOT NULL, " +
+                    SENSOR + " TEXT NOT NULL, " +
                     SENT + " TEXT NOT NULL, " +
                     VALUE1 + " TEXT NOT NULL, " +
                     VALUE2 + " TEXT NOT NULL, " +
