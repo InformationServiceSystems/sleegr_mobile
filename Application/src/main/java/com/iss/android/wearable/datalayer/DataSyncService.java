@@ -122,9 +122,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             alarm.SetAlarm(this);
 
-            String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-            OutputEvent(android_id);
-
             DataStorageManager.InitializeTriathlonFolder();
 
         } catch (Exception ex) {
