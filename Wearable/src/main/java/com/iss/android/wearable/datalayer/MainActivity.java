@@ -426,15 +426,6 @@ public class MainActivity extends Activity {
 
     public void onClicked(View view) {
         switch (view.getId()) {
-            case R.id.trainingHR:
-
-                if (SensorsDataService.itself != null) {
-
-                    if (!SensorsDataService.isNowASleepingHour())
-                        SensorsDataService.itself.SwitchSportsAction("TrainingHR");
-                }
-
-                break;
             case R.id.morningHR:
 
                 if (SensorsDataService.itself != null) {
@@ -444,12 +435,18 @@ public class MainActivity extends Activity {
                 }
 
                 break;
+            case R.id.trainingHR:
+
+                if (SensorsDataService.itself != null) {
+                    SensorsDataService.itself.SwitchSportsAction("TrainingHR");
+                }
+
+                break;
             case R.id.startCooldown:
 
                 if (SensorsDataService.itself != null) {
                     SensorsDataService.itself.SwitchSportsAction("Cooldown");
                 }
-
 
                 break;
             case R.id.continueCooldown:
