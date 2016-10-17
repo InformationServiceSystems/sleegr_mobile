@@ -80,4 +80,8 @@ public class ISSRecordData implements Serializable {
         Log.d("Timestamp post", time.getTime().toString());
         return time.getTime();
     }
+
+    public String getSensorDeviceName() {
+        return Sensor;
+    }
 }

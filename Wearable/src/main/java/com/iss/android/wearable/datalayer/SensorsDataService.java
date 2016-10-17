@@ -173,7 +173,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], 0, 0, PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext()).getString(getString(R.string.device_name), "dummy sensor"), measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             } else {
-                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2], "Samsung Wear", measurementNumber);
+                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2], android.os.Build.MODEL, measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             }
 

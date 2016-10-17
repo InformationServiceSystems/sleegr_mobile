@@ -130,6 +130,9 @@ public class MainActivity extends FragmentActivity implements
         checkPositon(29);
         mPager.setOnPageChangeListener(mPageChangeListener);
 
+        //Initialising stuff that happens somewhere else
+        UserData.setIdToken(CredentialsManager.getCredentials(getContext()).getIdToken());
+
         TextView text = (TextView) findViewById(R.id.text);
         String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));
         text.setText(datestring);

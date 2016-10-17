@@ -58,18 +58,18 @@ public class ISSContentProvider extends ContentProvider {
     static final int DATABASE_VERSION = 40;
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
-                    _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    USERID + " INTEGER NOT NULL, " +
-                    MEASUREMENT + " INTEGER NOT NULL, " +
-                    DATE + " TEXT NOT NULL, " +
-                    TIMESTAMP + " TEXT NOT NULL, " +
-                    EXTRA + " TEXT NOT NULL, " +
-                    MEASUREMENT_ID + " INTEGER NOT NULL, " +
-                    SENSOR + " TEXT NOT NULL, " +
-                    SENT + " TEXT NOT NULL, " +
-                    VALUE1 + " TEXT NOT NULL, " +
-                    VALUE2 + " TEXT NOT NULL, " +
-                    VALUE3 + " TEXT NOT NULL);";
+                    _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + //id of the specific value
+                    USERID + " INTEGER NOT NULL, " + //UserID, not necessary to transmit b/c of id token
+                    MEASUREMENT + " INTEGER NOT NULL, " + //21 = HR data
+                    DATE + " TEXT NOT NULL, " + //Only date, not time
+                    TIMESTAMP + " TEXT NOT NULL, " + //Only time, not date
+                    EXTRA + " TEXT NOT NULL, " + //Extrainfo, i.e. Cooldown, Training etc
+                    MEASUREMENT_ID + " INTEGER NOT NULL, " + //ID of the measurement the value belongs to
+                    SENSOR + " TEXT NOT NULL, " + //Name of the sensor that measured the data
+                    SENT + " TEXT NOT NULL, " + //If that value already has been sent to the server
+                    VALUE1 + " TEXT NOT NULL, " + //X value for movement, hr value for hr
+                    VALUE2 + " TEXT NOT NULL, " + //Y value for movement
+                    VALUE3 + " TEXT NOT NULL);"; //Z value for movement
     static final String CREATE_MEASUREMENT_DB_TABLE =
             " CREATE TABLE " + MEASUREMENTS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +

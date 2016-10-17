@@ -23,8 +23,19 @@
         <item name="android:textColor">@color/actionbar_text_color</item>
     </style>
 
-    <style name="MyLockStyle" parent="Lock.Theme">
+    <style name="Lock.Theme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorAccent">?attr/Auth0.PrimaryColor</item>
+        <item name="colorPrimaryDark">?attr/Auth0.HeaderBackground</item>
+        <item name="android:windowBackground">@color/com_auth0_lock_form_background</item>
+        <item name="Auth0.HeaderLogo">@drawable/com_auth0_lock_header_logo</item>
+        <item name="Auth0.HeaderTitle">@string/com_auth0_lock_header_title</item>
+        <item name="Auth0.HeaderTitleColor">@color/com_auth0_lock_text</item>
+        <item name="Auth0.HeaderBackground">@color/com_auth0_lock_header_background</item>
         <item name="Auth0.PrimaryColor">@color/actionbar_background_color</item>
         <item name="Auth0.DarkPrimaryColor">@color/statusbar_background_color</item>
     </style>
+
+    <color name="actionbar_text_color">#FFFFFF</color>
+    <color name="actionbar_background_color">#3b5998</color>
+    <color name="statusbar_background_color">#2b4988</color>
 </resources>

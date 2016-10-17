@@ -20,6 +20,8 @@ import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.iss.android.wearable.datalayer.MainActivity.getContext;
+
 
 public class Auth0Activity extends Activity {
 
@@ -50,7 +52,6 @@ public class Auth0Activity extends Activity {
         //Request a refresh token along with the id token.
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("scope", "openid offline_access");
-        parameters.put("primaryColor", "#3b5998");
         mLock = Lock.newBuilder(auth0, mCallback)
                 .withAuthenticationParameters(parameters)
                 //Add parameters to the build
@@ -69,6 +70,8 @@ public class Auth0Activity extends Activity {
                         Auth0Activity.this.runOnUiThread(new Runnable() {
                             public void run() {
                                 Toast.makeText(Auth0Activity.this, "Automatic Login Success", Toast.LENGTH_SHORT).show();
+                                UserData.setName(payload.getName());
+                                UserData.setEmail(payload.getEmail());
                             }
                         });
                         startActivity(new Intent(getApplicationContext(), MainActivity.class));

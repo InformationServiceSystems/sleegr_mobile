@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -40,8 +39,6 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -384,7 +381,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     // uploading json to server
     public String send_record_as_json(JSONObject jsonForServer, ArrayList<Integer> arrayOfMeasurementIDs) {
         String uri = "http://web01.iss.uni-saarland.de/post_json";
-        HttpURLConnection urlConnection;
         Boolean server_transac_successful = false;
 
         String data = jsonForServer.toString();
@@ -465,7 +461,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     public void ShareDataWithServer() {
 
         JSONObject jsonForServer = new JSONObject();
-        JSONArray arrayOfMeasurements = new JSONArray();
+        JSONArray arrayOfFhirObservations = new JSONArray();
         ArrayList<Integer> arrayOfMeasurementIDs = new ArrayList<>();
 
         try {
@@ -505,8 +501,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 arrayOfMeasurementIDs.add(mCursor.getInt(0));
                 Log.d("Timestamp", mCursor.getString(2));
                 ArrayList<ISSRecordData> records = queryForRecordsOfMeasurement(mCursor);
-                JSONObject measurement = JSONFactory.constructMeasurement(mCursor, records);
-                arrayOfMeasurements.put(measurement);
+                JSONObject fhirObservation = FhirFactory.constructFhirObservation(mCursor, records);
+                arrayOfFhirObservations.put(fhirObservation);
             }
             mCursor.close();
         }
@@ -515,7 +511,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             // This if clause guarantees, that if there are no new records, transmitting to the server will stop.
 
             try {
-                jsonForServer.put("arrayOfMeasurements", arrayOfMeasurements);
+                jsonForServer.put("arrayOfFhirObservations", arrayOfFhirObservations);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -543,7 +539,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         ArrayList<ISSRecordData> records = new ArrayList<>();
         Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
 
-        String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = " + mCursor.getInt(0);
+        String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = " + mCursor.getInt(0) + " AND " + ISSContentProvider.MEASUREMENT + " = 21";
         String[] mSelectionArgs = {};
         String[] mProjection =
                 {
@@ -607,18 +603,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
         // After we've updated the newest measurements that we have transferred, start anew to check if there are some left
         ShareDataWithServer();
-    }
-
-    private ArrayList<String> createDateList() {
-        ArrayList<String> dateList = new ArrayList<String>();
-        Calendar cal = Calendar.getInstance();
-        for (int i = 0; i < 30; i++) {
-            Date date = cal.getTime();
-            cal.add(Calendar.DATE, -1);
-            String dateAsString = ISSDictionary.dateToDayString(date);
-            dateList.add(dateAsString);
-        }
-        return dateList;
     }
 
     @Override
