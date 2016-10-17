@@ -69,7 +69,7 @@ public class Auth0Activity extends Activity {
                     public void onSuccess(final UserProfile payload) {
                         Auth0Activity.this.runOnUiThread(new Runnable() {
                             public void run() {
-                                Toast.makeText(Auth0Activity.this, "Automatic Login Success", Toast.LENGTH_SHORT).show();
+                                // Toast.makeText(Auth0Activity.this, "Automatic Login Success", Toast.LENGTH_SHORT).show();
                                 UserData.setName(payload.getName());
                                 UserData.setEmail(payload.getEmail());
                             }
