@@ -501,7 +501,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 arrayOfMeasurementIDs.add(mCursor.getInt(0));
                 Log.d("Timestamp", mCursor.getString(2));
                 ArrayList<ISSRecordData> records = queryForRecordsOfMeasurement(mCursor);
-                JSONObject fhirObservation = FhirFactory.constructFhirObservation(mCursor, records);
+                JSONObject fhirObservation = FhirFactory.constructHrFhirObservation(mCursor, records);
                 arrayOfFhirObservations.put(fhirObservation);
             }
             mCursor.close();

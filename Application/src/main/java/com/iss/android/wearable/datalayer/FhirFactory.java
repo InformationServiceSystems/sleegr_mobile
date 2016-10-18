@@ -13,11 +13,11 @@ import java.util.ArrayList;
  * Created by micha on 23.08.2016.
  */
 public class FhirFactory {
-    public static JSONObject getJSON(ISSRecordData tosend) {
+    public static JSONObject getHrJson(ISSRecordData tosend) {
         JSONObject json = new JSONObject();
         try {
             JSONObject code = new JSONObject();
-            code.put("system", "Android");
+            code.put("system", "Code system. dictionary, where all the codes are explained");
             code.put("code", tosend.MeasurementType);
             code.put("display", "Heart Rate Measurement");
             json.put("code", code);
@@ -27,9 +27,9 @@ public class FhirFactory {
             json.put("tag", tosend.ExtraData);
 
             JSONObject valueQuantity = new JSONObject();
-            valueQuantity.put("unit", "BPM");
-            valueQuantity.put("system", "default");
-            valueQuantity.put("code", "default");
+            valueQuantity.put("unit", "Hz");
+            valueQuantity.put("system", "http://unitsofmeasure.org");
+            valueQuantity.put("code", "Hz");
             valueQuantity.put("value", tosend.Value1);
             json.put("valueQuantity", valueQuantity);
         } catch (JSONException e) {
@@ -38,20 +38,23 @@ public class FhirFactory {
         return json;
     }
 
-    public static JSONObject constructFhirObservation(Cursor mCursor, ArrayList<ISSRecordData> records) {
+    public static JSONObject constructHrFhirObservation(Cursor mCursor, ArrayList<ISSRecordData> records) {
         JSONObject mainObject = new JSONObject();
 
         JSONArray componentElements = new JSONArray();
         String sensorDeviceName = "";
         for (ISSRecordData record : records) {
             sensorDeviceName = record.getSensorDeviceName();
-            JSONObject recordJson = getJSON(record);
+            JSONObject recordJson = getHrJson(record);
             componentElements.put(recordJson);
         }
 
         try {
             mainObject.put("status", "final");
-            mainObject.put("code", "dummyCode");
+            JSONObject CodeableConcept = new JSONObject();
+            CodeableConcept.put("system", "http://loinc.org");
+            CodeableConcept.put("code", "8867-4");
+            CodeableConcept.put("display", "Heart rate");
 
             JSONObject subject = new JSONObject();
             subject.put("ref", UserData.getIdToken());
