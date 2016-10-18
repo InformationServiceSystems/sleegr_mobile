@@ -17,9 +17,9 @@ public class FhirFactory {
         JSONObject json = new JSONObject();
         try {
             JSONObject code = new JSONObject();
-            code.put("system", "Code system. dictionary, where all the codes are explained");
-            code.put("code", tosend.MeasurementType);
-            code.put("display", "Heart Rate Measurement");
+            code.put("system", "http://loinc.org");
+            code.put("code", "8867-4");
+            code.put("display", "Heart rate");
             json.put("code", code);
 
             json.put("valueTime", tosend.Timestamp);
