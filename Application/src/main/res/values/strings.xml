@@ -167,5 +167,6 @@
     <string name="auth0_preferences">AUTH0_SHARED_PREFERENCES_KEY</string>
     <string name="auth0_client_id">kMlSIl3Itqt6mQetzGXES6biAVFei6k8</string>
     <string name="auth0_domain">app-iss.eu.auth0.com</string>
+    <string name="title_activity_main2">Main2Activity</string>
 
 </resources>
