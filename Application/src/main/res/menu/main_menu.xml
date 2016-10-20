@@ -11,6 +11,10 @@
         android:title="Averages" />-->
 
     <item
+        android:id="@+id/measuringActivity"
+        android:title="Measure" />
+
+    <item
         android:id="@+id/setSchedule"
         android:title="Set Schedule" />
 

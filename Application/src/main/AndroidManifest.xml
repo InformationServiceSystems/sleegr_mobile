@@ -141,12 +141,17 @@
         </activity>
         <activity
             android:name=".MeasuringActivity"
-            android:label="@string/title_activity_main2"
+            android:label="@string/title_activity_measuring"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.iss.android.wearable.datalayer.MainActivity" />
         </activity>
+
+        <service
+            android:name=".BluetoothService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

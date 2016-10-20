@@ -236,6 +236,9 @@ public class MainActivity extends FragmentActivity implements
             /*case R.id.averageValues:
                 onShowAverages();
                 return true;*/
+            case R.id.measuringActivity:
+                onStartMeasuringActivity();
+                return true;
             case R.id.logout:
                 onLogout();
                 return true;
@@ -247,22 +250,23 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
+    private void onStartMeasuringActivity() {
+        final Intent StartMeasuringActivity = new Intent(this, MeasuringActivity.class);
+        startActivity(StartMeasuringActivity);
+    }
     private void onShowMeasurements() {
-
         final Intent ShowMeasurements = new Intent(this, MeasurementsActivity.class);
         startActivity(ShowMeasurements);
     }
 
     // A method which starts the SetScheduleActivity
     private void onsetSchedule() {
-
         final Intent setSchedule = new Intent(this, SetScheduleActivity.class);
         startActivity(setSchedule);
     }
 
     @Override
     public void changeDisplayDate(Calendar calendar) {
-
     }
 
     // A method handling the click on the Server Sync button.
