@@ -1,25 +1,25 @@
 package com.iss.android.wearable.datalayer;
 
+import android.*;
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.app.Activity;
-import android.os.Handler;
-import android.support.v7.widget.RecyclerView;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
-import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,30 +27,14 @@ import java.util.ArrayList;
 
 public class MeasuringActivity extends Activity {
 
-    private Activity mActivity;
-    private Context mContext;
-    private PopupWindow mPopupWindow;
-    private RelativeLayout mRelativeLayout;
+    private static final int REQUEST_LOCATION = 1;
     private BluetoothAdapter mBluetoothAdapter;
     private LeDeviceListAdapter mLeDeviceListAdapter;
-    private int REQUEST_ENABLE_BT = 1;
-    private Handler mHandler;
-    private boolean mScanning;
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
+    private BroadcastReceiver mReceiver;
+    private static final String[] PERMISSIONS_LOCATION = {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION};
 
-                @Override
-                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mLeDeviceListAdapter.addDevice(device);
-                            mLeDeviceListAdapter.notifyDataSetChanged();
-                        }
-                    });
-                }
-            };
-    private static final long SCAN_PERIOD = 10000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,42 +42,106 @@ public class MeasuringActivity extends Activity {
         setContentView(R.layout.activity_measuring);
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mRelativeLayout = (RelativeLayout) findViewById(R.id.measuring_inner_layout);
-        mContext = getApplicationContext();
-        mActivity = this;
+        checkPermissions();
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
+        Log.d("MeasuringActivityLog", "initialised a manager");
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
         // fire an intent to display a dialog asking the user to grant permission to enable it.
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            int REQUEST_ENABLE_BT = 1;
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
+        // Initializes list view adapter.
+        mLeDeviceListAdapter = new LeDeviceListAdapter();
+
+        IntentFilter filter = new IntentFilter();
+        // This is a method that adds an intent receiver that listens to every event that is triggered by bluetooth
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                    Log.d("MeasuringActivityLog", "Discovery started");
+                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                    Log.d("MeasuringActivityLog", "Discovery finished");
+                } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    // Get the BluetoothDevice object from the Intent
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    Log.d("MeasuringActivityLog", device.getName());
+                    mLeDeviceListAdapter.addDevice(device);
+                }
+            }
+        };
+        registerReceiver(mReceiver, filter);
+        mBluetoothAdapter.startDiscovery();
+    }
+
+    private void checkPermissions() {
+        int permission = android.support.v4.app.ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            android.support.v4.app.ActivityCompat.requestPermissions(
+                    this,
+                    PERMISSIONS_LOCATION,
+                    REQUEST_LOCATION
+            );
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay!
+                    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                    mBluetoothAdapter.startDiscovery();
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
         }
     }
 
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.switchBluetoothDevice:
-                onOpenSwitchBluetoothDevicePopup();
+                onOpenSwitchBluetoothDeviceDialog();
                 break;
         }
     }
 
-    private void onOpenSwitchBluetoothDevicePopup() {
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
-        View customView = inflater.inflate(R.layout.switch_bluetooth_device_popup,null);
-        mPopupWindow = new PopupWindow(
-                customView,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT
-        );
+    @Override
+    public void onDestroy() {
+        unregisterReceiver(mReceiver);
+        mBluetoothAdapter.cancelDiscovery();
+        super.onDestroy();
+    }
 
-        mHandler = new Handler();
+    private void onOpenSwitchBluetoothDeviceDialog() {
+        AlertDialog.Builder builderSingle = new AlertDialog.Builder(this, R.style.MyDialogTheme);
+        builderSingle.setTitle("Select your heart rate sensor:");
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
@@ -106,35 +154,35 @@ public class MeasuringActivity extends Activity {
         if (mBluetoothAdapter == null) {
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
         }
-        mPopupWindow.showAtLocation(mRelativeLayout, Gravity.CENTER,10,10);
 
-        // Initializes list view adapter.
-        mLeDeviceListAdapter = new LeDeviceListAdapter();
-        ListView listView = (ListView) customView.findViewById(R.id.switch_bluetooth_device_list);
-        listView.setAdapter(mLeDeviceListAdapter);
-        scanLeDevice(true);
-    }
+        builderSingle.setNegativeButton(
+                "cancel",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        builderSingle.setAdapter(mLeDeviceListAdapter,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mBluetoothAdapter.cancelDiscovery();
+                        BluetoothDevice device = mLeDeviceListAdapter.getDevice(which);
+                        if (device == null) return;
+                        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putString(getString(R.string.device_address), device.getAddress());
+                        Log.d("Device Address", device.getAddress());
+                        editor.putString(getString(R.string.device_name), device.getName());
+                        editor.apply();
+                        Log.d("Device Address", "has been stored");
+                        dialog.dismiss();
+                    }
+                });
 
-    // Scans for bluetooth devices
-    private void scanLeDevice(final boolean enable) {
-        if (enable) {
-            // Stops scanning after a pre-defined scan period.
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    invalidateOptionsMenu();
-                }
-            }, SCAN_PERIOD);
-
-            mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-        } else {
-            mScanning = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
-        }
-        invalidateOptionsMenu();
+        AlertDialog dialog = builderSingle.create();
+        dialog.show();
     }
 
     static class ViewHolder {
@@ -147,19 +195,19 @@ public class MeasuringActivity extends Activity {
         private ArrayList<BluetoothDevice> mLeDevices;
         private LayoutInflater mInflator;
 
-        public LeDeviceListAdapter() {
+        LeDeviceListAdapter() {
             super();
-            mLeDevices = new ArrayList<BluetoothDevice>();
+            mLeDevices = new ArrayList<>();
             mInflator = MeasuringActivity.this.getLayoutInflater();
         }
 
-        public void addDevice(BluetoothDevice device) {
+        void addDevice(BluetoothDevice device) {
             if (!mLeDevices.contains(device)) {
                 mLeDevices.add(device);
             }
         }
 
-        public BluetoothDevice getDevice(int position) {
+        BluetoothDevice getDevice(int position) {
             return mLeDevices.get(position);
         }
 

@@ -9,6 +9,8 @@
         <item name="actionButtonStyle">@style/MyActionButtonStyle</item>
     </style>
 
+    <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert" />
+
     <style name="MyActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
         <item name="android:background">@color/actionbar_background_color</item>
         <item name="android:titleTextStyle">@style/myTheme.ActionBar.Text</item>
