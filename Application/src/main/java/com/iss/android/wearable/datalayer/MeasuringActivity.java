@@ -76,7 +76,6 @@ public class MeasuringActivity extends Activity {
                 } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     // Get the BluetoothDevice object from the Intent
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    Log.d("MeasuringActivityLog", device.getName());
                     mLeDeviceListAdapter.addDevice(device);
                 }
             }
