@@ -406,14 +406,10 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }
 
         if (server_transac_successful) {
-            Log.d("hit", "successful");
             updateRecords(arrayOfMeasurementIDs);
             showToast(getApplicationContext(), "Sync successful", Toast.LENGTH_SHORT);
-            DataSyncService.OutputEventSq("");
         } else {
-            Log.d("hit", "failed");
             showToast(getApplicationContext(), "Sync failed. Please wait and try again later.", Toast.LENGTH_SHORT);
-            DataSyncService.OutputEventSq("");
         }
         return result;
     }

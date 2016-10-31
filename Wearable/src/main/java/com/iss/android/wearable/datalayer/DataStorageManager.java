@@ -19,7 +19,7 @@ public class DataStorageManager {
     static SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
 
     // Collects all ISSRecordDatas in the database that haven't been sent to the smartphone yet
-    public static ArrayList<ISSRecordData> GetAllFilesToUpload() {
+    public static ArrayList<ISSRecordData> GetAllFilesToUpload(long _ID) {
         ArrayList<ISSRecordData> result = new ArrayList<>();
         // A "projection" defines the columns that will be returned for each row
         String[] mProjection =
@@ -38,7 +38,7 @@ public class DataStorageManager {
                 };
 
         // Defines a string to contain the selection clause
-        String mSelectionClause = null;
+        String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = " + _ID;
 
         // Initializes an array to contain selection arguments
         String[] mSelectionArgs = {};
@@ -99,7 +99,7 @@ public class DataStorageManager {
         }
     }
 
-    public static int deleteISSRecords() {
+    public static int deleteISSRecords(Long _ID) {
         // Defines selection criteria for the rows you want to delete
         String mSelectionClause = "";
         String[] mSelectionArgs = null;
@@ -110,17 +110,17 @@ public class DataStorageManager {
         // Deletes the words that match the selection criteria
         mRowsDeleted = MainActivity.getContext().getContentResolver().delete(
                 ISSContentProvider.RECORDS_CONTENT_URI,     // the user dictionary content URI
-                mSelectionClause,                   // the column to select on
+                ISSContentProvider.MEASUREMENT_ID + " = " + _ID,                   // the column to select on
                 mSelectionArgs                      // the value to compare to
         );
         mRowsDeleted = MainActivity.getContext().getContentResolver().delete(
                 ISSContentProvider.RPE_CONTENT_URI,     // the user dictionary content URI
-                mSelectionClause,                   // the column to select on
+                ISSContentProvider.MEASUREMENT_ID + " = " + _ID,                   // the column to select on
                 mSelectionArgs                      // the value to compare to
         );
         mRowsDeleted = MainActivity.getContext().getContentResolver().delete(
                 ISSContentProvider.MEASUREMENT_CONTENT_URI,     // the user dictionary content URI
-                mSelectionClause,                   // the column to select on
+                ISSContentProvider._ID + " = " + _ID,                   // the column to select on
                 mSelectionArgs                      // the value to compare to
         );
         return mRowsDeleted;
@@ -154,9 +154,9 @@ public class DataStorageManager {
     }
 
     public static byte[] BuildItem() throws IOException {
-        ArrayList<ISSRecordData> ISSRecords = GetAllFilesToUpload();
         ArrayList<ISSMeasurement> Measurements = GetAllMeasurements();
-        ArrayList<ISSRPEAnswers> RPEAnswers = GetAllRPEAnswers();
+        ArrayList<ISSRecordData> ISSRecords = GetAllFilesToUpload(Measurements.get(0)._ID);
+        ArrayList<ISSRPEAnswers> RPEAnswers = GetAllRPEAnswers(Measurements.get(0)._ID);
         byte[][] data = new byte[3][];
 
         try {
@@ -169,7 +169,7 @@ public class DataStorageManager {
         return Serializer.SerializeToBytes(data);
     }
 
-    private static ArrayList<ISSRPEAnswers> GetAllRPEAnswers() {
+    private static ArrayList<ISSRPEAnswers> GetAllRPEAnswers(long _ID) {
         ArrayList<ISSRPEAnswers> result = new ArrayList<>();
         // A "projection" defines the columns that will be returned for each row
         String[] mProjection =
@@ -180,7 +180,7 @@ public class DataStorageManager {
                 };
 
         // Defines a string to contain the selection clause
-        String mSelectionClause = null;
+        String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = " + _ID;
 
         // Initializes an array to contain selection arguments
         String[] mSelectionArgs = {};
@@ -225,7 +225,7 @@ public class DataStorageManager {
         String[] mSelectionArgs = {};
 
         // Define a sorting order for the query results to appear in
-        String mSortOrder = ISSContentProvider._ID + " ASC";
+        String mSortOrder = ISSContentProvider._ID + " ASC " + " LIMIT 1";
 
         Cursor mCursor = MainActivity.getContext().getContentResolver().query(
                 ISSContentProvider.MEASUREMENT_CONTENT_URI,    // The content URI of the words table
@@ -239,16 +239,10 @@ public class DataStorageManager {
         } else if (mCursor.getCount() < 1) {
             // If the Cursor is empty, the provider found no matches
         } else {
-            int i = GetLastTransferredMeasurementID();
-            int j = 0;
             while (mCursor.moveToNext()) {
-                j++;
-                if (j > i) {
-                    ISSMeasurement measurement = ISSDictionary.CursorToISSMeasurement(mCursor);
-                    result.add(measurement);
-                }
+                ISSMeasurement measurement = ISSDictionary.CursorToISSMeasurement(mCursor);
+                result.add(measurement);
             }
-            SetLastTransferredMeasurementID(j);
         }
         return result;
     }
@@ -269,5 +263,45 @@ public class DataStorageManager {
         Log.d("Set measurement id", "to" + String.valueOf(measurementNumber));
         editor.putInt("LastMeasurement", measurementNumber);
         editor.apply();
+    }
+
+    public static void clearLastMeasurement() {
+        ArrayList<ISSMeasurement> Measurements = GetAllMeasurements();
+        deleteISSRecords(Measurements.get(0)._ID);
+
+    }
+
+    public static boolean dataAvailable() {ArrayList<ISSMeasurement> result = new ArrayList<>();
+        // A "projection" defines the columns that will be returned for each row
+        String[] mProjection =
+                {
+                        ISSContentProvider._ID,
+                        ISSContentProvider.TYPE,
+                        ISSContentProvider.TIMESTAMP
+                };
+
+        // Defines a string to contain the selection clause
+        String mSelectionClause = null;
+
+        // Initializes an array to contain selection arguments
+        String[] mSelectionArgs = {};
+
+        // Define a sorting order for the query results to appear in
+        String mSortOrder = null;
+
+        Cursor mCursor = MainActivity.getContext().getContentResolver().query(
+                ISSContentProvider.MEASUREMENT_CONTENT_URI,    // The content URI of the words table
+                mProjection,                       // The columns to return for each row
+                mSelectionClause,                  // Either null, or the word the user entered
+                mSelectionArgs,                    // Either empty, or the string the user entered
+                mSortOrder);                       // The sort order for the returned rows
+
+        if (null == mCursor) {
+            return false;
+        } else if (mCursor.getCount() < 1) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

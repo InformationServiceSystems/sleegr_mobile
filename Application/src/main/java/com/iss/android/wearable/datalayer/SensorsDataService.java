@@ -533,7 +533,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         Date date = new Date();
         values.put(ISSContentProvider.TIMESTAMP, date.toString());
         values.put(ISSContentProvider.TYPE, currentState);
-        measurementNumber = DataStorageManager.GetLastMeasurementID(); //Loads the ID from the last measurement in the db
+        measurementNumber = DataStorageManager.getLastMeasurementID(); //Loads the ID from the last measurement in the db
         Log.d("Loaded measurement as", String.valueOf(measurementNumber));
         measurementNumber++;
         values.put(ISSContentProvider._ID, measurementNumber);

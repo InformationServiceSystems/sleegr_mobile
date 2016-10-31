@@ -16,6 +16,7 @@
 
 package com.iss.android.wearable.datalayer;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,6 +45,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 import com.jjoe64.graphview.DefaultLabelFormatter;
@@ -290,13 +292,7 @@ public class MainActivity extends FragmentActivity implements
     // puts a String to the system message textview
     public void OutputEvent(final String content) {
         final String cont = content;
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                TextView tv = (TextView) findViewById(R.id.systemMessage);
-                tv.setText(content);
-            }
-        });
+        showToast(getApplicationContext(), cont, Toast.LENGTH_SHORT);
         if (cont.equals("Data saved. Clearing data on the watch")) {
             finish();
             startActivity(getIntent());
@@ -305,7 +301,17 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    // A method starting the RegisterUserActivity if no view is supplied.
+    private void showToast(final Context context, final String message, final int length) {
+        Activity mActivity = (Activity) MainActivity.itself;
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, message, length).show();
+            }
+        });
+    }
+
+    // A method starting the login activity if no view is supplied.
     public void onLogout() {
 
         CredentialsManager.deleteCredentials(getContext());

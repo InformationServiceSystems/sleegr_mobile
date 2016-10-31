@@ -205,7 +205,7 @@ public class DataStorageManager {
         resolver.insert(ISSContentProvider.MEASUREMENT_CONTENT_URI, values);
     }
 
-    public static int GetLastMeasurementID() {
+    public static int getLastMeasurementID() {
         return pref.getInt("LastMeasurement", 0);
 
     }

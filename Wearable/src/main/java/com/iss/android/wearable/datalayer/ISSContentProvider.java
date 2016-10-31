@@ -94,22 +94,6 @@ public class ISSContentProvider extends ContentProvider {
         uriMatcher.addURI(PROVIDER_NAME, "rpeanswers/#", RPE_IDTYPE);
     }
 
-    public static void clear() {
-        db.execSQL("DELETE FROM " + ISSContentProvider.RECORDS_TABLE_NAME + "; " +
-                "DELETE FROM " + ISSContentProvider.MEASUREMENTS_TABLE_NAME + "; " +
-                "DELETE FROM " + ISSContentProvider.RPE_TABLE_NAME + ";");
-        String count = "SELECT count(*) FROM " + ISSContentProvider.RECORDS_TABLE_NAME;
-        Cursor mcursor = db.rawQuery(count, null);
-        mcursor.moveToFirst();
-        int icount = mcursor.getInt(0);
-        if (icount > 0) {
-            Log.d("Deleted", "not everything");
-        } else {
-            Log.d("Deleted", "everything");
-            // test
-        }
-    }
-
     public static SQLiteDatabase getDB() {
         return db;
     }

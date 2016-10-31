@@ -43,7 +43,6 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -81,7 +80,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     public static SensorsDataService itself;
     private static HashMap<String, Boolean> recordedActivities = new HashMap<String, Boolean>();
     private final BluetoothGattCallback mGattCallback;
-    public ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
     public boolean needToShowRPE = false;
     String UserHRM = "";
     int[] sensorIDs = new int[]{Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE, Sensor.TYPE_STEP_COUNTER};//,
@@ -643,31 +641,29 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 NodeApi.GetConnectedNodesResult result =
                         Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
                 List<Node> nodes = result.getNodes();
-                String nodeId = null;
 
-                //genData();
+                if(DataStorageManager.dataAvailable()) {
 
-                byte[] data = new byte[0];
-                try {
-                    data = DataStorageManager.BuildItem();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                if (nodes.size() > 0) {
-                    for (int i = 0; i < nodes.size(); i++) {
-                        nodeId = nodes.get(i).getId();
-
-                        Asset asset = Asset.createFromBytes(data);
-
-                        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensorData");
-                        dataMap.getDataMap().putAsset("sensorData", asset);
-                        PutDataRequest request = dataMap.asPutDataRequest();
-                        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+                    byte[] data = new byte[0];
+                    try {
+                        data = DataStorageManager.BuildItem();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                }
 
-                OutputEvent("Sending data ...");
+                    if (nodes.size() > 0) {
+                        for (int i = 0; i < nodes.size(); i++) {
+                            Asset asset = Asset.createFromBytes(data);
+
+                            PutDataMapRequest dataMap = PutDataMapRequest.create("/sensorData");
+                            dataMap.getDataMap().putAsset("sensorData", asset);
+                            PutDataRequest request = dataMap.asPutDataRequest();
+                            PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+                        }
+                    }
+
+                    OutputEvent("Sending data ...");
+                }
 
             }
         }).start();
@@ -696,10 +692,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             if (data[0] == 2) {
                 // send available data
                 OutputEvent("Data saved");
-                alldata.clear();
+                DataStorageManager.clearLastMeasurement();
                 Log.d("Order received", "Will delete data");
-                ISSContentProvider.clear();
                 OutputEvent("Data deleted");
+                SendCollectedData();
 
                 // clear the existing data on the smartwatch
 
