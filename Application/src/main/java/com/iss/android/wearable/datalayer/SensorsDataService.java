@@ -338,7 +338,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     public void OutputCurrentState() {
 
-        MeasuringActivity.showState(currentState);
+        new MeasuringActivity().showState(currentState);
 
     }
 

@@ -34,10 +34,6 @@ public class MeasuringActivity extends Activity {
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private BroadcastReceiver mReceiver;
 
-    public static void showState(String currentState) {
-
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -265,5 +261,12 @@ public class MeasuringActivity extends Activity {
 
             return view;
         }
+    }
+
+    /* Following are methods directly affecting the activity's layout*/
+
+    public void showState(String currentState) {
+        TextView currentStateTextView = (TextView) findViewById(R.id.showCurrentState);
+        currentStateTextView.setText(currentState);
     }
 }
