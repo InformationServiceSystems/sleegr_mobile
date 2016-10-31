@@ -1,5 +1,6 @@
 package com.iss.android.wearable.datalayer;
 
+import android.app.Activity;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -26,24 +27,17 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,10 +47,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-import static com.iss.android.wearable.datalayer.DataLayerListenerService.LOGD;
-
 public class SensorsDataService extends Service implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, DataApi.DataListener, MessageApi.MessageListener,
+        GoogleApiClient.OnConnectionFailedListener, DataApi.DataListener,
         NodeApi.NodeListener {
 
     public static final String
@@ -65,11 +57,8 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             EXTRA_STATUS = "extra_status",
             EXTRA_HR = "extra_hr",
             TAG = "MainActivity",
-            ASK_USER_FOR_RPE = "show rpe dialog",
             CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb",
-            UPDATE_TIMER_VALUE = "update the timer value",
-            UPDATE_GPS_PARAMS = "update gps data",
-            NEW_MESSAGE_AVAILABLE = "log the output";
+            UPDATE_TIMER_VALUE = "update the timer value";
     private static final UUID UUID_HRS =
             UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb"),
             UUID_HRD =
@@ -81,8 +70,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     public static SensorsDataService itself;
     private static HashMap<String, Boolean> recordedActivities = new HashMap<String, Boolean>();
     private final BluetoothGattCallback mGattCallback;
-    public ArrayList<ISSRecordData> alldata = new ArrayList<ISSRecordData>();
-    public boolean needToShowRPE = false;
     String UserHRM = "";
     int[] sensorIDs = new int[]{Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_GYROSCOPE, Sensor.TYPE_STEP_COUNTER};//,
     PowerManager.WakeLock wakeLock = null;
@@ -103,19 +90,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     int timerTimeout = 60 * 60 * 24;
     int RESTING_MEASUREMENT_TIME = 60 * 3; // measure heart rate for 3 min
     int TRAINING_MEASUREMENT_TIME = 60 * 60 * 2;
-    String[] rpeValues = new String[]{
-            "0 Rest",
-            "1 Very easy",
-            "2 Easy",
-            "3 Moderate",
-            "4 Somewhat hard",
-            "5 Hard",
-            "6 Harder",
-            "7 Very hard",
-            "8 Very very hard",
-            "9 Very very very hard",
-            "10 Maximal"
-    };
     private int SamplingRate = 3; // in secs
     private long TrainingStart;
     private int UserID = 0;
@@ -198,11 +172,11 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 String intentAction;
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     mBluetoothGatt.discoverServices();
-                    OutputEvent("HRM connected");
+                    showToast(getApplicationContext(), "HRM connected", Toast.LENGTH_SHORT);
                     hrmDisconnected = false;
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                    OutputEvent("HRM disconnected");
+                    showToast(getApplicationContext(), "HRM disconnected", Toast.LENGTH_SHORT);
                     hrmDisconnected = true;
                     //mBluetoothAdapter.startLeScan(mLeScanCallback);
                 }
@@ -233,7 +207,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                             descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
 
                             mBluetoothGatt.writeDescriptor(descriptor);
-                            OutputEvent("Reading HRM");
+                            showToast(getApplicationContext(), "Reading HRM", Toast.LENGTH_SHORT);
                         } catch (Exception ex) {
                             Log.e(TAG, "wuuuuut?");
 
@@ -362,31 +336,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         OutputCurrentState();
     }
 
-    // Opens the feedback dialog asking the user about the training in form of some radio buttons
-    private void AskUserForFeedback(String time) {
-
-        Intent myIntent = new Intent(this, DALDActivity.class);
-        String[] daldaItems;
-        if (time.equals("evening")) {
-            daldaItems = new String[]{"Sport training", "Health", "Muscle pain", "Tiredness", "Recovery time"};
-            myIntent.putExtra("time", "evening");
-        } else if (time.equals("morning")) {
-            daldaItems = new String[]{"Sleep"};
-            myIntent.putExtra("time", "morning");
-        } else {
-            daldaItems = new String[]{};
-        }
-
-
-        myIntent.putExtra("rpeValues", rpeValues);
-        myIntent.putExtra("daldaItems", daldaItems);
-        myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(myIntent);
-    }
-
     public void OutputCurrentState() {
 
-        OutputEvent(currentState);
+        MeasuringActivity.showState(currentState);
 
     }
 
@@ -520,6 +472,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     // starts sleep tracking
     private void startSleeping() {
+        alarm.CancelAlarm(getApplicationContext());
         Intent intent = new Intent(this, SensorsDataService.class);
         stopService(intent);
 
@@ -552,16 +505,16 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         outputVibration();
 
         if (state.equals("Idle")) {
+            alarm.CancelAlarm(getApplicationContext());
             return;
         }
+        alarm.SetAlarm(getApplicationContext());
 
         if (state.equals("MorningHR")) {
             // stop recording cooling / resting prematurely
             timerTimeout = RESTING_MEASUREMENT_TIME;
-            AskUserForFeedback("morning");
         } else if (state.equals("EveningHR")) {
             timerTimeout = RESTING_MEASUREMENT_TIME;
-            AskUserForFeedback("evening");
         } else if (state.equals("TrainingHR")) {
             timerTimeout = TRAINING_MEASUREMENT_TIME;
         } else if (state.equals("Cooldown")) {
@@ -593,7 +546,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
         mBluetoothAdapter.startLeScan(mLeScanCallback);
 
-        OutputEvent("Searching HRM ... ");
+        showToast(getApplicationContext(), "Searching HRM ... ", Toast.LENGTH_SHORT);
         timerTask = new TimerTask() {
             public void run() {
                 TimerEvent();
@@ -626,93 +579,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             hrmDevice = null;
         }
 
-        OutputEvent("HRM off");
+        showToast(getApplicationContext(), "HRM off", Toast.LENGTH_SHORT);
 
         if (timer != null) {
             timer.cancel();
-        }
-    }
-
-    // Sends the collected data to the smartphone
-    public void SendCollectedData() {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //mGoogleApiClient.blockingConnect(3000, TimeUnit.MILLISECONDS);
-                NodeApi.GetConnectedNodesResult result =
-                        Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-                List<Node> nodes = result.getNodes();
-                String nodeId = null;
-
-                //genData();
-
-                byte[] data = new byte[0];
-                try {
-                    data = DataStorageManager.BuildItem();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                if (nodes.size() > 0) {
-                    for (int i = 0; i < nodes.size(); i++) {
-                        nodeId = nodes.get(i).getId();
-
-                        Asset asset = Asset.createFromBytes(data);
-
-                        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensorData");
-                        dataMap.getDataMap().putAsset("sensorData", asset);
-                        PutDataRequest request = dataMap.asPutDataRequest();
-                        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
-                    }
-                }
-
-                OutputEvent("Sending data ...");
-
-            }
-        }).start();
-
-    }
-
-    // Broadcasts a string, generally an update about the state of the app
-    public void OutputEvent(String str) {
-        // Send a Broadcast with the message
-        Intent intent = new Intent(NEW_MESSAGE_AVAILABLE);
-        intent.putExtra("message", str);
-        sendBroadcast(intent);
-    }
-
-    @Override
-    public void onMessageReceived(MessageEvent event) {
-        LOGD(TAG, "onMessageReceived: " + event);
-        byte[] data = event.getData();
-
-        if (data != null) {
-            if (data[0] == 1) {
-                // send available data
-                SendCollectedData();
-            }
-
-            if (data[0] == 2) {
-                // send available data
-                OutputEvent("Data saved");
-                alldata.clear();
-                Log.d("Order received", "Will delete data");
-                ISSContentProvider.clear();
-                OutputEvent("Data deleted");
-
-                // clear the existing data on the smartwatch
-
-                /*if (DataStorageManager.deleteISSRecords() > 0){
-                    OutputEvent("Data transferred");
-                };*/
-
-            }
-
-            if (data[0] == 3) {
-                SleepTrackingStopped = true;
-            }
-
         }
     }
 
@@ -750,7 +620,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     @Override
     public void onConnected(Bundle bundle) {
         Wearable.DataApi.addListener(mGoogleApiClient, this);
-        Wearable.MessageApi.addListener(mGoogleApiClient, this);
         Wearable.NodeApi.addListener(mGoogleApiClient, this);
     }
 
@@ -779,6 +648,16 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     }
 
+    private void showToast(final Context context, final String message, final int length) {
+        Activity mActivity = (Activity) MainActivity.itself;
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, message, length).show();
+            }
+        });
+    }
+
     // stops sleep tracking
     public void StopSleep() {
 
@@ -801,7 +680,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                         }
                     }
                 } catch (Exception ex) {
-                    OutputEvent(ex.toString());
+                    showToast(getApplicationContext(), ex.getMessage(), Toast.LENGTH_SHORT);
                 }
             }
         }).start();

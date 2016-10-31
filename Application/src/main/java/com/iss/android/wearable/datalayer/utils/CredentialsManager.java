@@ -4,15 +4,15 @@ package com.iss.android.wearable.datalayer.utils;
  * Created by micha on 30.09.2016.
  */
 
-        import android.content.Context;
-        import android.content.SharedPreferences;
+import android.content.Context;
+import android.content.SharedPreferences;
 
-        import com.auth0.android.result.Credentials;
-        import com.iss.android.wearable.datalayer.R;
+import com.auth0.android.result.Credentials;
+import com.iss.android.wearable.datalayer.R;
 
 public class CredentialsManager {
 
-    public static void saveCredentials(Context context, Credentials credentials){
+    public static void saveCredentials(Context context, Credentials credentials) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.auth0_preferences), Context.MODE_PRIVATE);
 
@@ -24,7 +24,7 @@ public class CredentialsManager {
                 .apply();
     }
 
-    public static Credentials getCredentials(Context context){
+    public static Credentials getCredentials(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.auth0_preferences), Context.MODE_PRIVATE);
 
@@ -37,7 +37,7 @@ public class CredentialsManager {
         return credentials;
     }
 
-    public static void deleteCredentials(Context context){
+    public static void deleteCredentials(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.auth0_preferences), Context.MODE_PRIVATE);
 
@@ -48,8 +48,6 @@ public class CredentialsManager {
                 .putString(Constants.CREDENTIAL_TYPE, null)
                 .apply();
     }
-
-
 
 
 }

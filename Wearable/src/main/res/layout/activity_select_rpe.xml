@@ -10,15 +10,15 @@
     tools:context="com.iss.android.wearable.datalayer.SelectRPE">
 
     <TextView
+        android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Training was:"
-        android:id="@+id/textView3" />
+        android:text="Training was:" />
 
     <ListView
+        android:id="@+id/listView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/listView"
         android:layout_alignParentEnd="true"
         android:layout_below="@+id/textView3" />
 </RelativeLayout>

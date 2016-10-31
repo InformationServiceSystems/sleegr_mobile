@@ -1,49 +1,50 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.iss.android.wearable.datalayer.TrainingStartTimeActivity">
 
     <TextView
+        android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="When did the training end?"
-        android:id="@+id/textView4"
-        android:layout_alignParentTop="true"
+        android:layout_alignEnd="@+id/linearLayout2"
         android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:gravity="center"
-        android:layout_alignEnd="@+id/linearLayout2" />
+        android:text="When did the training end?" />
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_above="@+id/submitButton"
         android:layout_alignStart="@+id/submitButton"
         android:layout_below="@+id/textView4"
         android:gravity="center"
-        android:id="@+id/linearLayout2">
+        android:orientation="horizontal">
 
 
         <NumberPicker
+            android:id="@+id/hourPicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/hourPicker"
             android:layout_gravity="center_vertical" />
 
         <NumberPicker
+            android:id="@+id/minutePicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/minutePicker"
             android:layout_gravity="center_vertical" />
     </LinearLayout>
 
     <Button
+        android:id="@+id/submitButton"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:onClick="onSubmit"
-        android:text="Submit"
-        android:id="@+id/submitButton"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:onClick="onSubmit"
+        android:text="Submit" />
 
 </RelativeLayout>

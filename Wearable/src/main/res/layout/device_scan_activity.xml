@@ -20,32 +20,32 @@
     android:textColor="@color/black">
 
     <ListView
+        android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@android:id/list"
-        android:layout_below="@+id/textView"
-        android:layout_above="@+id/textView2" />
+        android:layout_above="@+id/textView2"
+        android:layout_below="@+id/textView" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select your HRM:"
         android:id="@+id/textView"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:textColor="@color/blue"
-        android:layout_alignParentEnd="true"
-        android:gravity="center" />
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Afterwards, run training mode to check connection."
-        android:id="@+id/textView2"
-        android:textColor="@color/blue"
-        android:gravity="center"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:text="Select your HRM:"
+        android:textColor="@color/blue" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:gravity="center"
+        android:text="Afterwards, run training mode to check connection."
+        android:textColor="@color/blue" />
 
 </RelativeLayout>

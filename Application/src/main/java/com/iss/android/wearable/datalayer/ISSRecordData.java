@@ -1,7 +1,6 @@
 package com.iss.android.wearable.datalayer;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.util.Log;
 
 import java.io.Serializable;

@@ -20,7 +20,7 @@ public class DailyData {
     private Double eveningHR;
 
     public DailyData(Date time) {
-        data = DatabaseManager.getData(time);
+        data = DataStorageManager.getData(time);
     }
 
     public Double getDALDA() {

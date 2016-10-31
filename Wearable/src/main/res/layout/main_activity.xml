@@ -14,7 +14,6 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -33,9 +32,9 @@
             android:layout_height="fill_parent"
             android:layout_margin="3dp"
             android:background="@color/grey"
-            android:src="@drawable/ic_settings_bluetooth_black_24dp"
             android:contentDescription="@string/StartTrainingButton"
-            android:onClick="onClicked" />
+            android:onClick="onClicked"
+            android:src="@drawable/ic_settings_bluetooth_black_24dp" />
 
 
         <TextView
@@ -51,32 +50,32 @@
             android:id="@+id/timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/searchForHRM"
             android:layout_marginLeft="3dp"
             android:layout_marginRight="3dp"
+            android:layout_toEndOf="@+id/searchForHRM"
             android:text="0:00"
-            android:textColor="@color/black"
-            android:layout_alignTop="@+id/searchForHRM"
-            android:layout_toEndOf="@+id/searchForHRM" />
+            android:textColor="@color/black" />
 
         <TextView
             android:id="@+id/batteryLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="HRM:"
-            android:textColor="@color/black"
             android:layout_alignBaseline="@+id/SWbatteryLabel"
             android:layout_alignBottom="@+id/SWbatteryLabel"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:text="HRM:"
+            android:textColor="@color/black" />
 
         <TextView
             android:id="@+id/SWbatteryLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SW:"
-            android:textColor="@color/black"
             android:layout_alignBaseline="@+id/timer"
             android:layout_alignBottom="@+id/timer"
-            android:layout_toStartOf="@+id/batteryLabel" />
+            android:layout_toStartOf="@+id/batteryLabel"
+            android:text="SW:"
+            android:textColor="@color/black" />
 
 
     </RelativeLayout>
@@ -109,13 +108,13 @@
                 android:id="@+id/heartRateLabel"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:textSize="30sp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
                 android:editable="true"
                 android:gravity="center"
                 android:text="HR"
                 android:textColor="@color/black"
-                android:layout_centerVertical="true"
-                android:layout_alignParentStart="true" />
+                android:textSize="30sp" />
 
         </RelativeLayout>
 
@@ -125,69 +124,67 @@
         android:id="@+id/BottomLayout"
         android:layout_width="wrap_content"
         android:layout_height="45dp"
-        android:background="@color/white"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:background="@color/white">
 
 
         <ImageButton
             android:id="@+id/morningHR"
             android:layout_width="30dp"
             android:layout_height="fill_parent"
-            android:background="@color/grey"
-            android:src="@drawable/ic_hotel_black_24dp"
-            android:onClick="onClicked"
+            android:layout_alignParentStart="true"
             android:layout_marginBottom="3dp"
-            android:layout_alignParentStart="true" />
+            android:background="@color/grey"
+            android:onClick="onClicked"
+            android:src="@drawable/ic_hotel_black_24dp" />
 
 
         <ImageButton
             android:id="@+id/trainingHR"
             android:layout_width="30dp"
             android:layout_height="fill_parent"
-            android:background="@color/grey"
-            android:src="@drawable/ic_directions_run_black_24dp"
-            android:onClick="onClicked"
             android:layout_marginBottom="3dp"
             android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@+id/morningHR" />
+            android:layout_toRightOf="@+id/morningHR"
+            android:background="@color/grey"
+            android:onClick="onClicked"
+            android:src="@drawable/ic_directions_run_black_24dp" />
 
 
         <ImageButton
             android:id="@+id/startCooldown"
             android:layout_width="30dp"
             android:layout_height="fill_parent"
-            android:background="@color/grey"
-            android:src="@drawable/ic_ac_unit_black_24dp"
-            android:onClick="onClicked"
             android:layout_marginBottom="3dp"
             android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@+id/trainingHR"/>
+            android:layout_toRightOf="@+id/trainingHR"
+            android:background="@color/grey"
+            android:onClick="onClicked"
+            android:src="@drawable/ic_ac_unit_black_24dp" />
 
 
         <ImageButton
             android:id="@+id/continueCooldown"
             android:layout_width="30dp"
             android:layout_height="fill_parent"
-            android:background="@color/grey"
-            android:src="@drawable/ic_trending_down_black_24dp"
-            android:onClick="onClicked"
             android:layout_marginBottom="3dp"
             android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@+id/startCooldown"/>
+            android:layout_toRightOf="@+id/startCooldown"
+            android:background="@color/grey"
+            android:onClick="onClicked"
+            android:src="@drawable/ic_trending_down_black_24dp" />
 
         <ImageButton
             android:id="@+id/eveningHR"
             android:layout_width="30dp"
             android:layout_height="fill_parent"
-            android:background="@color/grey"
-            android:src="@drawable/ic_hotel_black_24dp"
-            android:onClick="onClicked"
             android:layout_marginBottom="3dp"
             android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@+id/continueCooldown"/>
-
-
+            android:layout_toRightOf="@+id/continueCooldown"
+            android:background="@color/grey"
+            android:onClick="onClicked"
+            android:src="@drawable/ic_hotel_black_24dp" />
 
 
     </RelativeLayout>

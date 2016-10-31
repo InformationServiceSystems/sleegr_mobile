@@ -1,13 +1,5 @@
 package com.iss.android.wearable.datalayer;
 
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.util.Log;
-
-import com.iss.android.wearable.datalayer.utils.CredentialsManager;
-
-import static com.iss.android.wearable.datalayer.MainActivity.getContext;
-
 /**
  * Created by micha on 17.10.2016.
  */
@@ -20,8 +12,16 @@ public class UserData {
         return UserData.idToken;
     }
 
+    public static void setIdToken(String idToken) {
+        UserData.idToken = idToken;
+    }
+
     public static String getEmail() {
         return UserData.email;
+    }
+
+    public static void setEmail(String email) {
+        UserData.email = email;
     }
 
     public static String getName() {
@@ -30,13 +30,5 @@ public class UserData {
 
     public static void setName(String name) {
         UserData.name = name;
-    }
-
-    public static void setEmail(String email) {
-        UserData.email = email;
-    }
-
-    public static void setIdToken(String idToken) {
-        UserData.idToken = idToken;
     }
 }

@@ -1,7 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
-import android.*;
 import android.Manifest;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -12,7 +12,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.app.Activity;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -28,13 +27,16 @@ import java.util.ArrayList;
 public class MeasuringActivity extends Activity {
 
     private static final int REQUEST_LOCATION = 1;
-    private BluetoothAdapter mBluetoothAdapter;
-    private LeDeviceListAdapter mLeDeviceListAdapter;
-    private BroadcastReceiver mReceiver;
     private static final String[] PERMISSIONS_LOCATION = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION};
+    private BluetoothAdapter mBluetoothAdapter;
+    private LeDeviceListAdapter mLeDeviceListAdapter;
+    private BroadcastReceiver mReceiver;
 
+    public static void showState(String currentState) {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +133,8 @@ public class MeasuringActivity extends Activity {
         }
     }
 
+    /*Following are methods dealing with the Bluetooth dialog*/
+
     @Override
     public void onDestroy() {
         unregisterReceiver(mReceiver);
@@ -173,8 +177,14 @@ public class MeasuringActivity extends Activity {
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putString(getString(R.string.device_address), device.getAddress());
                         Log.d("Device Address", device.getAddress());
-                        editor.putString(getString(R.string.device_name), device.getName());
+
+                        final String deviceName = device.getName();
+                        if (deviceName != null && deviceName.length() > 0)
+                            editor.putString(getString(R.string.device_name), device.getName());
+                        else
+                            editor.putString(getString(R.string.device_name), getString(R.string.unknown_device));
                         editor.apply();
+                        Toast.makeText(getApplicationContext(), "Set " + pref.getString(getString(R.string.device_name), "nothing") + " as your sensor!", Toast.LENGTH_SHORT).show();
                         Log.d("Device Address", "has been stored");
                         dialog.dismiss();
                     }
@@ -188,6 +198,8 @@ public class MeasuringActivity extends Activity {
         TextView deviceName;
         TextView deviceAddress;
     }
+
+    /*Following are methods affecting the open UI:*/
 
     // Adapter for holding devices found through scanning.
     private class LeDeviceListAdapter extends BaseAdapter {

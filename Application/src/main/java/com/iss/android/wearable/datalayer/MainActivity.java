@@ -41,15 +41,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.Wearable;
 import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
@@ -61,13 +56,9 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
-
-import static com.iss.android.wearable.datalayer.DateTimeManager.getDateFromToday;
 
 /**
  * Receives its own events using a listener API designed for foreground activities. Updates a data
@@ -254,6 +245,7 @@ public class MainActivity extends FragmentActivity implements
         final Intent StartMeasuringActivity = new Intent(this, MeasuringActivity.class);
         startActivity(StartMeasuringActivity);
     }
+
     private void onShowMeasurements() {
         final Intent ShowMeasurements = new Intent(this, MeasurementsActivity.class);
         startActivity(ShowMeasurements);

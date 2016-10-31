@@ -257,37 +257,10 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 resolver.insert(ISSContentProvider.RPE_CONTENT_URI, values);
             }
             for (ISSRecordData row : ISSRecords) {
-                Log.d("measurement id", String.valueOf(row.measurementID));
-                ContentValues values = new ContentValues();
-                values.put(ISSContentProvider.SENT, false);
-                values.put(ISSContentProvider.USERID,
-                        getUserID());
-                values.put(ISSContentProvider.MEASUREMENT,
-                        row.MeasurementType);
-                values.put(ISSContentProvider.MEASUREMENT_ID,
-                        row.measurementID);
-                values.put(ISSContentProvider.DATE, row.Date);
-                values.put(ISSContentProvider.TIMESTAMP, row.Timestamp);
-                values.put(ISSContentProvider.EXTRA, row.ExtraData);
-                values.put(ISSContentProvider.VALUE1, row.Value1);
-                values.put(ISSContentProvider.VALUE2, row.Value2);
-                values.put(ISSContentProvider.VALUE3, row.Value3);
-                values.put(ISSContentProvider.SENSOR, row.Sensor);
-                values.put(ISSContentProvider.SENT, "false");
-                Log.d("values", values.toString());
-                resolver.insert(ISSContentProvider.RECORDS_CONTENT_URI, values);
+                DataStorageManager.insertISSRecordData(row);
             }
             for (ISSMeasurement row : Measurements) {
-                Log.d("tries to insert", String.valueOf(row._ID));
-                ContentValues values = new ContentValues();
-                values.put(ISSContentProvider._ID, row._ID);
-                values.put(ISSContentProvider.TIMESTAMP,
-                        row.timestamp);
-                values.put(ISSContentProvider.TYPE,
-                        row.type);
-                values.put(ISSContentProvider.SENT,
-                        "false");
-                resolver.insert(ISSContentProvider.MEASUREMENT_CONTENT_URI, values);
+                DataStorageManager.insertISSMeasurement(row);
             }
             ClearWatchData();
 
@@ -444,9 +417,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         }
         return result;
     }
-
-
-    // A method querying for all records that have not been sent yet, and sends them to the server.
 
     private void showToast(final Context context, final String message, final int length) {
         Activity mActivity = (Activity) MainActivity.itself;

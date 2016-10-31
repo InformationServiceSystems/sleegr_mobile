@@ -20,8 +20,6 @@ import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.iss.android.wearable.datalayer.MainActivity.getContext;
-
 
 public class Auth0Activity extends Activity {
 
