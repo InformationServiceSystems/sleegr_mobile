@@ -2,6 +2,7 @@ package com.iss.android.wearable.datalayer;
 
 import android.content.ContentValues;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
@@ -16,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.iss.android.wearable.datalayer.DataSyncService.getUserID;
 import static com.iss.android.wearable.datalayer.ISSRecordData.resolver;
 
@@ -128,6 +130,7 @@ public class DataStorageManager {
     }
 
     public static void insertISSRecordData(ISSRecordData data) {
+        int latestMeasurement = pref.getInt(Resources.getSystem().getString(R.string.latest_measurement),0);
         Log.d("measurement id", String.valueOf(data.measurementID));
         ContentValues values = new ContentValues();
         values.put(ISSContentProvider.SENT, false);
@@ -136,7 +139,7 @@ public class DataStorageManager {
         values.put(ISSContentProvider.MEASUREMENT,
                 data.MeasurementType);
         values.put(ISSContentProvider.MEASUREMENT_ID,
-                data.measurementID);
+                latestMeasurement);
         values.put(ISSContentProvider.DATE, data.Date);
         values.put(ISSContentProvider.TIMESTAMP, data.Timestamp);
         values.put(ISSContentProvider.EXTRA, data.ExtraData);
@@ -193,9 +196,14 @@ public class DataStorageManager {
     }
 
     public static void insertISSMeasurement(ISSMeasurement row) {
+        int latestMeasurement = pref.getInt(Resources.getSystem().getString(R.string.latest_measurement),0);
+        latestMeasurement++;
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt(Resources.getSystem().getString(R.string.latest_measurement), latestMeasurement);
+
         Log.d("tries to insert", String.valueOf(row._ID));
         ContentValues values = new ContentValues();
-        values.put(ISSContentProvider._ID, row._ID);
+        values.put(ISSContentProvider._ID, latestMeasurement);
         values.put(ISSContentProvider.TIMESTAMP,
                 row.timestamp);
         values.put(ISSContentProvider.TYPE,
@@ -216,5 +224,15 @@ public class DataStorageManager {
         editor.putInt("LastMeasurement", measurementNumber);
         editor.apply();
 
+    }
+
+    public static void insertISSRPEAnswer(ISSRPEAnswers row) {
+        int latestMeasurement = pref.getInt(Resources.getSystem().getString(R.string.latest_measurement),0);
+        ContentValues values = new ContentValues();
+        values.put(ISSContentProvider.MEASUREMENT_ID,
+                latestMeasurement);
+        values.put(ISSContentProvider.RPE_ANSWERS,
+                ISSDictionary.MapToByteArray(row.Answers));
+        resolver.insert(ISSContentProvider.RPE_CONTENT_URI, values);
     }
 }

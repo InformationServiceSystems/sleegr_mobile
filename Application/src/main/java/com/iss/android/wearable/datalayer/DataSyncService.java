@@ -246,15 +246,8 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             // Okay this looks f'kin ugly, but there's no other way due to erasure of ArrayLists.
             // It's bs but there's no way around.
-            ContentResolver resolver = MainActivity.getContext().getContentResolver();
             for (ISSRPEAnswers row : RPEAnswers) {
-
-                ContentValues values = new ContentValues();
-                values.put(ISSContentProvider.MEASUREMENT_ID,
-                        row.Measurement_ID);
-                values.put(ISSContentProvider.RPE_ANSWERS,
-                        ISSDictionary.MapToByteArray(row.Answers));
-                resolver.insert(ISSContentProvider.RPE_CONTENT_URI, values);
+                DataStorageManager.insertISSRPEAnswer(row);
             }
             for (ISSRecordData row : ISSRecords) {
                 DataStorageManager.insertISSRecordData(row);
