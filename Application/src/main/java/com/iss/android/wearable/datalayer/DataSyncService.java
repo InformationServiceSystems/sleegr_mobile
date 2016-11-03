@@ -188,6 +188,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     // A method that is triggered if sensor data has changed and then saves the data from the sensor (I guess?)
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
+        Log.d("Finds out that", "data has changed");
 
         for (DataEvent event : dataEvents) {
             if (event.getType() == DataEvent.TYPE_CHANGED && event.getDataItem().getUri().getPath().equals("/sensorData")) {
@@ -198,6 +199,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
+                            Log.d("Calls", "Save data from Asset");
                             SaveDataFromAsset(asset);
                         }
                     }).start();
@@ -239,6 +241,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         try {
 
             byte[] dataAsByteArray = Serializer.InputStreamToByte(assetInputStream);
+            Log.d("Received", dataAsByteArray.toString());
             byte[][] data = (byte[][]) Serializer.DeserializeFromBytes(dataAsByteArray);
             ArrayList<ISSRecordData> ISSRecords = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data[0]);
             ArrayList<ISSMeasurement> Measurements = (ArrayList<ISSMeasurement>) Serializer.DeserializeFromBytes(data[1]);
@@ -246,14 +249,17 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             // Okay this looks f'kin ugly, but there's no other way due to erasure of ArrayLists.
             // It's bs but there's no way around.
+            for (ISSMeasurement row : Measurements) {
+                Log.d("Trying to insert", "Measurement " + row._ID);
+                DataStorageManager.insertISSMeasurement(row);
+            }
             for (ISSRPEAnswers row : RPEAnswers) {
+                Log.d("Trying to insert", "RPEAnswers");
                 DataStorageManager.insertISSRPEAnswer(row);
             }
             for (ISSRecordData row : ISSRecords) {
+                Log.d("Trying to insert", "Records");
                 DataStorageManager.insertISSRecordData(row);
-            }
-            for (ISSMeasurement row : Measurements) {
-                DataStorageManager.insertISSMeasurement(row);
             }
             ClearWatchData();
 
@@ -299,7 +305,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     // A method that handles deletion of data that has successfully been send to the phone.
     public void ClearWatchData() {
 
-        OutputEvent("Data saved. Clearing data on the watch");
+        OutputEvent("Received a measurement");
         Log.d("Now clearing", "Data on the watch");
 
         new Thread(new Runnable() {

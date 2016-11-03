@@ -55,6 +55,7 @@ public class FhirFactory {
             CodeableConcept.put("system", "http://loinc.org");
             CodeableConcept.put("code", "8867-4");
             CodeableConcept.put("display", "Heart rate");
+            mainObject.put("code", CodeableConcept);
 
             JSONObject subject = new JSONObject();
             subject.put("ref", UserData.getIdToken());
@@ -65,13 +66,10 @@ public class FhirFactory {
             device.put("display", sensorDeviceName);
             mainObject.put("device", device);
 
-            JSONObject component = new JSONObject();
-
             /* mainObject.put("Id", mCursor.getInt(0));
             mainObject.put("Type", mCursor.getString(1));
             mainObject.put("Timestamp", mCursor.getString(2));*/
-            component.put("elements", componentElements);
-            mainObject.put("component", component);
+            mainObject.put("component", componentElements);
         } catch (JSONException e) {
             e.printStackTrace();
         }

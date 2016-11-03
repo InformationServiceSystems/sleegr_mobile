@@ -293,7 +293,7 @@ public class MainActivity extends FragmentActivity implements
     public void OutputEvent(final String content) {
         final String cont = content;
         showToast(getApplicationContext(), cont, Toast.LENGTH_SHORT);
-        if (cont.equals("Data saved. Clearing data on the watch")) {
+        if (cont.equals("Received a measurement")) {
             finish();
             startActivity(getIntent());
             this.overridePendingTransition(0, 0);

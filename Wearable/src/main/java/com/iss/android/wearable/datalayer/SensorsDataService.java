@@ -641,28 +641,36 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 NodeApi.GetConnectedNodesResult result =
                         Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
                 List<Node> nodes = result.getNodes();
+                String nodeId = null;
 
                 if(DataStorageManager.dataAvailable()) {
 
                     byte[] data = new byte[0];
                     try {
                         data = DataStorageManager.BuildItem();
+                        Log.d("Received", "serialized Item");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
                     if (nodes.size() > 0) {
                         for (int i = 0; i < nodes.size(); i++) {
+                            Log.d("Node" + i, nodes.get(i).toString());
+                            nodeId = nodes.get(i).getId();
+
                             Asset asset = Asset.createFromBytes(data);
 
                             PutDataMapRequest dataMap = PutDataMapRequest.create("/sensorData");
                             dataMap.getDataMap().putAsset("sensorData", asset);
                             PutDataRequest request = dataMap.asPutDataRequest();
+                            Log.d("Sending data", "now");
                             PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
                         }
                     }
 
                     OutputEvent("Sending data ...");
+                } else {
+                    Log.d("No data", "available anymore");
                 }
 
             }
@@ -687,14 +695,15 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             if (data[0] == 1) {
                 // send available data
                 SendCollectedData();
+                Log.d("Looking for", "data to send");
             }
 
             if (data[0] == 2) {
                 // send available data
                 OutputEvent("Data saved");
                 DataStorageManager.clearLastMeasurement();
-                Log.d("Order received", "Will delete data");
                 OutputEvent("Data deleted");
+                Log.d("Smartphone", "confirms that data has been received");
                 SendCollectedData();
 
                 // clear the existing data on the smartwatch

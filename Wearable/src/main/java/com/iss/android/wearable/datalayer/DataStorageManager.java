@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -155,14 +156,17 @@ public class DataStorageManager {
 
     public static byte[] BuildItem() throws IOException {
         ArrayList<ISSMeasurement> Measurements = GetAllMeasurements();
+        Log.d("Found Measurement", Measurements.get(0).toString());
         ArrayList<ISSRecordData> ISSRecords = GetAllFilesToUpload(Measurements.get(0)._ID);
+        Log.d("Found Records", ISSRecords.toString());
         ArrayList<ISSRPEAnswers> RPEAnswers = GetAllRPEAnswers(Measurements.get(0)._ID);
-        byte[][] data = new byte[3][];
+        byte[][] data = new byte[4][];
 
         try {
             data[0] = Serializer.SerializeToBytes(ISSRecords);
             data[1] = Serializer.SerializeToBytes(Measurements);
             data[2] = Serializer.SerializeToBytes(RPEAnswers);
+            data[3] = Serializer.SerializeToBytes(getCurrentTime());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -303,5 +307,9 @@ public class DataStorageManager {
         } else {
             return true;
         }
+    }
+
+    public static Date getCurrentTime() {
+        return new Date();
     }
 }

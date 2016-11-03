@@ -130,7 +130,7 @@ public class DataStorageManager {
     }
 
     public static void insertISSRecordData(ISSRecordData data) {
-        int latestMeasurement = pref.getInt(Resources.getSystem().getString(R.string.latest_measurement),0);
+        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement),0);
         Log.d("measurement id", String.valueOf(data.measurementID));
         ContentValues values = new ContentValues();
         values.put(ISSContentProvider.SENT, false);
@@ -196,10 +196,12 @@ public class DataStorageManager {
     }
 
     public static void insertISSMeasurement(ISSMeasurement row) {
-        int latestMeasurement = pref.getInt(Resources.getSystem().getString(R.string.latest_measurement),0);
+        Log.d("insertISSMeasurement", "has been called");
+        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement),0);
         latestMeasurement++;
         SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(Resources.getSystem().getString(R.string.latest_measurement), latestMeasurement);
+        editor.putInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement), latestMeasurement);
+        editor.apply();
 
         Log.d("tries to insert", String.valueOf(row._ID));
         ContentValues values = new ContentValues();
@@ -227,7 +229,7 @@ public class DataStorageManager {
     }
 
     public static void insertISSRPEAnswer(ISSRPEAnswers row) {
-        int latestMeasurement = pref.getInt(Resources.getSystem().getString(R.string.latest_measurement),0);
+        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement),0);
         ContentValues values = new ContentValues();
         values.put(ISSContentProvider.MEASUREMENT_ID,
                 latestMeasurement);
