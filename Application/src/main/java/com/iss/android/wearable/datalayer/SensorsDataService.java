@@ -53,6 +53,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     public static final String
             ACTION_BATTERY_STATUS = SensorsDataService.class.getName() + "BatteryStatus",
+            MESSAGE = SensorsDataService.class.getName() + "Message",
             ACTION_HR = SensorsDataService.class.getName() + "HeartRate",
             EXTRA_STATUS = "extra_status",
             EXTRA_HR = "extra_hr",
@@ -337,9 +338,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     public void OutputCurrentState() {
-
-        new MeasuringActivity().showState(currentState);
-
+        Intent i = new Intent("com.iss.android.wearable.datalayer." + currentState);
+        i.putExtra("message", currentState);
+        sendBroadcast(i);
     }
 
     // broadcasts the time elapsed via intent
@@ -507,6 +508,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         if (state.equals("Idle")) {
             alarm.CancelAlarm(getApplicationContext());
+            showToast(getApplicationContext(), "Stopped Measuring", Toast.LENGTH_SHORT);
             return;
         }
         alarm.SetAlarm(getApplicationContext());
@@ -529,17 +531,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     // Starts measuring the heart rate and, during that time, holds wakelock
     void StartMeasuring() {
         // Starts a new Measurement in the database.
-        ContentResolver resolver = MainActivity.getContext().getContentResolver();
-        ContentValues values = new ContentValues();
         Date date = new Date();
-        values.put(ISSContentProvider.TIMESTAMP, date.toString());
-        values.put(ISSContentProvider.TYPE, currentState);
-        measurementNumber = DataStorageManager.getLastMeasurementID(); //Loads the ID from the last measurement in the db
-        Log.d("Loaded measurement as", String.valueOf(measurementNumber));
-        measurementNumber++;
-        values.put(ISSContentProvider._ID, measurementNumber);
-        DataStorageManager.SetLastMeasurementID(measurementNumber);
-        resolver.insert(ISSContentProvider.MEASUREMENT_CONTENT_URI, values);
+        ISSMeasurement measurement = new ISSMeasurement(Log.d("Loaded measurement as", String.valueOf(measurementNumber)), currentState, date.toString());
+        DataStorageManager.insertISSMeasurement(measurement);
         // as a secondary key for the rpe values and the record data
 
         GetHRMid();
@@ -547,7 +541,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
         mBluetoothAdapter.startLeScan(mLeScanCallback);
 
-        showToast(getApplicationContext(), "Searching HRM ... ", Toast.LENGTH_SHORT);
+        showToast(getApplicationContext(), "Starting measuring", Toast.LENGTH_SHORT);
         timerTask = new TimerTask() {
             public void run() {
                 TimerEvent();
@@ -579,8 +573,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             mBluetoothGatt = null;
             hrmDevice = null;
         }
-
-        showToast(getApplicationContext(), "HRM off", Toast.LENGTH_SHORT);
 
         if (timer != null) {
             timer.cancel();

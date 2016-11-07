@@ -176,5 +176,6 @@
     <string name="afterwards_run_training_mode_to_check_connection">Afterwards, run training mode to check connection.</string>
     <string name="select_your_hrm">Select your HRM:</string>
     <string name="latest_measurement">Latest Measurement</string>
+    <string name="battery_warning_title">Battery Warning</string>
 
 </resources>

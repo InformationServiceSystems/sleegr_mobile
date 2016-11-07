@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -21,6 +22,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 
@@ -32,7 +35,56 @@ public class MeasuringActivity extends Activity {
             Manifest.permission.ACCESS_COARSE_LOCATION};
     private BluetoothAdapter mBluetoothAdapter;
     private LeDeviceListAdapter mLeDeviceListAdapter;
-    private BroadcastReceiver mReceiver;
+    private int warned = 0;
+    private boolean broadcastReceiverIsRegistered = false;
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        // Receives broadcasts sent from other points of the app, like the SensorsDataService
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                Log.d("MeasuringActivityLog", "Discovery started");
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                Log.d("MeasuringActivityLog", "Discovery finished");
+            } else if (action.equals(SensorsDataService.MESSAGE)) {
+                showState(intent.getStringExtra("message"));
+            } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // Get the BluetoothDevice object from the Intent
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                mLeDeviceListAdapter.addDevice(device);
+            }   else if (action.equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
+                final TextView BatteryStatus = (TextView) findViewById(R.id.batteryLabel);
+                int status = intent.getIntExtra(SensorsDataService.EXTRA_STATUS, 0);
+                BatteryStatus.setText("HR: " + status + "%");
+                // Checks if the Battery status is 15% or below and if the User already has been alarmed.
+                // If the battery got charged up again, reset the Warning.
+                if (status <= 15 && status > 10 && warned != 1) {
+                    warned = 1;
+                    displayBatteryWarning(warned);
+                } else if (status <= 10 && status > 5 && warned != 2) {
+                    warned = 2;
+                    displayBatteryWarning(warned);
+                } else if (status <= 5 && warned != 3) {
+                    warned = 3;
+                    displayBatteryWarning(warned);
+                } else if (status > 15 && warned != 0) {
+                    warned = 0;
+                }
+            } else if (action.equals(SensorsDataService.ACTION_HR)) {
+                // Prints out the heart rate
+                final TextView HeartRate = (TextView) findViewById(R.id.heartRateDisplay);
+                int result = intent.getIntExtra(SensorsDataService.EXTRA_HR, 0);
+                // Need to convert the Int to String or else the app crashes. GJ Google.
+                HeartRate.setText(Integer.toString(result));
+            } else if (action.equals(SensorsDataService.UPDATE_TIMER_VALUE)) {
+                String newtime = String.valueOf(intent.getIntExtra("minutes", 0))
+                        + ":" + StringUtils.leftPad(Long.toString(intent.getIntExtra("seconds", 0)), 2, "0");
+                TextView timetext = (TextView) findViewById(R.id.timer);
+                timetext.setText(newtime);
+            }
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +92,7 @@ public class MeasuringActivity extends Activity {
         setContentView(R.layout.activity_measuring);
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
+        RegisterBroadcastReceiver();
         checkPermissions();
 
         if (SensorsDataService.itself == null) {
@@ -63,29 +116,21 @@ public class MeasuringActivity extends Activity {
 
         // Initializes list view adapter.
         mLeDeviceListAdapter = new LeDeviceListAdapter();
+        mBluetoothAdapter.startDiscovery();
+    }
 
+    private void RegisterBroadcastReceiver() {
         IntentFilter filter = new IntentFilter();
-        // This is a method that adds an intent receiver that listens to every event that is triggered by bluetooth
+        filter.addAction(SensorsDataService.ACTION_BATTERY_STATUS);
+        filter.addAction(SensorsDataService.MESSAGE);
+        filter.addAction(SensorsDataService.ACTION_HR);
+        filter.addAction(SensorsDataService.UPDATE_TIMER_VALUE);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
         filter.addAction(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                    Log.d("MeasuringActivityLog", "Discovery started");
-                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                    Log.d("MeasuringActivityLog", "Discovery finished");
-                } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    // Get the BluetoothDevice object from the Intent
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    mLeDeviceListAdapter.addDevice(device);
-                }
-            }
-        };
-        registerReceiver(mReceiver, filter);
-        mBluetoothAdapter.startDiscovery();
+        registerReceiver(broadcastReceiver, filter);
+        broadcastReceiverIsRegistered = true;
     }
 
     private void checkPermissions() {
@@ -127,6 +172,22 @@ public class MeasuringActivity extends Activity {
         }
     }
 
+    @Override
+    public void onResume() {
+        RegisterBroadcastReceiver();
+        broadcastReceiverIsRegistered = true;
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        if (broadcastReceiverIsRegistered) {
+            unregisterReceiver(broadcastReceiver);
+            broadcastReceiverIsRegistered = false;
+        }
+        super.onPause();
+    }
+
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.switchBluetoothDevice:
@@ -139,7 +200,10 @@ public class MeasuringActivity extends Activity {
 
     @Override
     public void onDestroy() {
-        unregisterReceiver(mReceiver);
+        if (broadcastReceiverIsRegistered) {
+            unregisterReceiver(broadcastReceiver);
+            broadcastReceiverIsRegistered = false;
+        }
         mBluetoothAdapter.cancelDiscovery();
         super.onDestroy();
     }
@@ -324,5 +388,39 @@ public class MeasuringActivity extends Activity {
     public void showState(String currentState) {
         TextView currentStateTextView = (TextView) findViewById(R.id.showCurrentState);
         currentStateTextView.setText(currentState);
+    }
+
+    // displays a battery warning if the battery is low
+    private void displayBatteryWarning(int warned) {
+        // Display a cancelable warning that the HRM battery is running low.
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+
+        String warning = "";
+        switch (warned) {
+            case 1:
+                warning = "HRM Battery Level at 15%";
+                break;
+            case 2:
+                warning = "HRM Battery Level at 10%";
+                break;
+            case 3:
+                warning = "HRM Battery Level at 5%";
+                break;
+        }
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(100);
+        builder.setMessage(warning)
+                .setTitle(R.string.battery_warning_title)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        dialog.dismiss();
+                    }
+                });
+
+        android.app.AlertDialog dialog = builder.create();
+        dialog.setCancelable(true);
+        dialog.show();
     }
 }

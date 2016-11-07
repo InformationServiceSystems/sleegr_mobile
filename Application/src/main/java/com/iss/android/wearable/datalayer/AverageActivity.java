@@ -58,9 +58,9 @@ public class AverageActivity extends Activity {
             // Iterate over all heart rate values and assign their value to morning, day or evening
             for (int i = 0; i< listOfFiles.size(); i++){
                 for (File f: listOfFiles.get(i)){
-                    try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+                    try (BufferedReader broadcastReceiver = new BufferedReader(new FileReader(f))) {
                         String line;
-                        while ((line = br.readLine()) != null) {
+                        while ((line = broadcastReceiver.readLine()) != null) {
                             String[] parts = line.split(",");
                             String type = parts[1]; // Measurement Type (Heart rate etc.)
                             String stringDate = parts[2]; // Date
