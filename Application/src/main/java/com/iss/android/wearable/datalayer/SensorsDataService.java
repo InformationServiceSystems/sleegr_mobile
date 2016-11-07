@@ -446,6 +446,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     // Switches the sports action to the new activity type
     public void SwitchSportsAction(String action) {
+        Log.d("Switched to", action);
 
         String newState = "";
 

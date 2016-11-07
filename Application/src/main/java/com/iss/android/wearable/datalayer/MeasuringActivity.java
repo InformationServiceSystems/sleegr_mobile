@@ -42,6 +42,12 @@ public class MeasuringActivity extends Activity {
 
         checkPermissions();
 
+        if (SensorsDataService.itself == null) {
+            Log.d("Starting", "SensorsDataService");
+            Intent intent = new Intent(this, SensorsDataService.class);
+            startService(intent);
+        }
+
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
         Log.d("MeasuringActivityLog", "initialised a manager");
@@ -188,6 +194,56 @@ public class MeasuringActivity extends Activity {
 
         AlertDialog dialog = builderSingle.create();
         dialog.show();
+    }
+
+    public void onClicked(View view) {
+        Log.d("Click", "happened");
+        Log.d("SensorsDataService", String.valueOf(SensorsDataService.itself==null));
+        switch (view.getId()) {
+            case R.id.morningHR:
+
+                if (SensorsDataService.itself != null) {
+
+                    if (!SensorsDataService.isNowASleepingHour())
+                        SensorsDataService.itself.SwitchSportsAction("MorningHR");
+                }
+
+                break;
+            case R.id.trainingHR:
+
+                if (SensorsDataService.itself != null) {
+                    SensorsDataService.itself.SwitchSportsAction("TrainingHR");
+                }
+
+                break;
+            case R.id.startCooldown:
+
+                if (SensorsDataService.itself != null) {
+                    SensorsDataService.itself.SwitchSportsAction("Cooldown");
+                }
+
+                break;
+            case R.id.continueCooldown:
+
+                if (SensorsDataService.itself != null) {
+                    SensorsDataService.itself.SwitchSportsAction("Recovery");
+                }
+
+
+                break;
+            case R.id.eveningHR:
+
+                if (SensorsDataService.itself != null) {
+                    if (SensorsDataService.isNowASleepingHour())
+                        SensorsDataService.itself.SwitchSportsAction("EveningHR");
+                }
+
+
+                break;
+            default:
+
+                Log.e("OnClicked", "Unknown click event registered");
+        }
     }
 
     static class ViewHolder {

@@ -22,8 +22,7 @@ public class FhirFactory {
             code.put("display", "Heart rate");
             json.put("code", code);
 
-            json.put("valueTime", tosend.Timestamp);
-            json.put("valueDate", tosend.Date);
+            json.put("valueDateTime", tosend.Date+"T"+tosend.Timestamp);
             json.put("tag", tosend.ExtraData);
 
             JSONObject valueQuantity = new JSONObject();
