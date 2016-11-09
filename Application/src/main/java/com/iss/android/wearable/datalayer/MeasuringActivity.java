@@ -243,6 +243,8 @@ public class MeasuringActivity extends Activity {
 
                     if (!SensorsDataService.isNowASleepingHour()) {
                         SensorsDataService.itself.SwitchSportsAction("MorningHR");
+                    } else {
+                        Toast.makeText(this, R.string.too_late_for_morning, Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -274,6 +276,8 @@ public class MeasuringActivity extends Activity {
                 if (SensorsDataService.itself != null) {
                     if (SensorsDataService.isNowASleepingHour()) {
                         SensorsDataService.itself.SwitchSportsAction("EveningHR");
+                    } else {
+                        Toast.makeText(this, R.string.too_early_for_evening, Toast.LENGTH_SHORT).show();
                     }
                 }
 
