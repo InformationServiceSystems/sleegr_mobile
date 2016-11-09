@@ -11,8 +11,6 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -40,6 +38,7 @@ import com.google.android.gms.wearable.Wearable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -343,6 +342,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         sendBroadcast(i);
     }
 
+    public void OutputMessage(String message) {
+        Intent i = new Intent(MESSAGE);
+        i.putExtra("message", message);
+        sendBroadcast(i);
+    }
+
     // broadcasts the time elapsed via intent
     public void SendTimerTime(int minutes, int seconds) {
         Intent intent = new Intent(UPDATE_TIMER_VALUE);
@@ -498,6 +503,10 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     // Changes the state of the app so as to realise what is being measured at the moment
     private void BringIntoState(String state) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = pref.edit();
+        Calendar calendar = new GregorianCalendar();
+        String date = calendar.get(Calendar.DAY_OF_MONTH) + calendar.get(Calendar.MONTH) + calendar.get(Calendar.YEAR) + "";
         recordedActivities.put(state, true);
 
         currentState = state;
@@ -509,22 +518,33 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         if (state.equals("Idle")) {
             alarm.CancelAlarm(getApplicationContext());
             showToast(getApplicationContext(), "Stopped Measuring", Toast.LENGTH_SHORT);
+            OutputMessage("Invalidate Button Colors, Finished");
             return;
         }
         alarm.SetAlarm(getApplicationContext());
 
         if (state.equals("MorningHR")) {
-            // stop recording cooling / resting prematurely
             timerTimeout = RESTING_MEASUREMENT_TIME;
+            editor.putBoolean(date + state, true);
+            OutputMessage("Invalidate Morning Colors");
         } else if (state.equals("EveningHR")) {
             timerTimeout = RESTING_MEASUREMENT_TIME;
+            editor.putBoolean(date + state, true);
+            OutputMessage("Invalidate Evening Colors");
         } else if (state.equals("TrainingHR")) {
             timerTimeout = TRAINING_MEASUREMENT_TIME;
+            editor.putBoolean(date + state, true);
+            OutputMessage("Invalidate Training Colors");
         } else if (state.equals("Cooldown")) {
             timerTimeout = RESTING_MEASUREMENT_TIME;
+            editor.putBoolean(date + state, true);
+            OutputMessage("Invalidate Cooldown Colors");
         } else if (state.contains("Recovery")) {
-            timerTimeout = RESTING_MEASUREMENT_TIME; // needed to recover the state of the app properly
+            timerTimeout = RESTING_MEASUREMENT_TIME;
+            editor.putBoolean(date + state, true);
+            OutputMessage("Invalidate Recovery Colors");
         }
+        editor.apply();
         StartMeasuring();
     }
 
@@ -536,7 +556,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         DataStorageManager.insertISSMeasurement(measurement);
         // as a secondary key for the rpe values and the record data
 
-        GetHRMid();
+        getHrmAddress();
 
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
         mBluetoothAdapter.startLeScan(mLeScanCallback);
@@ -586,7 +606,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     }
 
     // this method defined user heart rate monitor prior to the enabling of the training mode
-    public void GetHRMid() {
+    public void getHrmAddress() {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         UserHRM = pref.getString(getString(R.string.device_address), "");
     }

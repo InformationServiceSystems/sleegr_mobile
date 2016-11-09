@@ -25,7 +25,8 @@
             android:layout_marginTop="11dp"
             android:id="@+id/switchBluetoothDevice"
             android:onClick="onClick"
-            android:visibility="visible" />
+            android:visibility="visible"
+            android:background="@color/com_facebook_button_background_color" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -66,74 +67,80 @@
             android:id="@+id/heartRateDisplay"
             android:visibility="visible"/>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/BottomLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="45dp"
+            android:layout_width="match_parent"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:background="@color/white">
+            android:background="@color/white"
+            android:layout_height="60dp">
 
 
             <ImageButton
                 android:id="@+id/morningHR"
-                android:layout_width="30dp"
                 android:layout_height="fill_parent"
-                android:layout_alignParentStart="true"
                 android:layout_marginBottom="3dp"
-                android:background="@color/grey"
-                android:onClick="onClicked"
-                android:src="@drawable/ic_hotel_black_24dp" />
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@color/com_facebook_blue"
+                android:onClick="onClick"
+                android:src="@drawable/ic_hotel_black_24dp"
+                android:layout_weight="1"
+                android:layout_width="wrap_content" />
 
 
             <ImageButton
                 android:id="@+id/trainingHR"
-                android:layout_width="30dp"
                 android:layout_height="fill_parent"
                 android:layout_marginBottom="3dp"
-                android:layout_marginLeft="5dp"
-                android:layout_toRightOf="@+id/morningHR"
-                android:background="@color/grey"
-                android:onClick="onClicked"
-                android:src="@drawable/ic_directions_run_black_24dp" />
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@color/com_facebook_blue"
+                android:onClick="onClick"
+                android:src="@drawable/ic_directions_run_black_24dp"
+                android:layout_weight="1"
+                android:layout_width="wrap_content" />
 
 
             <ImageButton
-                android:id="@+id/startCooldown"
-                android:layout_width="30dp"
+                android:id="@+id/cooldownHR"
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_marginBottom="3dp"
-                android:layout_marginLeft="5dp"
-                android:layout_toRightOf="@+id/trainingHR"
-                android:background="@color/grey"
-                android:onClick="onClicked"
-                android:src="@drawable/ic_ac_unit_black_24dp" />
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@color/com_facebook_blue"
+                android:onClick="onClick"
+                android:src="@drawable/ic_ac_unit_black_24dp"
+                android:layout_weight="1" />
 
 
             <ImageButton
-                android:id="@+id/continueCooldown"
-                android:layout_width="30dp"
+                android:id="@+id/recoveryHR"
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_marginBottom="3dp"
-                android:layout_marginLeft="5dp"
-                android:layout_toRightOf="@+id/startCooldown"
-                android:background="@color/grey"
-                android:onClick="onClicked"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@color/com_facebook_blue"
+                android:onClick="onClick"
+                android:layout_weight="1"
                 android:src="@drawable/ic_trending_down_black_24dp" />
 
             <ImageButton
                 android:id="@+id/eveningHR"
-                android:layout_width="30dp"
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_marginBottom="3dp"
-                android:layout_marginLeft="5dp"
-                android:layout_toRightOf="@+id/continueCooldown"
-                android:background="@color/grey"
-                android:onClick="onClicked"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@color/com_facebook_blue"
+                android:onClick="onClick"
+                android:layout_weight="1"
                 android:src="@drawable/ic_hotel_black_24dp" />
 
 
-        </RelativeLayout>
+        </LinearLayout>
 
     </RelativeLayout>
 

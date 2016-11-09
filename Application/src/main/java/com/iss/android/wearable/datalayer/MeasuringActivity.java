@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -20,12 +21,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public class MeasuringActivity extends Activity {
 
@@ -36,6 +40,7 @@ public class MeasuringActivity extends Activity {
     private BluetoothAdapter mBluetoothAdapter;
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private int warned = 0;
+    private SensorsDataService sensorsDataService;
     private boolean broadcastReceiverIsRegistered = false;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         // Receives broadcasts sent from other points of the app, like the SensorsDataService
@@ -47,12 +52,49 @@ public class MeasuringActivity extends Activity {
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 Log.d("MeasuringActivityLog", "Discovery finished");
             } else if (action.equals(SensorsDataService.MESSAGE)) {
-                showState(intent.getStringExtra("message"));
+                Calendar calendar = new GregorianCalendar();
+                String date = calendar.get(Calendar.DAY_OF_MONTH) + calendar.get(Calendar.MONTH) + calendar.get(Calendar.YEAR) + "";
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+                if (intent.getStringExtra("message").equals("Invalidate Morning Colors")) {
+                    ImageButton button = (ImageButton) findViewById(R.id.morningHR);
+                    button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
+                } else if (intent.getStringExtra("message").equals("Invalidate Evening Colors")) {
+                    ImageButton button = (ImageButton) findViewById(R.id.eveningHR);
+                    button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
+                } else if (intent.getStringExtra("message").equals("Invalidate Training Colors")) {
+                    ImageButton button = (ImageButton) findViewById(R.id.trainingHR);
+                    button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
+                } else if (intent.getStringExtra("message").equals("Invalidate Cooldown Colors")) {
+                    ImageButton button = (ImageButton) findViewById(R.id.cooldownHR);
+                    button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
+                } else if (intent.getStringExtra("message").equals("Invalidate Recovery Colors")) {
+                    ImageButton button = (ImageButton) findViewById(R.id.recoveryHR);
+                    button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
+                } else if (intent.getStringExtra("message").equals("Invalidate Button Colors, Finished")) {
+                    if (pref.getBoolean(date + "Cooldown", false)) {
+                        ImageButton button = (ImageButton) findViewById(R.id.cooldownHR);
+                        button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
+                    } if (pref.getBoolean(date + "EveningHR", false)) {
+                        ImageButton button = (ImageButton) findViewById(R.id.eveningHR);
+                        button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
+                    } if (pref.getBoolean(date + "Recovery", false)) {
+                        ImageButton button = (ImageButton) findViewById(R.id.recoveryHR);
+                        button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
+                    } if (pref.getBoolean(date + "TrainingHR", false)) {
+                        ImageButton button = (ImageButton) findViewById(R.id.trainingHR);
+                        button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
+                    } if (pref.getBoolean(date + "MorningHR", false)) {
+                        ImageButton button = (ImageButton) findViewById(R.id.morningHR);
+                        button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
+                    }
+                } else if (intent.getStringExtra("message").equals("")) {
+
+                }
             } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 mLeDeviceListAdapter.addDevice(device);
-            }   else if (action.equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
+            } else if (action.equals(SensorsDataService.ACTION_BATTERY_STATUS)) {
                 final TextView BatteryStatus = (TextView) findViewById(R.id.batteryLabel);
                 int status = intent.getIntExtra(SensorsDataService.EXTRA_STATUS, 0);
                 BatteryStatus.setText("HR: " + status + "%");
@@ -100,6 +142,8 @@ public class MeasuringActivity extends Activity {
             Intent intent = new Intent(this, SensorsDataService.class);
             startService(intent);
         }
+
+        OutputMessage("Invalidate Button Colors, Finished");
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
@@ -193,6 +237,51 @@ public class MeasuringActivity extends Activity {
             case R.id.switchBluetoothDevice:
                 onOpenSwitchBluetoothDeviceDialog();
                 break;
+            case R.id.morningHR:
+
+                if (SensorsDataService.itself != null) {
+
+                    if (!SensorsDataService.isNowASleepingHour()) {
+                        SensorsDataService.itself.SwitchSportsAction("MorningHR");
+                    }
+                }
+
+                break;
+            case R.id.trainingHR:
+
+                if (SensorsDataService.itself != null) {
+                    SensorsDataService.itself.SwitchSportsAction("TrainingHR");
+                }
+
+                break;
+            case R.id.cooldownHR:
+
+                if (SensorsDataService.itself != null) {
+                    SensorsDataService.itself.SwitchSportsAction("Cooldown");
+                }
+
+                break;
+            case R.id.recoveryHR:
+
+                if (SensorsDataService.itself != null) {
+                    SensorsDataService.itself.SwitchSportsAction("Recovery");
+                }
+
+
+                break;
+            case R.id.eveningHR:
+
+                if (SensorsDataService.itself != null) {
+                    if (SensorsDataService.isNowASleepingHour()) {
+                        SensorsDataService.itself.SwitchSportsAction("EveningHR");
+                    }
+                }
+
+
+                break;
+            default:
+
+                Log.e("OnClick", "Unknown click event registered");
         }
     }
 
@@ -258,56 +347,6 @@ public class MeasuringActivity extends Activity {
 
         AlertDialog dialog = builderSingle.create();
         dialog.show();
-    }
-
-    public void onClicked(View view) {
-        Log.d("Click", "happened");
-        Log.d("SensorsDataService", String.valueOf(SensorsDataService.itself==null));
-        switch (view.getId()) {
-            case R.id.morningHR:
-
-                if (SensorsDataService.itself != null) {
-
-                    if (!SensorsDataService.isNowASleepingHour())
-                        SensorsDataService.itself.SwitchSportsAction("MorningHR");
-                }
-
-                break;
-            case R.id.trainingHR:
-
-                if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction("TrainingHR");
-                }
-
-                break;
-            case R.id.startCooldown:
-
-                if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction("Cooldown");
-                }
-
-                break;
-            case R.id.continueCooldown:
-
-                if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction("Recovery");
-                }
-
-
-                break;
-            case R.id.eveningHR:
-
-                if (SensorsDataService.itself != null) {
-                    if (SensorsDataService.isNowASleepingHour())
-                        SensorsDataService.itself.SwitchSportsAction("EveningHR");
-                }
-
-
-                break;
-            default:
-
-                Log.e("OnClicked", "Unknown click event registered");
-        }
     }
 
     static class ViewHolder {
@@ -422,5 +461,11 @@ public class MeasuringActivity extends Activity {
         android.app.AlertDialog dialog = builder.create();
         dialog.setCancelable(true);
         dialog.show();
+    }
+
+    public void OutputMessage(String message) {
+        Intent i = new Intent(SensorsDataService.MESSAGE);
+        i.putExtra("message", message);
+        sendBroadcast(i);
     }
 }
