@@ -42,16 +42,26 @@ public class MeasuringActivity extends Activity {
     private int warned = 0;
     private SensorsDataService sensorsDataService;
     private boolean broadcastReceiverIsRegistered = false;
+
+    /*
+    This broadcast receiver receives intents from the SensorsDataService class. As this is non-static,
+    the only acceptable way to interact with its UI from the SensorsDataService class is through intents.
+     */
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         // Receives broadcasts sent from other points of the app, like the SensorsDataService
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                //Search for bluetooth devices in surroundings started
                 Log.d("MeasuringActivityLog", "Discovery started");
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                //Search for bluetooth devices in surroundings ended
                 Log.d("MeasuringActivityLog", "Discovery finished");
             } else if (action.equals(SensorsDataService.MESSAGE)) {
+                // A message from SensorsDataService has been received.
+                // To get color-coding for the buttons, I check the message for the given date, if a measurement of this type already has been performed.
+                //TODO: switch to database queries for smartwatch compatibility.
                 Calendar calendar = new GregorianCalendar();
                 String date = calendar.get(Calendar.DAY_OF_MONTH) + calendar.get(Calendar.MONTH) + calendar.get(Calendar.YEAR) + "";
                 SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
@@ -71,6 +81,7 @@ public class MeasuringActivity extends Activity {
                     ImageButton button = (ImageButton) findViewById(R.id.recoveryHR);
                     button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
                 } else if (intent.getStringExtra("message").equals("Invalidate Button Colors, Finished")) {
+                    // The measurement has finished, fade all buttons that have been used today.
                     if (pref.getBoolean(date + "Cooldown", false)) {
                         ImageButton button = (ImageButton) findViewById(R.id.cooldownHR);
                         button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
@@ -91,6 +102,7 @@ public class MeasuringActivity extends Activity {
 
                 }
             } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // A bluetooth device has been found in the surroundings. add it to the listhandler for the popup.
                 // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 mLeDeviceListAdapter.addDevice(device);
@@ -119,6 +131,7 @@ public class MeasuringActivity extends Activity {
                 // Need to convert the Int to String or else the app crashes. GJ Google.
                 HeartRate.setText(Integer.toString(result));
             } else if (action.equals(SensorsDataService.UPDATE_TIMER_VALUE)) {
+                // Prints the time since the measurement has started to the smartphone display. Useful for the measurer.
                 String newtime = String.valueOf(intent.getIntExtra("minutes", 0))
                         + ":" + StringUtils.leftPad(Long.toString(intent.getIntExtra("seconds", 0)), 2, "0");
                 TextView timetext = (TextView) findViewById(R.id.timer);
@@ -164,6 +177,7 @@ public class MeasuringActivity extends Activity {
     }
 
     private void RegisterBroadcastReceiver() {
+        // Register all the different types of broadcast intents the receiver should listen to.
         IntentFilter filter = new IntentFilter();
         filter.addAction(SensorsDataService.ACTION_BATTERY_STATUS);
         filter.addAction(SensorsDataService.MESSAGE);
@@ -178,6 +192,8 @@ public class MeasuringActivity extends Activity {
     }
 
     private void checkPermissions() {
+        // The app needs to be able to have access to bluetooth devices, or else the sensors won't work.
+        // This checks if that is given, and, if not, asks the user to grant this permission.
         int permission = android.support.v4.app.ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
 
         if (permission != PackageManager.PERMISSION_GRANTED) {
@@ -190,6 +206,9 @@ public class MeasuringActivity extends Activity {
         }
     }
 
+    /*
+    Function that handles how the user response towards the eprmission request was answered.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -218,6 +237,7 @@ public class MeasuringActivity extends Activity {
 
     @Override
     public void onResume() {
+        // if we resume this activity, the broadcastreceievr has been unregistered before, so now we re-register it.
         RegisterBroadcastReceiver();
         broadcastReceiverIsRegistered = true;
         super.onResume();
@@ -225,6 +245,8 @@ public class MeasuringActivity extends Activity {
 
     @Override
     public void onPause() {
+        // important to unregister the broadcastreceiver, we dont want that be dangling in the
+        // background and closing randomly, sometimes having multiple versions open.
         if (broadcastReceiverIsRegistered) {
             unregisterReceiver(broadcastReceiver);
             broadcastReceiverIsRegistered = false;
@@ -232,13 +254,18 @@ public class MeasuringActivity extends Activity {
         super.onPause();
     }
 
+    /*
+    Clickhandler for buttons in this activity.
+     */
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.switchBluetoothDevice:
+                // Button to popup the bluetooth device list, from which the user can choose what device to use
                 onOpenSwitchBluetoothDeviceDialog();
                 break;
             case R.id.morningHR:
 
+                // Button to start morning measurement
                 if (SensorsDataService.itself != null) {
 
                     if (!SensorsDataService.isNowASleepingHour()) {
@@ -251,6 +278,7 @@ public class MeasuringActivity extends Activity {
                 break;
             case R.id.trainingHR:
 
+                // Button to start training measurement
                 if (SensorsDataService.itself != null) {
                     SensorsDataService.itself.SwitchSportsAction("TrainingHR");
                 }
@@ -258,6 +286,7 @@ public class MeasuringActivity extends Activity {
                 break;
             case R.id.cooldownHR:
 
+                // Button to start cooldown measurement
                 if (SensorsDataService.itself != null) {
                     SensorsDataService.itself.SwitchSportsAction("Cooldown");
                 }
@@ -265,6 +294,7 @@ public class MeasuringActivity extends Activity {
                 break;
             case R.id.recoveryHR:
 
+                // Button to start recovery measurement
                 if (SensorsDataService.itself != null) {
                     SensorsDataService.itself.SwitchSportsAction("Recovery");
                 }
@@ -273,6 +303,7 @@ public class MeasuringActivity extends Activity {
                 break;
             case R.id.eveningHR:
 
+                // Button to start evening measurement
                 if (SensorsDataService.itself != null) {
                     if (SensorsDataService.isNowASleepingHour()) {
                         SensorsDataService.itself.SwitchSportsAction("EveningHR");
@@ -284,15 +315,15 @@ public class MeasuringActivity extends Activity {
 
                 break;
             default:
-
+                // If the user clicks somewhere where no listener has been added, log this error.
                 Log.e("OnClick", "Unknown click event registered");
         }
     }
 
-    /*Following are methods dealing with the Bluetooth dialog*/
-
     @Override
     public void onDestroy() {
+        // important to unregister the broadcastreceiver, we dont want that be dangling in the
+        // background and closing randomly, sometimes having multiple versions open.
         if (broadcastReceiverIsRegistered) {
             unregisterReceiver(broadcastReceiver);
             broadcastReceiverIsRegistered = false;
@@ -300,6 +331,8 @@ public class MeasuringActivity extends Activity {
         mBluetoothAdapter.cancelDiscovery();
         super.onDestroy();
     }
+
+    /*Following are methods dealing with the Bluetooth dialog*/
 
     private void onOpenSwitchBluetoothDeviceDialog() {
         AlertDialog.Builder builderSingle = new AlertDialog.Builder(this, R.style.MyDialogTheme);
@@ -317,6 +350,7 @@ public class MeasuringActivity extends Activity {
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
         }
 
+        // Build a cancel button for the dialog, if the user chooses not to use a bluetooth device.
         builderSingle.setNegativeButton(
                 "cancel",
                 new DialogInterface.OnClickListener() {
@@ -334,15 +368,18 @@ public class MeasuringActivity extends Activity {
                         if (device == null) return;
                         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                         SharedPreferences.Editor editor = pref.edit();
+                        // Store the device address in Shared preferences. It overwrites, so no need to delete old addresses.
                         editor.putString(getString(R.string.device_address), device.getAddress());
                         Log.d("Device Address", device.getAddress());
 
                         final String deviceName = device.getName();
                         if (deviceName != null && deviceName.length() > 0)
+                            // Store the device name in the sharedpreferences, as long as it is not null (may happen with unknown devices)
                             editor.putString(getString(R.string.device_name), device.getName());
                         else
                             editor.putString(getString(R.string.device_name), getString(R.string.unknown_device));
                         editor.apply();
+                        // Show the user that it has been saved.
                         Toast.makeText(getApplicationContext(), "Set " + pref.getString(getString(R.string.device_name), "nothing") + " as your sensor!", Toast.LENGTH_SHORT).show();
                         Log.d("Device Address", "has been stored");
                         dialog.dismiss();
@@ -353,6 +390,9 @@ public class MeasuringActivity extends Activity {
         dialog.show();
     }
 
+    /*
+    Viewholder which describes a list element. Needed so that the listadapter can put stuff in it.
+     */
     static class ViewHolder {
         TextView deviceName;
         TextView deviceAddress;

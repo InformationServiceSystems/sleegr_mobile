@@ -132,10 +132,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
     private int measurementNumber = 0;
     SensorEventListener sensorEventListener = new SensorEventListener() {
 
+        /*
+        Event listener that gets triggered by the android service, when a sensor value has changed
+         */
         @Override
         public void onSensorChanged(SensorEvent event) {
             // Don't unregister the Step Counter Sensor or it will lose all information.
             if (event.sensor.getType() != Sensor.TYPE_STEP_COUNTER) {
+                // I don't know what happens here. Have to ask Iaros.
                 if (!recordedSensorTypes.containsKey(event.sensor.getType())) {
                     return;
                 }
@@ -143,10 +147,12 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 mSensorManager.unregisterListener(sensorEventListener, event.sensor);
             }
 
+            // If the sensor value is of dimension 1, it is a heart rate value, thus gets stored in that way.
             if (event.values.length == 1) {
                 ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], 0, 0, PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext()).getString(getString(R.string.device_name), "dummy sensor"), measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             } else {
+                // if it is not of dimension 1 (but rather of dimension 3), it is accelerometer or gyroscope data and gets stored as such.
                 ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2], android.os.Build.MODEL, measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             }
@@ -165,6 +171,9 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         }
     };
 
+    /*
+    Out of the box stuff, that is needed to maintain or establish a bluetooth connection.
+     */
     {
         mGattCallback = new BluetoothGattCallback() {
             @Override
@@ -258,6 +267,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         return recordedActivities;
     }
 
+    // Checks if it's evening (everything later than 13PM).
     static boolean isNowASleepingHour() {
 
         Calendar clnd = Calendar.getInstance();
@@ -283,6 +293,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
         mSensorManager = ((SensorManager) getSystemService(SENSOR_SERVICE));
 
+        // Register Acclerometer
         Sensor accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         int fifoSize = accelerometer.getFifoReservedEventCount();
         if (fifoSize > 0) {
@@ -290,6 +301,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         } else {
             Log.d("Accelerometer", "does not support batching");
         }
+        // Register Gyroscope
         Sensor gyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         int gyrofifoSize = gyroscope.getFifoReservedEventCount();
         if (gyrofifoSize > 0) {
@@ -336,12 +348,14 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         OutputCurrentState();
     }
 
+    // Sends an intent to MeasuringActivity containing the current state.
     public void OutputCurrentState() {
         Intent i = new Intent("com.iss.android.wearable.datalayer." + currentState);
         i.putExtra("message", currentState);
         sendBroadcast(i);
     }
 
+    // Sends a message intent to MeasuringActivity
     public void OutputMessage(String message) {
         Intent i = new Intent(MESSAGE);
         i.putExtra("message", message);
