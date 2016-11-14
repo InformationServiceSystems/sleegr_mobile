@@ -91,4 +91,29 @@ public class ISSDictionary {
         DateFormat df = new SimpleDateFormat("hh:mm:ss");
         return df.format(date);
     }
+
+    public static String makeTimestampBeautiful(String string) {
+        DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzzzzzzzz yyyy");
+        Date date = new Date();
+        try {
+            date = format.parse(string);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        format = new SimpleDateFormat("HH:mm");
+        return format.format(date);
+    }
+
+    public static String translate(String type) {
+        switch (type){
+            case "TrainingHR":
+                return "Training";
+            case "MorningHR":
+                return "Morning";
+            case "EveningHR":
+                return "Evening";
+            default:
+                return type;
+        }
+    }
 }

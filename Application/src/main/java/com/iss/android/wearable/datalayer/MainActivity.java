@@ -229,6 +229,9 @@ public class MainActivity extends FragmentActivity implements
             /*case R.id.averageValues:
                 onShowAverages();
                 return true;*/
+            case R.id.webAppActivity:
+                onStartWebAppActivity();
+                return true;
             case R.id.measuringActivity:
                 onStartMeasuringActivity();
                 return true;
@@ -241,6 +244,11 @@ public class MainActivity extends FragmentActivity implements
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void onStartWebAppActivity() {
+        Intent intent = new Intent(this, WebAppActivity.class);
+        startActivity(intent);
     }
 
     private void onStartMeasuringActivity() {

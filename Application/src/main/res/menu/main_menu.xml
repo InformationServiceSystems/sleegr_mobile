@@ -3,8 +3,12 @@
 
 
     <item
-        android:id="@+id/button4"
-        android:title="Today's graphs" />
+    android:id="@+id/button4"
+    android:title="Today's graphs" />
+
+    <item
+        android:id="@+id/webAppActivity"
+        android:title="Your graphs" />
 
     <!--<item
         android:id="@+id/averageValues"

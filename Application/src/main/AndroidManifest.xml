@@ -152,11 +152,19 @@
             android:name=".BluetoothService"
             android:enabled="true"
             android:exported="true" />
-
         <service
             android:name=".SensorsDataService"
             android:enabled="true"
             android:exported="true" />
+
+        <activity
+            android:name=".WebAppActivity"
+            android:label="@string/title_activity_web_app"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.iss.android.wearable.datalayer.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

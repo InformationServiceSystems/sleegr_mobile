@@ -68,6 +68,7 @@ public class Auth0Activity extends Activity {
                         Auth0Activity.this.runOnUiThread(new Runnable() {
                             public void run() {
                                 // Toast.makeText(Auth0Activity.this, "Automatic Login Success", Toast.LENGTH_SHORT).show();
+                                UserData.setProfile(payload);
                                 UserData.setName(payload.getName());
                                 UserData.setEmail(payload.getEmail());
                             }

@@ -6,11 +6,11 @@
     android:orientation="vertical"
     tools:context="com.iss.android.wearable.datalayer.MeasurementsActivity">
 
-        <ListView
+        <ExpandableListView
             android:id="@android:id/list"
             android:layout_height="wrap_content"
             android:layout_width="match_parent">
 
-        </ListView>
+        </ExpandableListView>
 
 </LinearLayout>
