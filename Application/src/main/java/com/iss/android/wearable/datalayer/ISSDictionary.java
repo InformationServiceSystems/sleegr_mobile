@@ -1,6 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Created by micha on 25.04.2016.
@@ -54,7 +56,7 @@ public class ISSDictionary {
     }
 
     public static Date DateStringToDate(String string) {
-        DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzzzzzzzz yyyy");
+        DateFormat format = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy", Locale.US);
         Date date = new Date();
         try {
             date = format.parse(string);
@@ -93,7 +95,8 @@ public class ISSDictionary {
     }
 
     public static String makeTimestampBeautiful(String string) {
-        DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzzzzzzzz yyyy");
+        Log.d("received", string);
+        DateFormat format = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy", Locale.US);
         Date date = new Date();
         try {
             date = format.parse(string);

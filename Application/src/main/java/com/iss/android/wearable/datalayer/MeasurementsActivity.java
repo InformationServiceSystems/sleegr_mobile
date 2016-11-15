@@ -78,10 +78,16 @@ public class MeasurementsActivity extends ListActivity {
                     measurementIDs.add(mCursor.getInt(0));
                     timestampList.add(ISSDictionary.makeTimestampBeautiful(mCursor.getString(1)));
                     typeList.add(mCursor.getString(2));
-                    Log.d("Found", String.valueOf(mCursor.getInt(0)));
                 }
             }
         }
+
+        /**
+         * 3 values get transferred to the list adapter:
+         * 1: The measurement IDs, so I can query the database for the corresponding values
+         * 2: The timestamps, so I can display on the upper level when the measurement was made
+         * 3: The measurement, so I can display what kind of measurement the data belongs to.
+         */
 
         Integer[] values = measurementIDs.toArray(new Integer[measurementIDs.size()]);
         String[] timestamps = timestampList.toArray(new String[measurementIDs.size()]);
