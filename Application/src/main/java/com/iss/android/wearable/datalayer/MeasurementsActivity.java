@@ -2,6 +2,7 @@ package com.iss.android.wearable.datalayer;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -41,6 +42,8 @@ public class MeasurementsActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_measurements);
 
+        Intent intent = getIntent();
+        String intentDate = intent.getStringExtra("Date");
         /**
          *Constructs a list of all measurements taken this day.
          */
@@ -74,7 +77,7 @@ public class MeasurementsActivity extends ListActivity {
             // If the Cursor is empty, the provider found no matches
         } else {
             while (mCursor.moveToNext()) {
-                if (ISSDictionary.dateToDayString(ISSDictionary.DateStringToDate(mCursor.getString(1))).equals(dateString)) {
+                if (ISSDictionary.dateToDayString(ISSDictionary.DateStringToDate(mCursor.getString(1))).equals(intentDate)) {
                     measurementIDs.add(mCursor.getInt(0));
                     timestampList.add(ISSDictionary.makeTimestampBeautiful(mCursor.getString(1)));
                     typeList.add(mCursor.getString(2));
@@ -298,7 +301,7 @@ public class MeasurementsActivity extends ListActivity {
 
             @Override
             protected void onPostExecute(Void result) {
-                if (measurementType.equals("Cooldown") || measurementType.equals("Recovery") || measurementType.equals("EveningHR") || measurementType.equals("MorningHR")) {
+                if (measurementType.equals("Cooldown")) {
                     graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
                         @Override
                         public String formatLabel(double value, boolean isValueX) {
@@ -341,7 +344,7 @@ public class MeasurementsActivity extends ListActivity {
                     this.TValue.setText("T: " + String.valueOf(CDParams[1]));
                     this.CValue.setText("C: " + String.valueOf(CDParams[2]));
                     this.Load.setText("Load: " + String.valueOf(CDParams[0] * CDParams[2]));
-                } else if (measurementType.equals("TrainingHR")) {
+                } else if (measurementType.equals("TrainingHR")  || measurementType.equals("Recovery") || measurementType.equals("EveningHR") || measurementType.equals("MorningHR")) {
                     graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
                         @Override
                         public String formatLabel(double value, boolean isValueX) {

@@ -128,6 +128,13 @@ public class MainActivity extends FragmentActivity implements
 
         TextView text = (TextView) findViewById(R.id.text);
         String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));
+        text.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("Date", ISSDictionary.dateToDayString(date.getTime()));
+                onShowMeasurements(ISSDictionary.dateToDayString(date.getTime()));
+            }
+        });
         text.setText(datestring);
         TextView day = (TextView) findViewById(R.id.day);
         day.setText(String.format("%1$tA", date).substring(0, 3).toUpperCase());
@@ -223,10 +230,10 @@ public class MainActivity extends FragmentActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.button4:
-                onShowMeasurements();
+            /*case R.id.button4:
+                onShowMeasurements(ISSDictionary.dateToDayString(new Date()));
                 return true;
-            /*case R.id.averageValues:
+            case R.id.averageValues:
                 onShowAverages();
                 return true;*/
             case R.id.webAppActivity:
@@ -256,8 +263,10 @@ public class MainActivity extends FragmentActivity implements
         startActivity(StartMeasuringActivity);
     }
 
-    private void onShowMeasurements() {
+    private void onShowMeasurements(String dateString) {
+        Log.d("DateString", dateString);
         final Intent ShowMeasurements = new Intent(this, MeasurementsActivity.class);
+        ShowMeasurements.putExtra("Date", dateString);
         startActivity(ShowMeasurements);
     }
 
