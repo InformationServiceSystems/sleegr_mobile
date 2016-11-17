@@ -273,6 +273,7 @@ public class MainActivity extends FragmentActivity implements
 
     // A method handling the click on the Server Sync button.
     public void onServerSync(View view) {
+        Toast.makeText(this, "Started sync with server", Toast.LENGTH_SHORT).show();
         RecomputeSynchronize();
     }
 

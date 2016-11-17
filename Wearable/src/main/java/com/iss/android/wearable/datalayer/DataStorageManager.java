@@ -302,11 +302,7 @@ public class DataStorageManager {
 
         if (null == mCursor) {
             return false;
-        } else if (mCursor.getCount() < 1) {
-            return false;
-        } else {
-            return true;
-        }
+        } else return mCursor.getCount() >= 1;
     }
 
     public static Date getCurrentTime() {

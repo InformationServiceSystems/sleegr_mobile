@@ -352,7 +352,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // uploading json to server
     public String send_record_as_json(JSONObject jsonForServer, ArrayList<Integer> arrayOfMeasurementIDs) {
-        String uri = "http://web01.iss.uni-saarland.de/post_json";
+        String uri = "http://81.169.137.80:5001/post_json";//"http://web01.iss.uni-saarland.de/post_json";
         Boolean server_transac_successful = false;
 
         String data = jsonForServer.toString();
@@ -390,11 +390,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 br.close();
                 System.out.println("" + sb.toString());
                 Log.d("message", sb.toString());
-                if (sb.toString().contains("{\"status\": \"success\"}")) {
-                    server_transac_successful = true;
-                } else {
-                    server_transac_successful = false;
-                }
+                server_transac_successful = sb.toString().contains("{\"status\": \"success\"}");
             } else {
                 System.out.println(con.getResponseMessage());
                 server_transac_successful = false;
@@ -429,12 +425,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         JSONArray arrayOfFhirObservations = new JSONArray();
         ArrayList<Integer> arrayOfMeasurementIDs = new ArrayList<>();
 
-        try {
-            jsonForServer.put("Token", CredentialsManager.getCredentials(MainActivity.getContext()).getIdToken());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
         Uri CONTENT_URI = ISSContentProvider.MEASUREMENT_CONTENT_URI;
 
         String mSelectionClause = ISSContentProvider.SENT + " = 'false'";
@@ -445,7 +435,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                         ISSContentProvider.TYPE,
                         ISSContentProvider.TIMESTAMP
                 };
-        String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC " + " LIMIT 5";
+        String mSortOrder = ISSContentProvider.TIMESTAMP + " DESC";
 
         // Does a query against the table and returns a Cursor object
         Cursor mCursor = MainActivity.getContext().getContentResolver().query(
@@ -466,7 +456,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 arrayOfMeasurementIDs.add(mCursor.getInt(0));
                 Log.d("Timestamp", mCursor.getString(2));
                 ArrayList<ISSRecordData> records = queryForRecordsOfMeasurement(mCursor);
-                JSONObject fhirObservation = FhirFactory.constructHrFhirObservation(mCursor, records);
+                JSONObject fhirObservation = FhirFactory.constructFhirObservation(mCursor, records);
                 arrayOfFhirObservations.put(fhirObservation);
             }
             mCursor.close();
@@ -504,7 +494,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         ArrayList<ISSRecordData> records = new ArrayList<>();
         Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
 
-        String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = " + mCursor.getInt(0) + " AND " + ISSContentProvider.MEASUREMENT + " = 21";
+        String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = " + mCursor.getInt(0);
         String[] mSelectionArgs = {};
         String[] mProjection =
                 {

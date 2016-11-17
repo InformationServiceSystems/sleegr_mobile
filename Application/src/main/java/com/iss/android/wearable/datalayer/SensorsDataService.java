@@ -263,10 +263,6 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
         };
     }
 
-    public static HashMap<String, Boolean> getRecordedActivities() {
-        return recordedActivities;
-    }
-
     // Checks if it's evening (everything later than 13PM).
     static boolean isNowASleepingHour() {
 

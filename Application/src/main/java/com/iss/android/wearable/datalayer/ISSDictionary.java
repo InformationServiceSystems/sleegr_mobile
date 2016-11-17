@@ -119,4 +119,13 @@ public class ISSDictionary {
                 return type;
         }
     }
+
+    public static String convertToFhirDate(String string) {
+        DateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        DateFormat formatTime = new SimpleDateFormat("HH:mm:ss z", Locale.US);
+        Date date = DateStringToDate(string);
+        String dateString = formatDate.format(date) + "T" + formatTime.format(date);
+        Log.d("Conceived date", dateString);
+        return dateString;
+    }
 }
