@@ -73,7 +73,7 @@ class FhirFactory {
             mainObject.put("code", CodeableConcept);
 
             JSONObject subject = new JSONObject();
-            subject.put("ref", UserData.getIdToken());
+            subject.put("reference", UserData.getIdToken());
             subject.put("display", UserData.getEmail()); //We could switch to name; but email is required, name isn't.
             mainObject.put("subject", subject);
 
