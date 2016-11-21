@@ -126,6 +126,7 @@ public class MainActivity extends FragmentActivity implements
 
         //Initialising stuff that happens somewhere else
         UserData.setIdToken(CredentialsManager.getCredentials(getContext()).getIdToken());
+        UserData.setRefreshToken(CredentialsManager.getCredentials(getContext()).getRefreshToken());
 
         TextView text = (TextView) findViewById(R.id.text);
         String datestring = String.valueOf(date.get(GregorianCalendar.DAY_OF_MONTH));

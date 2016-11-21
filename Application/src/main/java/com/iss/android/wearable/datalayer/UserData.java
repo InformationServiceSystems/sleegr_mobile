@@ -10,13 +10,20 @@ public class UserData {
     private static String email = "default";
     private static String name = "default";
     private static UserProfile profile;
+    private static String refreshToken;
 
     public static String getIdToken() {
         return UserData.idToken;
     }
 
+    public static String getRefreshToken() { return UserData.refreshToken;}
+
     public static void setIdToken(String idToken) {
         UserData.idToken = idToken;
+    }
+
+    public static void setRefreshToken(String refreshToken) {
+        UserData.refreshToken = refreshToken;
     }
 
     public static String getEmail() {

@@ -3,6 +3,7 @@ package com.iss.android.wearable.datalayer;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.auth0.android.Auth0;
@@ -14,6 +15,7 @@ import com.auth0.android.lock.Lock;
 import com.auth0.android.lock.LockCallback;
 import com.auth0.android.lock.utils.LockException;
 import com.auth0.android.result.Credentials;
+import com.auth0.android.result.Delegation;
 import com.auth0.android.result.UserProfile;
 import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 
@@ -60,9 +62,13 @@ public class Auth0Activity extends Activity {
             return;
         }
 
-        AuthenticationAPIClient aClient = new AuthenticationAPIClient(auth0);
+        final AuthenticationAPIClient aClient = new AuthenticationAPIClient(auth0);
         aClient.tokenInfo(CredentialsManager.getCredentials(this).getIdToken())
                 .start(new BaseCallback<UserProfile, AuthenticationException>() {
+                    /**
+                     * If the login per id token is successful, nothing else is needed to be done.
+                     * @param payload
+                     */
                     @Override
                     public void onSuccess(final UserProfile payload) {
                         Auth0Activity.this.runOnUiThread(new Runnable() {
@@ -77,15 +83,72 @@ public class Auth0Activity extends Activity {
                         finish();
                     }
 
+                    /**
+                     * In case the automatic login did not work, try to get a new idToken with your refreshToken.
+                     * @param error
+                     */
+
                     @Override
                     public void onFailure(AuthenticationException error) {
-                        Auth0Activity.this.runOnUiThread(new Runnable() {
-                            public void run() {
-                                Toast.makeText(Auth0Activity.this, "Session Expired, please Log In", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        CredentialsManager.deleteCredentials(getApplicationContext());
-                        startActivity(mLock.newIntent(Auth0Activity.this));
+                        String refreshToken = UserData.getRefreshToken();
+                        Log.d("Automatic Login failed", "Trying to get a new idToken");
+
+                        aClient.delegationWithRefreshToken(refreshToken)
+                                .start(new BaseCallback<Delegation, AuthenticationException>() {
+
+                                    @Override
+                                    public void onSuccess(Delegation payload) {
+                                        Log.d("Success", "Got a new idToken with the refreshToken");
+                                        String idToken = payload.getIdToken(); // New ID Token
+                                        UserData.setIdToken(idToken);
+                                        long expiresIn = payload.getExpiresIn(); // New ID Token Expire Date
+                                        Credentials credentials = CredentialsManager.getCredentials(getApplicationContext());
+                                        Credentials newCredentials = new Credentials(idToken, credentials.getAccessToken(), credentials.getType(), credentials.getRefreshToken());
+                                        CredentialsManager.saveCredentials(getApplicationContext(), newCredentials);
+
+                                        aClient.tokenInfo(newCredentials.getIdToken())
+                                                .start(new BaseCallback<UserProfile, AuthenticationException>() {
+                                                    @Override
+                                                    public void onSuccess(final UserProfile payload) {
+                                                        Log.d("Success", "Login with the new idToken worked");
+                                                        Auth0Activity.this.runOnUiThread(new Runnable() {
+                                                            public void run() {
+                                                                // Toast.makeText(Auth0Activity.this, "Automatic Login Success", Toast.LENGTH_SHORT).show();
+                                                                UserData.setProfile(payload);
+                                                                UserData.setName(payload.getName());
+                                                                UserData.setEmail(payload.getEmail());
+                                                            }
+                                                        });
+                                                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                                                        finish();
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(AuthenticationException error) {
+                                                        Log.d("Failure", "The new idToken did not work");
+                                                        Auth0Activity.this.runOnUiThread(new Runnable() {
+                                                            public void run() {
+                                                                Toast.makeText(Auth0Activity.this, "Session Expired, please Log In", Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        });
+                                                        CredentialsManager.deleteCredentials(getApplicationContext());
+                                                        startActivity(mLock.newIntent(Auth0Activity.this));
+                                                    }
+                                                });
+                                    }
+
+                                    @Override
+                                    public void onFailure(AuthenticationException error) {
+                                        Log.d("Failure", "Could not get a new idToken with the help of the refreshToken");
+                                        Auth0Activity.this.runOnUiThread(new Runnable() {
+                                            public void run() {
+                                                Toast.makeText(Auth0Activity.this, "Session Expired, please Log In", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                        CredentialsManager.deleteCredentials(getApplicationContext());
+                                        startActivity(mLock.newIntent(Auth0Activity.this));
+                                    }
+                                });
                     }
                 });
     }
