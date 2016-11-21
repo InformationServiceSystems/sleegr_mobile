@@ -50,6 +50,7 @@ import android.widget.Toast;
 import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -562,11 +563,6 @@ public class MainActivity extends FragmentActivity implements
 
     }
 
-    public void onShowAverages() {
-        Intent i = new Intent(MainActivity.this, AverageActivity.class);
-        startActivity(i);
-    }
-
     // Constructs the lower fragment which is responsible for showing the data of the selected day
     public static class SessionsFragment extends Fragment {
         int mNum;
@@ -641,8 +637,9 @@ public class MainActivity extends FragmentActivity implements
         public TextView text;
         public Context context;
         public Date time;
-        public ArrayList<Date> Times;
-        public ArrayList<Float> Values;
+        public ArrayList<ArrayList<Date>> Times;
+        public ArrayList<ArrayList<Float>> Values;
+        private ArrayList<String> Types;
 
         public PlotGraphsTask(GraphView arggraph, TextView argtext, Context argcontext, Date time) {
             this.graph = arggraph;
@@ -651,17 +648,25 @@ public class MainActivity extends FragmentActivity implements
             this.time = time;
             Times = new ArrayList<>();
             Values = new ArrayList<>();
+            Types = new ArrayList<>();
         }
 
         protected Void doInBackground(DailyData... cooldown) {
-            ArrayList<ISSRecordData> data = new ArrayList<ISSRecordData>();
-            Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
-            String date = ISSDictionary.dateToDayString(time);
-            Log.d("Time", date);
+            ArrayList<Integer> measurementIdList = queryForMeasurements(time);
+            for (Integer measurementId: measurementIdList){
+                queryForRecords(measurementId);
+            }
+            return null;
+        }
 
-            String mSelectionClause = ISSContentProvider.DATE + " = ? AND " + ISSContentProvider.MEASUREMENT + " = 21 AND " + ISSContentProvider.EXTRA + " = 'Cooldown'";
-            Log.d("Selection Clause", mSelectionClause);
-            String[] mSelectionArgs = {date};
+        private void queryForRecords(Integer measurementId) {
+            ArrayList<ISSRecordData> data = new ArrayList<>();
+            ArrayList<Float> values = new ArrayList<>();
+            ArrayList<Date> times = new ArrayList<>();
+            Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
+
+            String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = " + measurementId + " AND " + ISSContentProvider.MEASUREMENT + " = 21";
+            String[] mSelectionArgs = {};
             String[] mProjection =
                     {
                             ISSContentProvider._ID,
@@ -679,7 +684,7 @@ public class MainActivity extends FragmentActivity implements
             String mSortOrder = ISSContentProvider.TIMESTAMP + " ASC";
 
             // Does a query against the table and returns a Cursor object
-            Cursor mCursor = MainActivity.getContext().getContentResolver().query(
+            Cursor mCursor = getContext().getContentResolver().query(
                     CONTENT_URI,                       // The content URI of the database table
                     mProjection,                       // The columns to return for each row
                     mSelectionClause,                  // Either null, or the word the user entered
@@ -699,11 +704,47 @@ public class MainActivity extends FragmentActivity implements
                 }
             }
             for (ISSRecordData d : data) {
-                Times.add(d.getTimestamp());
-                Values.add(d.Value1);
+                times.add(d.getTimestamp());
+                values.add(d.Value1);
             }
-            TextView[] labels = new TextView[]{text};
-            return null;
+            Times.add(times);
+            Values.add(values);
+        }
+
+        private ArrayList<Integer> queryForMeasurements(Date time) {
+            ArrayList<Integer> measurementIdList = new ArrayList<>();
+            String mSelectionClause = "";
+            String[] mSelectionArgs = {};
+            Uri CONTENT_URI = ISSContentProvider.MEASUREMENT_CONTENT_URI;
+            String[] mProjection =
+                    {
+                            ISSContentProvider._ID,
+                            ISSContentProvider.TIMESTAMP,
+                            ISSContentProvider.TYPE
+                    };
+            String mSortOrder = ISSContentProvider.TIMESTAMP + " ASC";
+
+            Cursor mCursor = getContext().getContentResolver().query(
+                    CONTENT_URI,                       // The content URI of the database table
+                    mProjection,                       // The columns to return for each row
+                    mSelectionClause,                  // Either null, or the word the user entered
+                    mSelectionArgs,                    // Either empty, or the string the user entered
+                    mSortOrder);
+            // Some providers return null if an error occurs, others throw an exception
+            if (null == mCursor) {
+                // If the Cursor is empty, the provider found no matches
+            } else if (mCursor.getCount() < 1) {
+                // If the Cursor is empty, the provider found no matches
+            } else {
+                while (mCursor.moveToNext()) {
+                    if (ISSDictionary.dateToDayString(ISSDictionary.DateStringToDate(mCursor.getString(1))).equals(ISSDictionary.dateToDayString(time))) {
+                        Log.d("Found measurement", ISSDictionary.dateToDayString(ISSDictionary.DateStringToDate(mCursor.getString(1))) + " for day " + ISSDictionary.dateToDayString(time));
+                        measurementIdList.add(mCursor.getInt(0));
+                        Types.add(mCursor.getString(2));
+                    }
+                }
+            }
+            return measurementIdList;
         }
 
         @Override
@@ -725,22 +766,24 @@ public class MainActivity extends FragmentActivity implements
                     }
                 }
             });
-            graph.getGridLabelRenderer().setNumHorizontalLabels(5);
-            if (Times != null && Times.size() > 0) {
-                LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
-                for (int i = 0; i < Times.size(); i++) {
-                    series.appendData(new DataPoint(Times.get(i), Values.get(i)), true, Times.size());
-                    Log.d(Times.get(i).toString(), Values.get(i).toString());
+            /*graph.getViewport().setXAxisBoundsManual(true);*/
+            graph.getViewport().setYAxisBoundsManual(true);
+            graph.getViewport().setMinY(30);
+            graph.getViewport().setMaxY(200);
+            for (int j = 0; j < Types.size(); j++) {
+                graph.getGridLabelRenderer().setNumHorizontalLabels(5);
+                if (Times.get(j) != null && Times.get(j).size() > 0) {
+                    LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
+                    for (int i = 0; i < Times.get(j).size(); i++) {
+                        series.appendData(new DataPoint(Times.get(j).get(i), Values.get(j).get(i)), true, Times.get(j).size());
+                        Log.d(Times.get(j).get(i).toString(), Values.get(j).get(i).toString());
+                    }
+                    series.setColor(ISSDictionary.getGraphSeriesColor(Types.get(j)));
+                    series.setTitle(Types.get(j));
+                    graph.addSeries(series);
                 }
-                graph.getViewport().setMinX(Times.get(0).getTime());
-                graph.getViewport().setMaxX(Times.get(Times.size() - 1).getTime());
-                graph.getViewport().setXAxisBoundsManual(true);
-                graph.getViewport().setYAxisBoundsManual(true);
-                graph.getViewport().setMinY(30);
-                graph.getViewport().setMaxY(200);
-                series.setColor(Color.parseColor("#3b5998"));
-                graph.addSeries(series);
             }
+
         }
     }
 

@@ -1,6 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
 import android.database.Cursor;
+import android.graphics.Color;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -127,5 +128,18 @@ public class ISSDictionary {
         String dateString = formatDate.format(date) + "T" + formatTime.format(date);
         Log.d("Conceived date", dateString);
         return dateString;
+    }
+
+    public static int getGraphSeriesColor(String s) {
+        switch (s){
+            case "Cooldown":
+                return Color.BLUE;
+            case "Recovery":
+                return Color.GREEN;
+            case "TrainingHR":
+                return Color.RED;
+            default:
+                return Color.GRAY;
+        }
     }
 }

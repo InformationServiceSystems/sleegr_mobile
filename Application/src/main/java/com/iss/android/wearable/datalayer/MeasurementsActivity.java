@@ -335,7 +335,7 @@ public class MeasurementsActivity extends ListActivity {
                         graph.getViewport().setYAxisBoundsManual(true);
                         graph.getViewport().setMinY(0);
                         graph.getViewport().setMaxY(200);
-                        series.setColor(Color.parseColor("#3b5998"));
+                        series.setColor(ISSDictionary.getGraphSeriesColor(measurementType));
                         FittedCurveSeries.setColor(Color.GREEN);
                         graph.addSeries(FittedCurveSeries);
                         graph.addSeries(series);
@@ -378,6 +378,7 @@ public class MeasurementsActivity extends ListActivity {
                         graph.getViewport().setYAxisBoundsManual(true);
                         graph.getViewport().setMinY(0);
                         graph.getViewport().setMaxY(200);
+                        series.setColor(ISSDictionary.getGraphSeriesColor(measurementType));
                         series.setColor(Color.parseColor("#3b5998"));
                         FittedCurveSeries.setColor(Color.GREEN);
                         //graph.addSeries(FittedCurveSeries);
