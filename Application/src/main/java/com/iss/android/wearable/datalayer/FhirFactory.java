@@ -9,13 +9,12 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Created by micha on 23.08.2016.
  */
-public class FhirFactory {
-    public static JSONObject getHrJson(ISSRecordData tosend) {
+class FhirFactory {
+    private static JSONObject getHrJson(ISSRecordData tosend) {
         JSONObject json = new JSONObject();
         try {
             JSONObject code = new JSONObject();
@@ -24,7 +23,7 @@ public class FhirFactory {
             code.put("display", "Heart rate");
             json.put("code", code);
 
-            json.put("valueDateTime", tosend.Date+"T"+tosend.Timestamp);
+            json.put("valueDateTime", tosend.Date + "T" + tosend.Timestamp);
             json.put("tag", tosend.ExtraData);
 
             JSONObject valueQuantity = new JSONObject();
@@ -39,13 +38,13 @@ public class FhirFactory {
         return json;
     }
 
-    public static JSONObject constructFhirObservation(Cursor mCursor, ArrayList<ISSRecordData> records) {
+    static JSONObject constructFhirObservation(Cursor mCursor, ArrayList<ISSRecordData> records) {
         JSONObject mainObject = new JSONObject();
 
         JSONArray componentElements = new JSONArray();
         String sensorDeviceName = "";
         for (ISSRecordData record : records) {
-            JSONObject recordJson= new JSONObject();
+            JSONObject recordJson = new JSONObject();
             switch (record.MeasurementType) {
                 case 21:
                     sensorDeviceName = record.getSensorDeviceName();
@@ -103,7 +102,7 @@ public class FhirFactory {
             code.put("display", "Accelerometer");
             json.put("code", code);
 
-            json.put("valueDateTime", tosend.Date+"T"+tosend.Timestamp);
+            json.put("valueDateTime", tosend.Date + "T" + tosend.Timestamp);
             json.put("tag", tosend.ExtraData);
 
             JSONObject valueQuantity = new JSONObject();
@@ -127,7 +126,7 @@ public class FhirFactory {
             code.put("display", "Gyroscope");
             json.put("code", code);
 
-            json.put("valueDateTime", tosend.Date+"T"+tosend.Timestamp);
+            json.put("valueDateTime", tosend.Date + "T" + tosend.Timestamp);
             json.put("tag", tosend.ExtraData);
 
             JSONObject valueQuantity = new JSONObject();
@@ -142,7 +141,7 @@ public class FhirFactory {
         return json;
     }
 
-    public static BigDecimal round(float d, int decimalPlace) {
+    private static BigDecimal round(float d, int decimalPlace) {
         BigDecimal bd = new BigDecimal(Float.toString(d));
         bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
         return bd;
@@ -153,9 +152,9 @@ public class FhirFactory {
         BigDecimal value1Decimal;
         BigDecimal value2Decimal;
         BigDecimal value3Decimal;
-        value1Decimal=round(value1,2);
-        value2Decimal=round(value2,2);
-        value3Decimal=round(value3,2);
+        value1Decimal = round(value1, 2);
+        value2Decimal = round(value2, 2);
+        value3Decimal = round(value3, 2);
         BigDecimal result = new BigDecimal(1000000).multiply(value1Decimal).add(new BigDecimal(1000).multiply(value2Decimal)).add(value3Decimal);
         return result;
     }

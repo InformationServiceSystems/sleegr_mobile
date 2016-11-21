@@ -36,7 +36,7 @@ public class CSVManager {
     }
 
     // A method that writes a String to a file, iff it not already is stored in given file. Only relevant for the RPE schedule.
-    public static void WriteNewCSVdata(File file, String data) {
+    static void WriteNewCSVdata(File file, String data) {
         boolean edited = false;
         String current_date = data.substring(0, 10);
         try {
@@ -85,7 +85,7 @@ public class CSVManager {
 
     // A method that reads sleepData from the file defined in DataStorageManager
     // and transcribes it into a HashMap
-    public static HashMap<String, Double[]> ReadSleepData() {
+    static HashMap<String, Double[]> ReadSleepData() {
 
         HashMap<String, Double[]> result = new HashMap<>();
 

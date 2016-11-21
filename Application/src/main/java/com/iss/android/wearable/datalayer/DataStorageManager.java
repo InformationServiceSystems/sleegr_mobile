@@ -2,7 +2,6 @@ package com.iss.android.wearable.datalayer;
 
 import android.content.ContentValues;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
@@ -17,7 +16,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.iss.android.wearable.datalayer.DataSyncService.getUserID;
 import static com.iss.android.wearable.datalayer.ISSRecordData.resolver;
 
@@ -31,17 +29,17 @@ public class DataStorageManager {
     // I overwrote it so that it now takes Internal Storage, which is more fitting for in-app-data.
     // All other methods wouldn't let me write when using the scheduled RPE values.
     // static String dataFolder = MainActivity.getContext().getFilesDir().toString();
-    static String dataFolder = Environment.getExternalStorageDirectory().getAbsolutePath();
+    private static String dataFolder = Environment.getExternalStorageDirectory().getAbsolutePath();
     static File sleepData = new File(dataFolder + "/sleep-data/sleep-export.csv");
 
 
     // I use here external storage directory, as the previous versions of the
     // app use the external directory. In case ext. storage is not available, use
     // Environment.getDataDirectory().toString()
-    static File userDataFolder = new File(dataFolder + "/triathlon");
+    private static File userDataFolder = new File(dataFolder + "/triathlon");
 
     // a method responsible for creating the folders to write into
-    public static void InitializeTriathlonFolder() {
+    static void InitializeTriathlonFolder() {
 
         if (!userDataFolder.exists()) {
             userDataFolder.mkdir();
@@ -50,7 +48,7 @@ public class DataStorageManager {
     }
 
     // A method reading the schedule.csv file and parsing it to TimeSeries
-    public static TimeSeries readUserSchedule() {
+    static TimeSeries readUserSchedule() {
 
         TimeSeries result = new TimeSeries("RPE required");
 
@@ -74,7 +72,7 @@ public class DataStorageManager {
                 result.AddValue(date, value);
 
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
 
@@ -83,14 +81,14 @@ public class DataStorageManager {
     }
 
     // A method that transcribes the UserID. Currently replaces "@" with "_at_"
-    public static String getProperUserID(String UserID) {
+    static String getProperUserID(String UserID) {
 
         return UserID.replace("@", "_at_");
 
     }
 
     // sub-method of getKey
-    public static String getStateKey(String mark) {
+    private static String getStateKey(String mark) {
 
         int idx = mark.indexOf(":");
 
@@ -116,7 +114,7 @@ public class DataStorageManager {
     }
 
     // A method responsible for creating a file in which the scheduled RPE values will be saved (in CSVManager.WriteNewCSVdata)
-    public static void storeScheduleLine(String scheduleString) {
+    static void storeScheduleLine(String scheduleString) {
         File file = new File(userDataFolder, "schedule.csv");
         if (!file.exists()) {
             try {
@@ -129,8 +127,8 @@ public class DataStorageManager {
         CSVManager.WriteNewCSVdata(file, scheduleString);
     }
 
-    public static void insertISSRecordData(ISSRecordData data) {
-        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement),0);
+    static void insertISSRecordData(ISSRecordData data) {
+        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement), 0);
         Log.d("measurement id", String.valueOf(data.measurementID));
         ContentValues values = new ContentValues();
         values.put(ISSContentProvider.SENT, false);
@@ -153,7 +151,7 @@ public class DataStorageManager {
 
     }
 
-    public static ArrayList<ISSRecordData> getData(Date time) {
+    static ArrayList<ISSRecordData> getData(Date time) {
         ArrayList<ISSRecordData> data = new ArrayList<ISSRecordData>();
         Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
         String date = time.toString();
@@ -195,9 +193,9 @@ public class DataStorageManager {
         return data;
     }
 
-    public static void insertISSMeasurement(ISSMeasurement row) {
+    static void insertISSMeasurement(ISSMeasurement row) {
         Log.d("insertISSMeasurement", "has been called");
-        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement),0);
+        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement), 0);
         latestMeasurement++;
         SharedPreferences.Editor editor = pref.edit();
         editor.putInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement), latestMeasurement);
@@ -228,8 +226,8 @@ public class DataStorageManager {
 
     }
 
-    public static void insertISSRPEAnswer(ISSRPEAnswers row) {
-        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement),0);
+    static void insertISSRPEAnswer(ISSRPEAnswers row) {
+        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement), 0);
         ContentValues values = new ContentValues();
         values.put(ISSContentProvider.MEASUREMENT_ID,
                 latestMeasurement);

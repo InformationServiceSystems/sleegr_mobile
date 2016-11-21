@@ -14,7 +14,7 @@ import java.util.Date;
  */
 public class ISSRecordData implements Serializable {
 
-    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
     static final long serialVersionUID = 1L;
     static final int MEASUREMENT_HR = 21,
             MEASUREMENT_ACCELEROMETER = 1,
@@ -30,16 +30,16 @@ public class ISSRecordData implements Serializable {
             MEASUREMENT_TRAINING_END = 13,
             MEASUREMENT_STEPS = 39;
     static ContentResolver resolver = MainActivity.getContext().getContentResolver();
-    public int UserID;
-    public int MeasurementType;
+    private int UserID;
+    int MeasurementType;
     public String Date;
-    public String Timestamp;
-    public String ExtraData = null;
-    public float Value1;
-    public float Value2;
-    public float Value3;
-    public String Sensor;
-    public int measurementID;
+    String Timestamp;
+    String ExtraData = null;
+    float Value1;
+    float Value2;
+    float Value3;
+    String Sensor;
+    int measurementID;
 
     public ISSRecordData(int UID, int MType, String date, String timestamp, String extraData, float v1, float v2, float v3, String sensor, int measurementNumber) {
 
@@ -80,7 +80,7 @@ public class ISSRecordData implements Serializable {
         return time.getTime();
     }
 
-    public String getSensorDeviceName() {
+    String getSensorDeviceName() {
         return Sensor;
     }
 }

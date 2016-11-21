@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -50,7 +49,6 @@ import android.widget.Toast;
 import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -78,7 +76,6 @@ public class MainActivity extends FragmentActivity implements
     int mCurrentTabPosition = 30;
     PendingIntent pendingInt = null;
     private ListView mDataItemList;
-    private DataItemAdapter mDataItemListAdapter;
     private Handler mHandler;
     private Calendar date = new GregorianCalendar();
     private final ViewPager.SimpleOnPageChangeListener mPageChangeListener = new ViewPager.SimpleOnPageChangeListener() {
@@ -113,7 +110,7 @@ public class MainActivity extends FragmentActivity implements
         setContentView(R.layout.main_activity);
         setupViews();
         // Stores DataItems received by the local broadcaster or from the paired watch.
-        mDataItemListAdapter = new DataItemAdapter(this, android.R.layout.simple_list_item_1);
+        MainActivity.DataItemAdapter mDataItemListAdapter = new MainActivity.DataItemAdapter(this, android.R.layout.simple_list_item_1);
         mDataItemList.setAdapter(mDataItemListAdapter);
 
         mAdapter = new MyAdapter(getSupportFragmentManager());
@@ -654,7 +651,7 @@ public class MainActivity extends FragmentActivity implements
 
         protected Void doInBackground(DailyData... cooldown) {
             ArrayList<Integer> measurementIdList = queryForMeasurements(time);
-            for (Integer measurementId: measurementIdList){
+            for (Integer measurementId : measurementIdList) {
                 queryForRecords(measurementId);
             }
             return null;

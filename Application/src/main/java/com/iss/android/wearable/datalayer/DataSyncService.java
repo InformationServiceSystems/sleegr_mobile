@@ -2,7 +2,6 @@ package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
 import android.app.Service;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -39,6 +39,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -56,7 +57,6 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     SyncAlarm alarm = new SyncAlarm();
     private GoogleApiClient mGoogleApiClient;
     private boolean mResolvingError = false;
-    private Handler mHandler;
 
     // A method broadcasting a String.
     public static void OutputEventSq(String str) {
@@ -84,7 +84,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     public void onCreate() {
 
         super.onCreate();
-        mHandler = new Handler();
+        Handler mHandler = new Handler();
 
         // create artificial data
 
@@ -121,7 +121,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             DataStorageManager.InitializeTriathlonFolder();
 
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
 
         }
         return START_STICKY;
@@ -241,7 +241,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         try {
 
             byte[] dataAsByteArray = Serializer.InputStreamToByte(assetInputStream);
-            Log.d("Received", dataAsByteArray.toString());
+            Log.d("Received", Arrays.toString(dataAsByteArray));
             byte[][] data = (byte[][]) Serializer.DeserializeFromBytes(dataAsByteArray);
             ArrayList<ISSRecordData> ISSRecords = (ArrayList<ISSRecordData>) Serializer.DeserializeFromBytes(data[0]);
             ArrayList<ISSMeasurement> Measurements = (ArrayList<ISSMeasurement>) Serializer.DeserializeFromBytes(data[1]);
@@ -541,7 +541,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         StringBuilder stringBuilder = new StringBuilder();
         String or = "";
         for (Integer i : arrayOfMeasurementIDs) {
-            stringBuilder.append(or + ISSContentProvider._ID + " = " + i);
+            stringBuilder.append(or).append(ISSContentProvider._ID).append(" = ").append(i);
             or = " OR ";
         }
         String mSelectionClause = stringBuilder.toString();
@@ -571,10 +571,9 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
+    public void onConnectionFailed(@NonNull ConnectionResult result) {
         if (mResolvingError) {
             // Already attempting to resolve an error.
-            return;
         } else if (result.hasResolution()) {
             mResolvingError = true;
             mGoogleApiClient.connect();

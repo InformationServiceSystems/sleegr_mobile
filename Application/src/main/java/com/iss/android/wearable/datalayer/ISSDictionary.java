@@ -17,7 +17,7 @@ import java.util.Locale;
 /**
  * Created by micha on 25.04.2016.
  */
-public class ISSDictionary {
+class ISSDictionary {
     static final int MEASUREMENT_HR = 21,
             MEASUREMENT_ACCELEROMETER = 1,
             MEASUREMENT_GPS = 512,
@@ -42,7 +42,7 @@ public class ISSDictionary {
         return 0;
     }
 
-    public static ISSRecordData CursorToISSRecordData(Cursor mCursor) {
+    static ISSRecordData CursorToISSRecordData(Cursor mCursor) {
         ISSRecordData record = new ISSRecordData(mCursor.getInt(1),
                 mCursor.getInt(2),
                 mCursor.getString(3),
@@ -56,7 +56,7 @@ public class ISSDictionary {
         return record;
     }
 
-    public static Date DateStringToDate(String string) {
+    static Date DateStringToDate(String string) {
         DateFormat format = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy", Locale.US);
         Date date = new Date();
         try {
@@ -67,7 +67,7 @@ public class ISSDictionary {
         return date;
     }
 
-    public static byte[] MapToByteArray(HashMap<String, Integer> answers) {
+    static byte[] MapToByteArray(HashMap<String, Integer> answers) {
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         ObjectOutputStream out = null;
         try {
@@ -85,7 +85,7 @@ public class ISSDictionary {
         return byteOut.toByteArray();
     }
 
-    public static String dateToDayString(Date date) {
+    static String dateToDayString(Date date) {
         DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
         return df.format(date);
     }
@@ -95,7 +95,7 @@ public class ISSDictionary {
         return df.format(date);
     }
 
-    public static String makeTimestampBeautiful(String string) {
+    static String makeTimestampBeautiful(String string) {
         Log.d("received", string);
         DateFormat format = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy", Locale.US);
         Date date = new Date();
@@ -108,8 +108,8 @@ public class ISSDictionary {
         return format.format(date);
     }
 
-    public static String translate(String type) {
-        switch (type){
+    static String translate(String type) {
+        switch (type) {
             case "TrainingHR":
                 return "Training";
             case "MorningHR":
@@ -121,7 +121,7 @@ public class ISSDictionary {
         }
     }
 
-    public static String convertToFhirDate(String string) {
+    static String convertToFhirDate(String string) {
         DateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         DateFormat formatTime = new SimpleDateFormat("HH:mm:ss z", Locale.US);
         Date date = DateStringToDate(string);
@@ -130,8 +130,8 @@ public class ISSDictionary {
         return dateString;
     }
 
-    public static int getGraphSeriesColor(String s) {
-        switch (s){
+    static int getGraphSeriesColor(String s) {
+        switch (s) {
             case "Cooldown":
                 return Color.BLUE;
             case "Recovery":

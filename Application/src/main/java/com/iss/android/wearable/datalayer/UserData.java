@@ -16,7 +16,9 @@ public class UserData {
         return UserData.idToken;
     }
 
-    public static String getRefreshToken() { return UserData.refreshToken;}
+    public static String getRefreshToken() {
+        return UserData.refreshToken;
+    }
 
     public static void setIdToken(String idToken) {
         UserData.idToken = idToken;

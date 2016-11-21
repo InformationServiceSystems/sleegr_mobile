@@ -1,8 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
-import android.os.Bundle;
 import android.app.Activity;
-import android.provider.ContactsContract;
+import android.os.Bundle;
 import android.util.Log;
 import android.webkit.WebSettings;
 import android.webkit.WebView;

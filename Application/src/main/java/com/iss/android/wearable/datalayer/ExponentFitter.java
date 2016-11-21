@@ -7,14 +7,14 @@ import java.util.ArrayList;
  */
 public class ExponentFitter {
 
-    public static double H = 150.0;
+    private static double H = 150.0;
 
-    public static double fExp(double[] p, double x) {
+    static double fExp(double[] p, double x) {
         // double a = p[0], t = p[1], c = p[2];
         return (H - p[2]) * Math.exp(-(x - p[1]) / p[0]) + p[2];
     }
 
-    public static double[] computeFitGrd(double[] p, ArrayList<Double> X, ArrayList<Double> Y) {
+    private static double[] computeFitGrd(double[] p, ArrayList<Double> X, ArrayList<Double> Y) {
         // the form of the curve as given in fExp
         // to compute the derivatives of norm of differences, use
         //          http://www.derivative-calculator.net/
@@ -62,7 +62,7 @@ public class ExponentFitter {
         return result;
     }
 
-    public static void applyAdam(double[] p, double alpha, double[] gr, double[] gn) {
+    private static void applyAdam(double[] p, double alpha, double[] gr, double[] gn) {
 
         for (int i = 0; i < p.length; i++) {
             gn[i] = gn[i] * 0.9 + gr[i] * gr[i] * 0.1;
@@ -85,7 +85,7 @@ public class ExponentFitter {
 
     }
 
-    public static double maxval(ArrayList<Double> Y) {
+    private static double maxval(ArrayList<Double> Y) {
 
         double mx = Y.get(0);
 
@@ -99,7 +99,7 @@ public class ExponentFitter {
 
     }
 
-    public static double[] fitLowerExpGD(ArrayList<Double> Xr, ArrayList<Double> Yr) {
+    static double[] fitLowerExpGD(ArrayList<Double> Xr, ArrayList<Double> Yr) {
 
 
         if (Xr.size() == 0) {

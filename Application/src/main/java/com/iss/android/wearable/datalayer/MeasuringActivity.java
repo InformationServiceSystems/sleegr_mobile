@@ -11,11 +11,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
-import android.hardware.Sensor;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -87,19 +86,23 @@ public class MeasuringActivity extends Activity {
                         ImageButton button = (ImageButton) findViewById(R.id.cooldownHR);
                         button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
                         button.setImageResource(R.drawable.ic_ac_unit_black_24dp);
-                    } if (pref.getBoolean(date + "EveningHR", false)) {
+                    }
+                    if (pref.getBoolean(date + "EveningHR", false)) {
                         ImageButton button = (ImageButton) findViewById(R.id.eveningHR);
                         button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
                         button.setImageResource(R.drawable.ic_hotel_black_24dp);
-                    } if (pref.getBoolean(date + "Recovery", false)) {
+                    }
+                    if (pref.getBoolean(date + "Recovery", false)) {
                         ImageButton button = (ImageButton) findViewById(R.id.recoveryHR);
                         button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
                         button.setImageResource(R.drawable.ic_trending_down_black_24dp);
-                    } if (pref.getBoolean(date + "TrainingHR", false)) {
+                    }
+                    if (pref.getBoolean(date + "TrainingHR", false)) {
                         ImageButton button = (ImageButton) findViewById(R.id.trainingHR);
                         button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
                         button.setImageResource(R.drawable.ic_directions_run_black_24dp);
-                    } if (pref.getBoolean(date + "MorningHR", false)) {
+                    }
+                    if (pref.getBoolean(date + "MorningHR", false)) {
                         ImageButton button = (ImageButton) findViewById(R.id.morningHR);
                         button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
                         button.setImageResource(R.drawable.ic_hotel_black_24dp);
@@ -217,7 +220,7 @@ public class MeasuringActivity extends Activity {
      */
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_LOCATION: {
                 // If request is cancelled, the result arrays are empty.

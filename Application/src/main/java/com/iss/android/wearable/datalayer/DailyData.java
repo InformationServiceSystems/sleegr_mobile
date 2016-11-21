@@ -8,7 +8,7 @@ import java.util.Date;
  */
 
 // TODO: Fill up this class in the constructor
-public class DailyData {
+class DailyData {
     // This is an object containing all data available for a single day.
     ArrayList<ISSRecordData> data = new ArrayList<ISSRecordData>();
     private Double DALDA;
@@ -19,35 +19,35 @@ public class DailyData {
     private Double morningHR;
     private Double eveningHR;
 
-    public DailyData(Date time) {
+    DailyData(Date time) {
         data = DataStorageManager.getData(time);
     }
 
-    public Double getDALDA() {
+    Double getDALDA() {
         return DALDA;
     }
 
-    public Double getRPE() {
+    Double getRPE() {
         return RPE;
     }
 
-    public Double getAlpha2min() {
+    Double getAlpha2min() {
         return alpha2min;
     }
 
-    public Double getAlphaAllData() {
+    Double getAlphaAllData() {
         return alphaAllData;
     }
 
-    public Double getDeepSleep() {
+    Double getDeepSleep() {
         return deepSleep;
     }
 
-    public Double getMorningHR() {
+    Double getMorningHR() {
         return morningHR;
     }
 
-    public Double getEveningHR() {
+    Double getEveningHR() {
         return eveningHR;
     }
 }

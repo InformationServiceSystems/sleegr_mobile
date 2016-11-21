@@ -643,7 +643,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 List<Node> nodes = result.getNodes();
                 String nodeId = null;
 
-                if(DataStorageManager.dataAvailable()) {
+                if (DataStorageManager.dataAvailable()) {
 
                     byte[] data = new byte[0];
                     try {

@@ -122,7 +122,7 @@ public class MeasurementsActivity extends ListActivity {
         private String[] measurementTimestamps;
         private String[] types;
 
-        public ExpandableListAdapter(Context context, int resource, Integer[] values, String[] timestamps, String[] types) {
+        ExpandableListAdapter(Context context, int resource, Integer[] values, String[] timestamps, String[] types) {
             this.context = context;
             this.resource = resource;
             this.items = values;
@@ -216,20 +216,20 @@ public class MeasurementsActivity extends ListActivity {
         }
 
         private class PlotGraphsTask extends AsyncTask<DailyData, Void, Void> {
-            public GraphView graph;
+            GraphView graph;
             public Context context;
-            public Integer MID;
-            public ArrayList<Date> Times;
-            public ArrayList<Float> HRValues;
-            public ArrayList<Double> FittedCurve;
-            public String measurementType;
+            Integer MID;
+            ArrayList<Date> Times;
+            ArrayList<Float> HRValues;
+            ArrayList<Double> FittedCurve;
+            String measurementType;
             double[] CDParams;
             private TextView AValue;
             private TextView TValue;
             private TextView CValue;
             private TextView Load;
 
-            public PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView AValue, TextView TValue, TextView CValue, TextView Load) {
+            PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView AValue, TextView TValue, TextView CValue, TextView Load) {
                 this.graph = arggraph;
                 this.context = argcontext;
                 this.MID = p;
@@ -344,7 +344,7 @@ public class MeasurementsActivity extends ListActivity {
                     this.TValue.setText("T: " + String.valueOf(CDParams[1]));
                     this.CValue.setText("C: " + String.valueOf(CDParams[2]));
                     this.Load.setText("Load: " + String.valueOf(CDParams[0] * CDParams[2]));
-                } else if (measurementType.equals("TrainingHR")  || measurementType.equals("Recovery") || measurementType.equals("EveningHR") || measurementType.equals("MorningHR")) {
+                } else if (measurementType.equals("TrainingHR") || measurementType.equals("Recovery") || measurementType.equals("EveningHR") || measurementType.equals("MorningHR")) {
                     graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
                         @Override
                         public String formatLabel(double value, boolean isValueX) {

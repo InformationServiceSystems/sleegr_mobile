@@ -173,8 +173,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
 
     /*
     Out of the box stuff, that is needed to maintain or establish a bluetooth connection.
-     */
-    {
+     */ {
         mGattCallback = new BluetoothGattCallback() {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {

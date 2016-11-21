@@ -275,7 +275,8 @@ public class DataStorageManager {
 
     }
 
-    public static boolean dataAvailable() {ArrayList<ISSMeasurement> result = new ArrayList<>();
+    public static boolean dataAvailable() {
+        ArrayList<ISSMeasurement> result = new ArrayList<>();
         // A "projection" defines the columns that will be returned for each row
         String[] mProjection =
                 {
