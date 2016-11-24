@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -45,6 +46,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+
+import static com.iss.android.wearable.datalayer.MainActivity.getContext;
 
 public class SensorsDataService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, DataApi.DataListener,
@@ -153,7 +156,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 DataStorageManager.insertISSRecordData(data);
             } else {
                 // if it is not of dimension 1 (but rather of dimension 3), it is accelerometer or gyroscope data and gets stored as such.
-                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2], android.os.Build.MODEL, measurementNumber);
+                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2], Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID), measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             }
 

@@ -180,6 +180,6 @@
     <string name="too_late_for_morning">It is no longer morning.</string>
     <string name="too_early_for_evening">It is not yet evening.</string>
     <string name="title_activity_web_app">WebAppActivity</string>
-    <string name="testserver_website_port">http://81.169.137.80:3000</string>
+    <string name="testserver_website_port">http://web01.iss.uni-saarland.de</string>
 
 </resources>

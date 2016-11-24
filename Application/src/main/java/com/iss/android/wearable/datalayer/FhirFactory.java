@@ -17,14 +17,17 @@ class FhirFactory {
     private static JSONObject getHrJson(ISSRecordData tosend) {
         JSONObject json = new JSONObject();
         try {
+            JSONArray coding = new JSONArray();
+            JSONObject codingElement = new JSONObject();
+            codingElement.put("system", "http://loinc.org");
+            codingElement.put("code", "8867-4");
+            codingElement.put("display", "Heart rate");
+            coding.put(codingElement);
             JSONObject code = new JSONObject();
-            code.put("system", "http://loinc.org");
-            code.put("code", "8867-4");
-            code.put("display", "Heart rate");
+            code.put("coding", coding);
             json.put("code", code);
 
             json.put("valueDateTime", tosend.Date + "T" + tosend.Timestamp);
-            json.put("tag", tosend.ExtraData);
 
             JSONObject valueQuantity = new JSONObject();
             valueQuantity.put("unit", "Hz");
@@ -68,12 +71,17 @@ class FhirFactory {
             Coding.put("system", "http://loinc.org");
             Coding.put("code", "8867-4");
             Coding.put("display", mCursor.getString(1));
-            JSONObject CodeableConcept = new JSONObject();
-            CodeableConcept.put("coding", Coding);
-            mainObject.put("code", CodeableConcept);
+
+            JSONObject category = new JSONObject();
+            JSONArray coding = new JSONArray();
+            JSONObject categoryObject = new JSONObject();
+            categoryObject.put("display", mCursor.getString(1));
+            coding.put(categoryObject);
+            category.put("coding", coding);
+            mainObject.put("category", category);
+
 
             JSONObject subject = new JSONObject();
-            subject.put("reference", UserData.getIdToken());
             subject.put("display", UserData.getEmail()); //We could switch to name; but email is required, name isn't.
             mainObject.put("subject", subject);
 
@@ -96,14 +104,17 @@ class FhirFactory {
     private static JSONObject getAccelerometerJson(ISSRecordData tosend) {
         JSONObject json = new JSONObject();
         try {
+            JSONArray coding = new JSONArray();
+            JSONObject codingElement = new JSONObject();
+            codingElement.put("system", "http://loinc.org");
+            codingElement.put("code", "8867-4");
+            codingElement.put("display", "Accelerometer");
+            coding.put(codingElement);
             JSONObject code = new JSONObject();
-            code.put("system", "http://loinc.org");
-            code.put("code", "8867-4");
-            code.put("display", "Accelerometer");
+            code.put("coding", coding);
             json.put("code", code);
 
             json.put("valueDateTime", tosend.Date + "T" + tosend.Timestamp);
-            json.put("tag", tosend.ExtraData);
 
             JSONObject valueQuantity = new JSONObject();
             valueQuantity.put("unit", "m/s2");
@@ -120,14 +131,17 @@ class FhirFactory {
     private static JSONObject getGyroscopeJson(ISSRecordData tosend) {
         JSONObject json = new JSONObject();
         try {
+            JSONArray coding = new JSONArray();
+            JSONObject codingElement = new JSONObject();
+            codingElement.put("system", "http://loinc.org");
+            codingElement.put("code", "8867-4");
+            codingElement.put("display", "Gyroscope");
+            coding.put(codingElement);
             JSONObject code = new JSONObject();
-            code.put("system", "http://loinc.org");
-            code.put("code", "8867-4");
-            code.put("display", "Gyroscope");
+            code.put("coding", coding);
             json.put("code", code);
 
             json.put("valueDateTime", tosend.Date + "T" + tosend.Timestamp);
-            json.put("tag", tosend.ExtraData);
 
             JSONObject valueQuantity = new JSONObject();
             valueQuantity.put("unit", "rad/s");

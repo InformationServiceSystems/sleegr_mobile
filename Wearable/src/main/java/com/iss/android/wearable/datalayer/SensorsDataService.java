@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -53,6 +54,7 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 import static com.iss.android.wearable.datalayer.DataLayerListenerService.LOGD;
+import static com.iss.android.wearable.datalayer.MainActivity.getContext;
 
 public class SensorsDataService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, DataApi.DataListener, MessageApi.MessageListener,
@@ -171,7 +173,7 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
                 ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], 0, 0, PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext()).getString(getString(R.string.device_name), "dummy sensor"), measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             } else {
-                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2], android.os.Build.MODEL, measurementNumber);
+                ISSRecordData data = new ISSRecordData(UserID, event.sensor.getType(), GetDateNow(), GetTimeNow(), currentState, event.values[0], event.values[1], event.values[2], Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID), measurementNumber);
                 DataStorageManager.insertISSRecordData(data);
             }
 
