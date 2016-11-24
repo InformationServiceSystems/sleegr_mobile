@@ -32,16 +32,6 @@ class ISSDictionary {
             MEASUREMENT_TRAINING_END = 13,
             MEASUREMENT_STEPS = 39;
 
-    public static int getMeasurementNumber(String measurement) {
-        switch (measurement) {
-            case "resting":
-                return MEASUREMENT_HR;
-            case "cooldown":
-                return MEASUREMENT_HR;
-        }
-        return 0;
-    }
-
     static ISSRecordData CursorToISSRecordData(Cursor mCursor) {
         ISSRecordData record = new ISSRecordData(mCursor.getInt(1),
                 mCursor.getInt(2),

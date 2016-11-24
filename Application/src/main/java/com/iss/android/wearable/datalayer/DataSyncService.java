@@ -121,7 +121,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             DataStorageManager.InitializeTriathlonFolder();
 
-        } catch (Exception ignored) {
+        } catch (Exception e) {
 
         }
         return START_STICKY;
@@ -450,6 +450,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             // If the Cursor is empty, the provider found no matches
         } else if (mCursor.getCount() < 1) {
             // If the Cursor is empty, the provider found no matches
+            mCursor.close();
         } else {
             while (mCursor.moveToNext()) {
                 Log.d("ID", String.valueOf(mCursor.getInt(0)));
@@ -524,11 +525,13 @@ public class DataSyncService extends Service implements DataApi.DataListener,
         if (null == innerCursor) {
             // If the Cursor is empty, the provider found no matches
         } else if (innerCursor.getCount() < 1) {
+            innerCursor.close();
             // If the Cursor is empty, the provider found no matches
         } else {
             while (innerCursor.moveToNext()) {
                 records.add(ISSDictionary.CursorToISSRecordData(innerCursor));
             }
+            innerCursor.close();
         }
         return records;
     }

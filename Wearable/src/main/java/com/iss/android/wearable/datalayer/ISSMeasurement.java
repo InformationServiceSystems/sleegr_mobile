@@ -5,12 +5,13 @@ import java.io.Serializable;
 /**
  * Created by micha on 03.05.2016.
  */
-public class ISSMeasurement implements Serializable {
-    public long _ID;
+class ISSMeasurement implements Serializable {
+    long _ID;
     public String type;
-    public String timestamp;
+    private String timestamp;
+    private static final long serialVersionUID = 1L;
 
-    public ISSMeasurement(long _ID, String type, String timestamp) {
+    ISSMeasurement(long _ID, String type, String timestamp) {
         this._ID = _ID;
         this.type = type;
         this.timestamp = timestamp;

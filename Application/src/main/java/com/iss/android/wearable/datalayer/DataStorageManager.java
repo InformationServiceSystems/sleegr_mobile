@@ -72,7 +72,7 @@ public class DataStorageManager {
                 result.AddValue(date, value);
 
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
 
         }
 
@@ -183,11 +183,13 @@ public class DataStorageManager {
             // If the Cursor is empty, the provider found no matches
         } else if (mCursor.getCount() < 1) {
             // If the Cursor is empty, the provider found no matches
+            mCursor.close();
         } else {
             while (mCursor.moveToNext()) {
                 ISSRecordData record = ISSDictionary.CursorToISSRecordData(mCursor);
                 data.add(record);
             }
+            mCursor.close();
         }
 
         return data;

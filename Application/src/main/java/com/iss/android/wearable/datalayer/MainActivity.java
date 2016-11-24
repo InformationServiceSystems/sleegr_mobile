@@ -694,12 +694,14 @@ public class MainActivity extends FragmentActivity implements
                 // If the Cursor is empty, the provider found no matches
             } else if (mCursor.getCount() < 1) {
                 // If the Cursor is empty, the provider found no matches
+                mCursor.close();
             } else {
                 while (mCursor.moveToNext()) {
                     ISSRecordData record = ISSDictionary.CursorToISSRecordData(mCursor);
                     data.add(record);
                     Log.d("Found", record.toString());
                 }
+                mCursor.close();
             }
             for (ISSRecordData d : data) {
                 times.add(d.getTimestamp());
@@ -733,6 +735,7 @@ public class MainActivity extends FragmentActivity implements
                 // If the Cursor is empty, the provider found no matches
             } else if (mCursor.getCount() < 1) {
                 // If the Cursor is empty, the provider found no matches
+                mCursor.close();
             } else {
                 while (mCursor.moveToNext()) {
                     if (ISSDictionary.dateToDayString(ISSDictionary.DateStringToDate(mCursor.getString(1))).equals(ISSDictionary.dateToDayString(time))) {
@@ -741,6 +744,7 @@ public class MainActivity extends FragmentActivity implements
                         Types.add(mCursor.getString(2));
                     }
                 }
+                mCursor.close();
             }
             return measurementIdList;
         }

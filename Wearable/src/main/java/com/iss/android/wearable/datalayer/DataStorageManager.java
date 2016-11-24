@@ -58,12 +58,14 @@ public class DataStorageManager {
             // If the Cursor is empty, the provider found no matches
         } else if (mCursor.getCount() < 1) {
             // If the Cursor is empty, the provider found no matches
+            mCursor.close();
         } else {
             while (mCursor.moveToNext()) {
                 ISSRecordData record = ISSDictionary.CursorToISSRecordDate(mCursor);
                 Log.d("record caught", record.toString());
                 result.add(record);
             }
+            mCursor.close();
         }
 
         return result;
@@ -203,11 +205,13 @@ public class DataStorageManager {
             // If the Cursor is empty, the provider found no matches
         } else if (mCursor.getCount() < 1) {
             // If the Cursor is empty, the provider found no matches
+            mCursor.close();
         } else {
             while (mCursor.moveToNext()) {
                 ISSRPEAnswers issrpeAnswers = ISSDictionary.CursorToISSRPEAnswers(mCursor);
                 result.add(issrpeAnswers);
             }
+            mCursor.close();
         }
         return result;
     }
@@ -242,11 +246,13 @@ public class DataStorageManager {
             // If the Cursor is empty, the provider found no matches
         } else if (mCursor.getCount() < 1) {
             // If the Cursor is empty, the provider found no matches
+            mCursor.close();
         } else {
             while (mCursor.moveToNext()) {
                 ISSMeasurement measurement = ISSDictionary.CursorToISSMeasurement(mCursor);
                 result.add(measurement);
             }
+            mCursor.close();
         }
         return result;
     }
@@ -303,7 +309,11 @@ public class DataStorageManager {
 
         if (null == mCursor) {
             return false;
-        } else return mCursor.getCount() >= 1;
+        } else {
+            boolean i = (mCursor.getCount() >= 1);
+            mCursor.close();
+            return i;
+        }
     }
 
     public static Date getCurrentTime() {

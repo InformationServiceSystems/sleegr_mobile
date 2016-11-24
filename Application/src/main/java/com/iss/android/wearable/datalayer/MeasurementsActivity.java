@@ -75,6 +75,7 @@ public class MeasurementsActivity extends ListActivity {
             // If the Cursor is empty, the provider found no matches
         } else if (mCursor.getCount() < 1) {
             // If the Cursor is empty, the provider found no matches
+            mCursor.close();
         } else {
             while (mCursor.moveToNext()) {
                 if (ISSDictionary.dateToDayString(ISSDictionary.DateStringToDate(mCursor.getString(1))).equals(intentDate)) {
@@ -83,6 +84,7 @@ public class MeasurementsActivity extends ListActivity {
                     typeList.add(mCursor.getString(2));
                 }
             }
+            mCursor.close();
         }
 
         /**
@@ -277,6 +279,7 @@ public class MeasurementsActivity extends ListActivity {
                     // If the Cursor is empty, the provider found no matches
                 } else if (mCursor.getCount() < 1) {
                     // If the Cursor is empty, the provider found no matches
+                    mCursor.close();
                 } else {
                     while (mCursor.moveToNext()) {
                         ISSRecordData record = ISSDictionary.CursorToISSRecordData(mCursor);
@@ -294,6 +297,7 @@ public class MeasurementsActivity extends ListActivity {
                             FittedCurve.add(ExponentFitter.fExp(CDParams, (d.getTimestamp().getTime() - Times.get(0).getTime()) / 1000));
                         }
                     }
+                    mCursor.close();
                 }
 
                 return null;

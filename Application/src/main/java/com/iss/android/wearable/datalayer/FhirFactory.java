@@ -67,10 +67,6 @@ class FhirFactory {
 
         try {
             mainObject.put("status", "final");
-            JSONObject Coding = new JSONObject();
-            Coding.put("system", "http://loinc.org");
-            Coding.put("code", "8867-4");
-            Coding.put("display", mCursor.getString(1));
 
             JSONObject category = new JSONObject();
             JSONArray coding = new JSONArray();
