@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -67,19 +68,19 @@ public class MeasuringActivity extends Activity {
                 SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
                 if (intent.getStringExtra("message").equals("Invalidate Morning Colors")) {
                     ImageButton button = (ImageButton) findViewById(R.id.morningHR);
-                    button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
+                    button.setBackgroundColor(Color.GREEN);
                 } else if (intent.getStringExtra("message").equals("Invalidate Evening Colors")) {
                     ImageButton button = (ImageButton) findViewById(R.id.eveningHR);
-                    button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
+                    button.setBackgroundColor(Color.GREEN);
                 } else if (intent.getStringExtra("message").equals("Invalidate Training Colors")) {
                     ImageButton button = (ImageButton) findViewById(R.id.trainingHR);
-                    button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
+                    button.setBackgroundColor(Color.GREEN);
                 } else if (intent.getStringExtra("message").equals("Invalidate Cooldown Colors")) {
                     ImageButton button = (ImageButton) findViewById(R.id.cooldownHR);
-                    button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
+                    button.setBackgroundColor(Color.GREEN);
                 } else if (intent.getStringExtra("message").equals("Invalidate Recovery Colors")) {
                     ImageButton button = (ImageButton) findViewById(R.id.recoveryHR);
-                    button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_like_background_color_selected));
+                    button.setBackgroundColor(Color.GREEN);
                 } else if (intent.getStringExtra("message").equals("Invalidate Button Colors, Finished")) {
                     // The measurement has finished, fade all buttons that have been used today.
                     if (pref.getBoolean(date + "Cooldown", false)) {

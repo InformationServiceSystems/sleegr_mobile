@@ -33,14 +33,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class DataSyncService extends Service implements DataApi.DataListener,
@@ -352,7 +357,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // uploading json to server
     public String send_record_as_json(JSONObject jsonForServer, ArrayList<Integer> arrayOfMeasurementIDs) {
-        String uri = "http://81.169.137.80:5001/post_json";//"http://web01.iss.uni-saarland.de/post_json";
+        String uri = getString(R.string.testserver_json);//"http://web01.iss.uni-saarland.de/post_json";
         Boolean server_transac_successful = false;
 
         String data = jsonForServer.toString();
@@ -457,6 +462,17 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 arrayOfMeasurementIDs.add(mCursor.getInt(0));
                 Log.d("Timestamp", mCursor.getString(2));
                 ArrayList<ISSRecordData> records = queryForRecordsOfMeasurement(mCursor);
+                // Here, I ask the server for the codes of the device that I user
+                String devices;
+                try {
+                    devices = askForDeviceNames(records);
+                } catch (ProtocolException e) {
+                    e.printStackTrace();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 JSONObject fhirObservation = FhirFactory.constructFhirObservation(mCursor, records);
                 arrayOfFhirObservations.put(fhirObservation);
             }
@@ -489,6 +505,55 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 send_record_as_json(record);
             }
         }*/
+    }
+
+    private String askForDeviceNames(ArrayList<ISSRecordData> records) throws IOException {
+        Set<String> devices = new HashSet<>();
+        for (ISSRecordData record: records) {
+            devices.add(record.Sensor);
+        }
+
+        JSONArray arrayOfDeviceNames = new JSONArray();
+        for (String device: devices) {
+            arrayOfDeviceNames.put(device);
+        }
+
+        String uri = getString(R.string.testserver_json);
+        URL object = new URL(uri);
+
+        String header = "bearer ";
+        String Token = CredentialsManager.getCredentials(MainActivity.getContext()).getIdToken();
+        header += Token;
+
+        HttpURLConnection con = (HttpURLConnection) object.openConnection();
+        con.setDoOutput(true);
+        con.setDoInput(true);
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("Accept", "application/json");
+        con.setRequestProperty("Authorization", header);
+        con.setRequestMethod("POST");
+        OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+        wr.write(arrayOfDeviceNames.toString());
+        wr.flush();
+
+        StringBuilder sb = new StringBuilder();
+        int HttpResult = con.getResponseCode();
+        if (HttpResult == HttpURLConnection.HTTP_OK) {
+            BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), "utf-8"));
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+            br.close();
+            System.out.println("" + sb.toString());
+            Log.d("message", sb.toString());
+            Log.d("Server response", sb.toString());
+        } else {
+            System.out.println(con.getResponseMessage());
+            Log.d("Server response", sb.toString());
+        }
+        return null;
     }
 
     private ArrayList<ISSRecordData> queryForRecordsOfMeasurement(Cursor mCursor) {

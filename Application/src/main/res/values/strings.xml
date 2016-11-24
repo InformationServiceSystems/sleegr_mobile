@@ -181,5 +181,6 @@
     <string name="too_early_for_evening">It is not yet evening.</string>
     <string name="title_activity_web_app">WebAppActivity</string>
     <string name="testserver_website_port">http://web01.iss.uni-saarland.de</string>
+    <string name="testserver_json">http://81.169.137.80:5000/get_device_code</string>
 
 </resources>
