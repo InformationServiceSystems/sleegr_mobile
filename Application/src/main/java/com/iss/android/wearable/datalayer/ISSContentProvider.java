@@ -28,6 +28,8 @@ public class ISSContentProvider extends ContentProvider {
     static final Uri RECORDS_CONTENT_URI = Uri.parse(RECORDS_URL);
     static final String MEASUREMENT_URL = "content://" + PROVIDER_NAME + "/measurement";
     static final Uri MEASUREMENT_CONTENT_URI = Uri.parse(MEASUREMENT_URL);
+    static final String SCHEDULE_URL = "content://" + PROVIDER_NAME + "/schedule";
+    static final Uri SCHEDULE_CONTENT_URI = Uri.parse(SCHEDULE_URL);
     static final String RPE_URL = "content://" + PROVIDER_NAME + "/rpeanswers";
     static final Uri RPE_CONTENT_URI = Uri.parse(RPE_URL);
 
@@ -45,18 +47,22 @@ public class ISSContentProvider extends ContentProvider {
     static final String RPE_ANSWERS = "rpe_answers";
     static final String TYPE = "type";
     static final String SENT = "sent";
+    static final String VALUE = "value";
     static final int RECORDSTYPE = 1;
     static final int RECORD_IDTYPE = 2;
     static final int MEASUREMENTSTYPE = 3;
     static final int MEASUREMENT_IDTYPE = 4;
     static final int RPESTYPE = 5;
     static final int RPE_IDTYPE = 6;
+    static final int SCHEDULESTYPE = 7;
+    static final int SCHEDULE_IDTYPE = 8;
     static final UriMatcher uriMatcher;
     static final String DATABASE_NAME = "ISSRecordData";
     static final String RECORDS_TABLE_NAME = "records";
     static final String MEASUREMENTS_TABLE_NAME = "measurements";
     static final String RPE_TABLE_NAME = "RPESets";
-    static final int DATABASE_VERSION = 40;
+    static final String SCHEDULE_TABLE_NAME = "schedules";
+    static final int DATABASE_VERSION = 43;
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + //id of the specific value
@@ -82,6 +88,11 @@ public class ISSContentProvider extends ContentProvider {
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     MEASUREMENT_ID + " INTEGER NOT NULL, " +
                     RPE_ANSWERS + " BLOB);";
+    static final String CREATE_SCHEDULE_TABLE =
+            " CREATE TABLE " + SCHEDULE_TABLE_NAME + " (" +
+                    _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    DATE + " TEXT NOT NULL, " +
+                    VALUE + " BLOB);";
     private static HashMap<String, String> RECORDS_PROJECTION_MAP;
 
     static {
@@ -92,6 +103,8 @@ public class ISSContentProvider extends ContentProvider {
         uriMatcher.addURI(PROVIDER_NAME, "measurement/#", MEASUREMENT_IDTYPE);
         uriMatcher.addURI(PROVIDER_NAME, "rpeanswers", RPESTYPE);
         uriMatcher.addURI(PROVIDER_NAME, "rpeanswers/#", RPE_IDTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "schedule", SCHEDULESTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "schedule/#", SCHEDULE_IDTYPE);
     }
 
     /**
@@ -110,11 +123,6 @@ public class ISSContentProvider extends ContentProvider {
          */
         db = dbHelper.getWritableDatabase();
         return (db != null);
-    }
-
-    public void updateAllRecords() {
-        db.execSQL("UPDATE " + ISSContentProvider.RECORDS_TABLE_NAME + " SET SENT = 'true'");
-        Log.d("update", "worked");
     }
 
     @Nullable
@@ -150,6 +158,16 @@ public class ISSContentProvider extends ContentProvider {
 
             case RPE_IDTYPE:
                 qb.setTables(RPE_TABLE_NAME);
+                qb.appendWhere(_ID + "=" + uri.getPathSegments().get(1));
+                break;
+
+            case SCHEDULESTYPE:
+                qb.setTables(SCHEDULE_TABLE_NAME);
+                qb.setProjectionMap(RECORDS_PROJECTION_MAP);
+                break;
+
+            case SCHEDULE_IDTYPE:
+                qb.setTables(SCHEDULE_TABLE_NAME);
                 qb.appendWhere(_ID + "=" + uri.getPathSegments().get(1));
                 break;
 
@@ -201,6 +219,12 @@ public class ISSContentProvider extends ContentProvider {
             case RPE_IDTYPE:
                 return "vnd.android.cursor.item/vnd.example.rpes";
 
+            case SCHEDULESTYPE:
+                return "vnd.android.cursor.dir/vnd.example.schedules";
+
+            case SCHEDULE_IDTYPE:
+                return "vnd.android.cursor.item/vnd.example.schedules";
+
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
@@ -245,6 +269,15 @@ public class ISSContentProvider extends ContentProvider {
                     return _uri;
                 }
                 throw new SQLException("Failed to add a record into " + uri);
+            case SCHEDULESTYPE:
+                rowID = db.insert(SCHEDULE_TABLE_NAME, "", values);
+
+                if (rowID > 0) {
+                    Uri _uri = ContentUris.withAppendedId(SCHEDULE_CONTENT_URI, rowID);
+                    getContext().getContentResolver().notifyChange(_uri, null);
+                    return _uri;
+                }
+                throw new SQLException("Failed to add a record into " + uri);
         }
         throw new SQLException("Failed to add a record into " + uri);
     }
@@ -282,6 +315,16 @@ public class ISSContentProvider extends ContentProvider {
                 count = db.delete(RPE_TABLE_NAME, _ID + " = " + id +
                         (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
                 break;
+
+            case SCHEDULESTYPE:
+                count = db.delete(SCHEDULE_TABLE_NAME, selection, selectionArgs);
+                break;
+
+            case SCHEDULE_IDTYPE:
+                id = uri.getPathSegments().get(1);
+                count = db.delete(SCHEDULE_TABLE_NAME, _ID + " = " + id +
+                        (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -311,6 +354,14 @@ public class ISSContentProvider extends ContentProvider {
                 count = db.update(MEASUREMENTS_TABLE_NAME, values, _ID + " = " + uri.getPathSegments().get(1) +
                         (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
                 break;
+            case SCHEDULESTYPE:
+                count = db.update(SCHEDULE_TABLE_NAME, values, selection, selectionArgs);
+                break;
+
+            case SCHEDULE_IDTYPE:
+                count = db.update(SCHEDULE_TABLE_NAME, values, _ID + " = " + uri.getPathSegments().get(1) +
+                        (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
+                break;
 
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
@@ -333,6 +384,7 @@ public class ISSContentProvider extends ContentProvider {
             db.execSQL(CREATE_RECORDS_DB_TABLE);
             db.execSQL(CREATE_MEASUREMENT_DB_TABLE);
             db.execSQL(CREATE_RPE_DB_TABLE);
+            db.execSQL(CREATE_SCHEDULE_TABLE);
         }
 
         @Override
@@ -340,6 +392,7 @@ public class ISSContentProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + RECORDS_TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + MEASUREMENTS_TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + RPE_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + SCHEDULE_TABLE_NAME);
             onCreate(db);
         }
     }

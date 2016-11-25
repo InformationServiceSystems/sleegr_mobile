@@ -1,7 +1,11 @@
 package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -11,6 +15,11 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+
+import static com.iss.android.wearable.datalayer.DataSyncService.getUserID;
+import static com.iss.android.wearable.datalayer.ISSRecordData.resolver;
+import static com.iss.android.wearable.datalayer.MainActivity.getContext;
 
 public class SetScheduleActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
@@ -35,32 +44,11 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
         this.start = cal.getTime();
         cal.add(Calendar.DAY_OF_MONTH, 6);
         this.end = cal.getTime();
-
-        int[] dupes = checkForDupes();
-        prepareSpinners(dupes);
-    }
-
-    // checks if the values for a given date have already been saved
-    private int[] checkForDupes() {
-        TimeSeries series = DataStorageManager.readUserSchedule();
-        series = series.inTimeRange(start, end);
-        int[] dupes = new int[7];
-        if (series != null) {
-            if (series.Values.size() > 7) {
-                for (int i = (series.Values.size() - 1); i > (series.Values.size() - 8); i--) {
-                    dupes[(i) - series.Values.size() + 7] = series.Values.get(i).y.intValue();
-                }
-            } else {
-                for (int i = 0; i < series.Values.size(); i++) {
-                    dupes[i] = series.Values.get(i).y.intValue();
-                }
-            }
-        }
-        return dupes;
+        prepareSpinners();
     }
 
     // Initializes the spinners and sets them to the values that have been saved.
-    private void prepareSpinners(int[] dupes) {
+    private void prepareSpinners() {
         int j = 0;
         for (int i : SpinnerIds) {
             Spinner spinner = (Spinner) findViewById(i);
@@ -72,9 +60,78 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
             // Apply the adapter to the spinner
             spinner.setAdapter(adapter);
             spinner.setOnItemSelectedListener(this);
-            spinner.setSelection(dupes[j]);
+            spinner.setSelection(getScheduleValueForOffset(j));
             j++;
         }
+    }
+
+    private int getScheduleValueForOffset(int j) {
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(start);
+        cal.add(Calendar.DAY_OF_YEAR, j);
+        int scheduleValue = queryForScheduleValue(cal.getTime());
+        switch (scheduleValue) {
+            case 11:
+                insertScheduleValue(cal.getTime());
+                return 0;
+            default:
+                return scheduleValue;
+        }
+    }
+
+    private void insertScheduleValue(Date time) {
+        ContentValues values = new ContentValues();
+        values.put(ISSContentProvider.DATE, ISSDictionary.dateToDayString(time));
+        values.put(ISSContentProvider.VALUE, 0);
+        Log.d("values", values.toString());
+        resolver.insert(ISSContentProvider.SCHEDULE_CONTENT_URI, values);
+    }
+
+    private void updateScheduleValue(Date time, int scheduleValue) {
+        ContentValues values = new ContentValues();
+        String mSelectionClause = ISSContentProvider.DATE + " = '" + ISSDictionary.dateToDayString(time) + "'";
+        values.put(ISSContentProvider.VALUE, scheduleValue);
+        Log.d("values", values.toString());
+        resolver.update(
+                ISSContentProvider.SCHEDULE_CONTENT_URI,   // the user dictionary content URI
+                values,                       // the columns to update
+                mSelectionClause,                    // the column to select on
+                null                     // the value to compare to
+        );
+    }
+
+    private int queryForScheduleValue(Date time) {
+        String dayString = ISSDictionary.dateToDayString(time);
+        String mSelectionClause = ISSContentProvider.DATE + " = '" + dayString + "'";
+        String[] mSelectionArgs = {};
+        Uri CONTENT_URI = ISSContentProvider.SCHEDULE_CONTENT_URI;
+        String[] mProjection =
+                {
+                        ISSContentProvider._ID,
+                        ISSContentProvider.DATE,
+                        ISSContentProvider.VALUE
+                };
+        String mSortOrder = ISSContentProvider.DATE + " ASC";
+
+        Cursor mCursor = getContext().getContentResolver().query(
+                CONTENT_URI,                       // The content URI of the database table
+                mProjection,                       // The columns to return for each row
+                mSelectionClause,                  // Either null, or the word the user entered
+                mSelectionArgs,                    // Either empty, or the string the user entered
+                mSortOrder);
+        // Some providers return null if an error occurs, others throw an exception
+        if (null == mCursor) {
+            return 11;
+        } else if (mCursor.getCount() < 1) {
+            mCursor.close();
+            return 11;
+        } else {
+            while (mCursor.moveToNext()) {
+                return mCursor.getInt(2);
+            }
+            mCursor.close();
+        }
+        return 11;
     }
 
     @Override
@@ -126,16 +183,11 @@ public class SetScheduleActivity extends Activity implements AdapterView.OnItemS
 
     // Starts the avalanche of methods needed to store the input schedule values
     private boolean commit(int[] array) {
-        Date date = this.start;
         Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
+        cal.setTime(start);
         for (int i = 0; i <= array.length - 1; i++) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
-            String dateString = sdf.format(date);
-            cal.add(Calendar.DAY_OF_MONTH, 1);
-            date = cal.getTime();
-            String scheduleString = dateString + "," + String.valueOf(array[i]) + "\n";
-            DataStorageManager.storeScheduleLine(scheduleString);
+            updateScheduleValue(cal.getTime(), array[i]);
+            cal.add(Calendar.DAY_OF_YEAR, 1);
         }
         return true;
     }
