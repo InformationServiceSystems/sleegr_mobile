@@ -24,8 +24,6 @@ import static com.iss.android.wearable.datalayer.ISSRecordData.resolver;
  */
 public class DataStorageManager {
 
-    static SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
-
     // I overwrote it so that it now takes Internal Storage, which is more fitting for in-app-data.
     // All other methods wouldn't let me write when using the scheduled RPE values.
     // static String dataFolder = MainActivity.getContext().getFilesDir().toString();
@@ -128,7 +126,7 @@ public class DataStorageManager {
     }
 
     static void insertISSRecordData(ISSRecordData data) {
-        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement), 0);
+        int latestMeasurement = getLastMeasurementID();
         Log.d("measurement id", String.valueOf(data.measurementID));
         ContentValues values = new ContentValues();
         values.put(ISSContentProvider.SENT, false);
@@ -197,11 +195,9 @@ public class DataStorageManager {
 
     static void insertISSMeasurement(ISSMeasurement row) {
         Log.d("insertISSMeasurement", "has been called");
-        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement), 0);
+        int latestMeasurement = getLastMeasurementID();
         latestMeasurement++;
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement), latestMeasurement);
-        editor.apply();
+        setLastMeasurementID(latestMeasurement);
 
         Log.d("tries to insert", String.valueOf(row._ID));
         ContentValues values = new ContentValues();
@@ -216,11 +212,13 @@ public class DataStorageManager {
     }
 
     public static int getLastMeasurementID() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
         return pref.getInt("LastMeasurement", 0);
 
     }
 
-    public static void SetLastMeasurementID(int measurementNumber) {
+    public static void setLastMeasurementID(int measurementNumber) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
         SharedPreferences.Editor editor = pref.edit();
         Log.d("Set measurement id", "to" + String.valueOf(measurementNumber));
         editor.putInt("LastMeasurement", measurementNumber);
@@ -229,7 +227,7 @@ public class DataStorageManager {
     }
 
     static void insertISSRPEAnswer(ISSRPEAnswers row) {
-        int latestMeasurement = pref.getInt(MainActivity.getContext().getResources().getString(R.string.latest_measurement), 0);
+        int latestMeasurement = getLastMeasurementID();
         ContentValues values = new ContentValues();
         values.put(ISSContentProvider.MEASUREMENT_ID,
                 latestMeasurement);

@@ -124,7 +124,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
             alarm.SetAlarm(this);
 
-            DataStorageManager.InitializeTriathlonFolder();
+            //DataStorageManager.InitializeTriathlonFolder();
 
         } catch (Exception e) {
 
