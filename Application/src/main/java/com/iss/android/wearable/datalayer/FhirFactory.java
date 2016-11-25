@@ -27,7 +27,7 @@ class FhirFactory {
             code.put("coding", coding);
             json.put("code", code);
 
-            json.put("valueDateTime", tosend.Date + "T" + tosend.Timestamp);
+            json.put("valueDateTime", ISSDictionary.convertToFhirDate(tosend.Date + " " + tosend.Timestamp));
 
             JSONObject valueQuantity = new JSONObject();
             valueQuantity.put("unit", "Hz");
@@ -110,7 +110,7 @@ class FhirFactory {
             code.put("coding", coding);
             json.put("code", code);
 
-            json.put("valueDateTime", tosend.Date + "T" + tosend.Timestamp);
+            json.put("valueDateTime", ISSDictionary.convertToFhirDate(tosend.Date + " " + tosend.Timestamp));
 
             JSONObject valueQuantity = new JSONObject();
             valueQuantity.put("unit", "m/s2");
@@ -137,7 +137,7 @@ class FhirFactory {
             code.put("coding", coding);
             json.put("code", code);
 
-            json.put("valueDateTime", tosend.Date + "T" + tosend.Timestamp);
+            json.put("valueDateTime", ISSDictionary.convertToFhirDate(tosend.Date + " " + tosend.Timestamp));
 
             JSONObject valueQuantity = new JSONObject();
             valueQuantity.put("unit", "rad/s");

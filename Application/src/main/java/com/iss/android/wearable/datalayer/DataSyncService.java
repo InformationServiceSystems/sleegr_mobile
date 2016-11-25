@@ -518,7 +518,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             arrayOfDeviceNames.put(device);
         }
 
-        String uri = getString(R.string.testserver_json);
+        String uri = getString(R.string.testserver_json_get_device);
         URL object = new URL(uri);
 
         String header = "bearer ";
