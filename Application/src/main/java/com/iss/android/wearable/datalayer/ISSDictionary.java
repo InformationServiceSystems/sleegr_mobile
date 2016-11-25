@@ -132,4 +132,25 @@ class ISSDictionary {
                 return Color.GRAY;
         }
     }
+
+    public static String convertToFhirDate(String dateString, String timestamp) {
+        DateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        DateFormat formatTime = new SimpleDateFormat("HH:mm:ss z", Locale.US);
+        Date date = SplitDateStringToDate(dateString, timestamp);
+        String timeString = formatDate.format(date) + "T" + formatTime.format(date);
+        Log.d("Conceived date", timeString);
+        return timeString;
+    }
+
+    private static Date SplitDateStringToDate(String dateString, String timestamp) {
+        String timeString = dateString + " " + timestamp;
+        DateFormat format = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+        Date date = new Date();
+        try {
+            date = format.parse(timeString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
 }
