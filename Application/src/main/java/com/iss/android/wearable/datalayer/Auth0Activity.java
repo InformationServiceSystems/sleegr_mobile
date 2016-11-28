@@ -3,6 +3,7 @@ package com.iss.android.wearable.datalayer;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -21,6 +22,8 @@ import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.iss.android.wearable.datalayer.MainActivity.getContext;
 
 
 public class Auth0Activity extends Activity {
@@ -52,6 +55,8 @@ public class Auth0Activity extends Activity {
         //Request a refresh token along with the id token.
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("scope", "openid offline_access");
+        parameters.put("device", Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID));
+        UserData.putDeviceID(Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID));
         mLock = Lock.newBuilder(auth0, mCallback)
                 .withAuthenticationParameters(parameters)
                 //Add parameters to the build
@@ -62,7 +67,7 @@ public class Auth0Activity extends Activity {
             return;
         }
 
-        final AuthenticationAPIClient aClient = new AuthenticationAPIClient(auth0);
+        AuthenticationAPIClient aClient = new AuthenticationAPIClient(auth0);
         aClient.tokenInfo(CredentialsManager.getCredentials(this).getIdToken())
                 .start(new BaseCallback<UserProfile, AuthenticationException>() {
                     /**
@@ -90,6 +95,8 @@ public class Auth0Activity extends Activity {
 
                     @Override
                     public void onFailure(AuthenticationException error) {
+                        Auth0 auth0 = new Auth0(getString(R.string.auth0_client_id), getString(R.string.auth0_domain));
+                        AuthenticationAPIClient aClient = new AuthenticationAPIClient(auth0);
                         String refreshToken = UserData.getRefreshToken();
                         Log.d("Automatic Login failed", "Trying to get a new idToken");
 
@@ -98,6 +105,8 @@ public class Auth0Activity extends Activity {
 
                                     @Override
                                     public void onSuccess(Delegation payload) {
+                                        Auth0 auth0 = new Auth0(getString(R.string.auth0_client_id), getString(R.string.auth0_domain));
+                                        AuthenticationAPIClient aClient = new AuthenticationAPIClient(auth0);
                                         Log.d("Success", "Got a new idToken with the refreshToken");
                                         String idToken = payload.getIdToken(); // New ID Token
                                         UserData.setIdToken(idToken);

@@ -152,6 +152,7 @@ public class MeasurementsActivity extends ListActivity {
             int p = (int) getGroup(groupPosition);
 
             if (p != 0) {
+                TextView SamplingField = (TextView) v.findViewById(R.id.SamplingField);
                 TextView AValue = (TextView) v.findViewById(R.id.AValue);
                 TextView TValue = (TextView) v.findViewById(R.id.TValue);
                 TextView CValue = (TextView) v.findViewById(R.id.CValue);
@@ -161,7 +162,7 @@ public class MeasurementsActivity extends ListActivity {
                 DailyData dailyData = new DailyData(date.getTime());
                 Log.d("Requested view for", String.valueOf(p));
                 GraphView graph = (GraphView) v.findViewById(R.id.output);
-                new PlotGraphsTask(graph, v.getContext(), p, AValue, TValue, CValue, Load).execute(dailyData);
+                new PlotGraphsTask(graph, v.getContext(), p, SamplingField, AValue, TValue, CValue, Load).execute(dailyData);
             }
             return v;
         }
@@ -226,12 +227,14 @@ public class MeasurementsActivity extends ListActivity {
             ArrayList<Double> FittedCurve;
             String measurementType;
             double[] CDParams;
+            private TextView SamplingField;
             private TextView AValue;
             private TextView TValue;
             private TextView CValue;
             private TextView Load;
+            private Double samplingRate;
 
-            PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView AValue, TextView TValue, TextView CValue, TextView Load) {
+            PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView SamplingField, TextView AValue, TextView TValue, TextView CValue, TextView Load) {
                 this.graph = arggraph;
                 this.context = argcontext;
                 this.MID = p;
@@ -242,6 +245,7 @@ public class MeasurementsActivity extends ListActivity {
                 this.TValue = TValue;
                 this.CValue = CValue;
                 this.Load = Load;
+                this.SamplingField = SamplingField;
             }
 
             protected Void doInBackground(DailyData... cooldown) {
@@ -288,6 +292,7 @@ public class MeasurementsActivity extends ListActivity {
                         Log.d("Found", record.toString());
                     }
                     this.CDParams = DataProcessingManager.getCooldownParameters(data);
+                    this.samplingRate = DataProcessingManager.getSamplingrate(data);
                     if (CDParams != null) {
                         for (ISSRecordData d : data) {
                             Times.add(d.getTimestamp());
@@ -305,88 +310,91 @@ public class MeasurementsActivity extends ListActivity {
 
             @Override
             protected void onPostExecute(Void result) {
-                if (measurementType.equals("Cooldown")) {
-                    graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
-                        @Override
-                        public String formatLabel(double value, boolean isValueX) {
-                            if (isValueX) {
-                                // show normal x values
+                if (measurementType != null) {
+                    if (measurementType.equals("Cooldown")) {
+                        graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                            @Override
+                            public String formatLabel(double value, boolean isValueX) {
+                                if (isValueX) {
+                                    // show normal x values
 
-                                Calendar mCalendar = Calendar.getInstance();
-                                mCalendar.setTimeInMillis((long) value);
-                                String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
+                                    Calendar mCalendar = Calendar.getInstance();
+                                    mCalendar.setTimeInMillis((long) value);
+                                    String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
 
-                                return time;
-                            } else {
-                                // show currency for y values
-                                return super.formatLabel(value, isValueX);
+                                    return time;
+                                } else {
+                                    // show currency for y values
+                                    return super.formatLabel(value, isValueX);
+                                }
                             }
-                        }
-                    });
-                    graph.getGridLabelRenderer().setNumHorizontalLabels(5);
-                    if (Times != null && Times.size() > 0) {
-                        LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
-                        for (int i = 0; i < Times.size(); i++) {
-                            series.appendData(new DataPoint(Times.get(i), HRValues.get(i)), false, Times.size() + 20);
-                        }
-                        LineGraphSeries<DataPoint> FittedCurveSeries = new LineGraphSeries<>();
-                        for (int i = 0; i < Times.size(); i++) {
-                            FittedCurveSeries.appendData(new DataPoint(Times.get(i), FittedCurve.get(i)), false, Times.size() + 20);
-                        }
-                        graph.getViewport().setMinX(Times.get(0).getTime());
-                        graph.getViewport().setMaxX(Times.get(Times.size() - 1).getTime());
-                        graph.getViewport().setXAxisBoundsManual(true);
-                        graph.getViewport().setYAxisBoundsManual(true);
-                        graph.getViewport().setMinY(0);
-                        graph.getViewport().setMaxY(200);
-                        series.setColor(ISSDictionary.getGraphSeriesColor(measurementType));
-                        FittedCurveSeries.setColor(Color.GREEN);
-                        graph.addSeries(FittedCurveSeries);
-                        graph.addSeries(series);
-                    }
-                    this.AValue.setText("A: " + String.valueOf(CDParams[0]));
-                    this.TValue.setText("T: " + String.valueOf(CDParams[1]));
-                    this.CValue.setText("C: " + String.valueOf(CDParams[2]));
-                    this.Load.setText("Load: " + String.valueOf(CDParams[0] * CDParams[2]));
-                } else if (measurementType.equals("TrainingHR") || measurementType.equals("Recovery") || measurementType.equals("EveningHR") || measurementType.equals("MorningHR")) {
-                    graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
-                        @Override
-                        public String formatLabel(double value, boolean isValueX) {
-                            if (isValueX) {
-                                // show normal x values
-
-                                Calendar mCalendar = Calendar.getInstance();
-                                mCalendar.setTimeInMillis((long) value);
-                                String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
-
-                                return time;
-                            } else {
-                                // show currency for y values
-                                return super.formatLabel(value, isValueX);
+                        });
+                        graph.getGridLabelRenderer().setNumHorizontalLabels(5);
+                        if (Times != null && Times.size() > 0) {
+                            LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
+                            for (int i = 0; i < Times.size(); i++) {
+                                series.appendData(new DataPoint(Times.get(i), HRValues.get(i)), false, Times.size() + 20);
                             }
+                            LineGraphSeries<DataPoint> FittedCurveSeries = new LineGraphSeries<>();
+                            for (int i = 0; i < Times.size(); i++) {
+                                FittedCurveSeries.appendData(new DataPoint(Times.get(i), FittedCurve.get(i)), false, Times.size() + 20);
+                            }
+                            graph.getViewport().setMinX(Times.get(0).getTime());
+                            graph.getViewport().setMaxX(Times.get(Times.size() - 1).getTime());
+                            graph.getViewport().setXAxisBoundsManual(true);
+                            graph.getViewport().setYAxisBoundsManual(true);
+                            graph.getViewport().setMinY(0);
+                            graph.getViewport().setMaxY(200);
+                            series.setColor(ISSDictionary.getGraphSeriesColor(measurementType));
+                            FittedCurveSeries.setColor(Color.GREEN);
+                            graph.addSeries(FittedCurveSeries);
+                            graph.addSeries(series);
                         }
-                    });
-                    graph.getGridLabelRenderer().setNumHorizontalLabels(5);
-                    if (Times != null && Times.size() > 0) {
-                        LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
-                        for (int i = 0; i < Times.size(); i++) {
-                            series.appendData(new DataPoint(Times.get(i), HRValues.get(i)), false, Times.size() + 20);
+                        this.SamplingField.setText("Sampling rate: " + String.valueOf(samplingRate));
+                        this.AValue.setText("A: " + String.valueOf(CDParams[0]));
+                        this.TValue.setText("T: " + String.valueOf(CDParams[1]));
+                        this.CValue.setText("C: " + String.valueOf(CDParams[2]));
+                        this.Load.setText("Load: " + String.valueOf(CDParams[0] * CDParams[2]));
+                    } else if (measurementType.equals("TrainingHR") || measurementType.equals("Recovery") || measurementType.equals("EveningHR") || measurementType.equals("MorningHR")) {
+                        graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                            @Override
+                            public String formatLabel(double value, boolean isValueX) {
+                                if (isValueX) {
+                                    // show normal x values
+
+                                    Calendar mCalendar = Calendar.getInstance();
+                                    mCalendar.setTimeInMillis((long) value);
+                                    String time = new SimpleDateFormat("HH:mm").format(mCalendar.getTime());
+
+                                    return time;
+                                } else {
+                                    // show currency for y values
+                                    return super.formatLabel(value, isValueX);
+                                }
+                            }
+                        });
+                        graph.getGridLabelRenderer().setNumHorizontalLabels(5);
+                        if (Times != null && Times.size() > 0) {
+                            LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
+                            for (int i = 0; i < Times.size(); i++) {
+                                series.appendData(new DataPoint(Times.get(i), HRValues.get(i)), false, Times.size() + 20);
+                            }
+                            LineGraphSeries<DataPoint> FittedCurveSeries = new LineGraphSeries<>();
+                            for (int i = 0; i < Times.size(); i++) {
+                                FittedCurveSeries.appendData(new DataPoint(Times.get(i), FittedCurve.get(i)), false, Times.size() + 20);
+                            }
+                            graph.getViewport().setMinX(Times.get(0).getTime());
+                            graph.getViewport().setMaxX(Times.get(Times.size() - 1).getTime());
+                            graph.getViewport().setXAxisBoundsManual(true);
+                            graph.getViewport().setYAxisBoundsManual(true);
+                            graph.getViewport().setMinY(0);
+                            graph.getViewport().setMaxY(200);
+                            series.setColor(ISSDictionary.getGraphSeriesColor(measurementType));
+                            series.setColor(Color.parseColor("#3b5998"));
+                            FittedCurveSeries.setColor(Color.GREEN);
+                            //graph.addSeries(FittedCurveSeries);
+                            graph.addSeries(series);
                         }
-                        LineGraphSeries<DataPoint> FittedCurveSeries = new LineGraphSeries<>();
-                        for (int i = 0; i < Times.size(); i++) {
-                            FittedCurveSeries.appendData(new DataPoint(Times.get(i), FittedCurve.get(i)), false, Times.size() + 20);
-                        }
-                        graph.getViewport().setMinX(Times.get(0).getTime());
-                        graph.getViewport().setMaxX(Times.get(Times.size() - 1).getTime());
-                        graph.getViewport().setXAxisBoundsManual(true);
-                        graph.getViewport().setYAxisBoundsManual(true);
-                        graph.getViewport().setMinY(0);
-                        graph.getViewport().setMaxY(200);
-                        series.setColor(ISSDictionary.getGraphSeriesColor(measurementType));
-                        series.setColor(Color.parseColor("#3b5998"));
-                        FittedCurveSeries.setColor(Color.GREEN);
-                        //graph.addSeries(FittedCurveSeries);
-                        graph.addSeries(series);
                     }
                 }
 

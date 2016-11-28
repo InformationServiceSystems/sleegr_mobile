@@ -52,6 +52,15 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -242,7 +251,15 @@ public class MainActivity extends FragmentActivity implements
                 onStartMeasuringActivity();
                 return true;
             case R.id.logout:
-                onLogout();
+                try {
+                    try {
+                        onLogout();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 return true;
             case R.id.setSchedule:
                 onsetSchedule();
@@ -329,10 +346,8 @@ public class MainActivity extends FragmentActivity implements
     }
 
     // A method starting the login activity if no view is supplied.
-    public void onLogout() {
-
-        CredentialsManager.deleteCredentials(getContext());
-        startActivity(new Intent(this, Auth0Activity.class));
+    public void onLogout() throws IOException, JSONException {
+        new LogoutTask().execute();
 
     }
 
@@ -871,6 +886,71 @@ public class MainActivity extends FragmentActivity implements
             String currentDateandTime = sdf.format(new Date());
             return currentDateandTime;
 
+        }
+    }
+
+    class LogoutTask extends AsyncTask<String, Void, Void> {
+
+        private Exception exception;
+
+        protected Void doInBackground(String... urls) {
+            try {
+
+                Log.d("entered", "doinBackground");
+                String uri = getString(R.string.server_logout);
+                URL object = new URL(uri);
+
+                JSONObject userJSON = new JSONObject();
+                userJSON.put("deviceID", UserData.getDeviceID());
+
+                String header = "bearer ";
+                String Token = CredentialsManager.getCredentials(MainActivity.getContext()).getIdToken();
+                header += Token;
+
+                HttpURLConnection con = (HttpURLConnection) object.openConnection();
+                con.setDoOutput(true);
+                con.setDoInput(true);
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Accept", "application/json");
+                con.setRequestProperty("Authorization", header);
+                con.setRequestMethod("POST");
+                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                wr.write(userJSON.toString());
+                wr.flush();
+
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = con.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    Log.d("if", "entered");
+                    BufferedReader br = new BufferedReader(
+                            new InputStreamReader(con.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("" + sb.toString());
+                    Log.d("message", sb.toString());
+                    Log.d("Server response", sb.toString());
+                } else {
+                    Log.d("else", "entered");
+                    Log.d("HTTP response", String.valueOf(HttpResult));
+                    System.out.println(con.getResponseMessage());
+                    Log.d("Server response", sb.toString());
+                }
+            } catch (Exception e) {
+                this.exception = e;
+                Log.e("error", e.toString());
+            }
+            return null;
+        }
+
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            CredentialsManager.deleteCredentials(getContext());
+            getContext().startActivity(new Intent(getContext(), Auth0Activity.class));
+            // TODO: check this.exception
+            // TODO: do something with the feed
         }
     }
 

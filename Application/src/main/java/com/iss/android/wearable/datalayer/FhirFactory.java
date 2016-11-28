@@ -10,6 +10,8 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
+import static com.iss.android.wearable.datalayer.MainActivity.getContext;
+
 /**
  * Created by micha on 23.08.2016.
  */
@@ -41,7 +43,7 @@ class FhirFactory {
         return json;
     }
 
-    static JSONObject constructFhirObservation(Cursor mCursor, ArrayList<ISSRecordData> records) {
+    static JSONObject constructFhirObservation(Cursor mCursor, ArrayList<ISSRecordData> records, String devices) {
         JSONObject mainObject = new JSONObject();
 
         JSONArray componentElements = new JSONArray();
@@ -82,7 +84,8 @@ class FhirFactory {
             mainObject.put("subject", subject);
 
             JSONObject device = new JSONObject();
-            device.put("display", sensorDeviceName);
+            device.put("reference", getContext().getResources().getString(R.string.server_json_get_device));
+            device.put("display", devices);
             mainObject.put("device", device);
 
             mainObject.put("effectiveDateTime", ISSDictionary.convertToFhirDate(mCursor.getString(2)));

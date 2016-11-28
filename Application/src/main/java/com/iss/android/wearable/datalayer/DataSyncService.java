@@ -26,6 +26,8 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 
 import org.json.JSONArray;
@@ -357,7 +359,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
 
     // uploading json to server
     public String send_record_as_json(JSONObject jsonForServer, ArrayList<Integer> arrayOfMeasurementIDs) {
-        String uri = getString(R.string.testserver_json);//"http://web01.iss.uni-saarland.de/post_json";
+        String uri = getString(R.string.server_json);//"http://web01.iss.uni-saarland.de/post_json";
         Boolean server_transac_successful = false;
 
         String data = jsonForServer.toString();
@@ -463,7 +465,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 Log.d("Timestamp", mCursor.getString(2));
                 ArrayList<ISSRecordData> records = queryForRecordsOfMeasurement(mCursor);
                 // Here, I ask the server for the codes of the device that I user
-                String devices;
+                String devices = "";
                 try {
                     devices = askForDeviceNames(records);
                 } catch (ProtocolException e) {
@@ -473,7 +475,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                JSONObject fhirObservation = FhirFactory.constructFhirObservation(mCursor, records);
+                JSONObject fhirObservation = FhirFactory.constructFhirObservation(mCursor, records, devices);
                 arrayOfFhirObservations.put(fhirObservation);
             }
             mCursor.close();
@@ -518,7 +520,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             arrayOfDeviceNames.put(device);
         }
 
-        String uri = getString(R.string.testserver_json_get_device);
+        String uri = getString(R.string.server_json_get_device);
         URL object = new URL(uri);
 
         String header = "bearer ";
@@ -548,7 +550,11 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             br.close();
             System.out.println("" + sb.toString());
             Log.d("message", sb.toString());
+            JsonParser jsonParser = new JsonParser();
+            JsonElement deviceJson = jsonParser.parse(sb.toString());
+            Log.d("deviceJSON", deviceJson.toString());
             Log.d("Server response", sb.toString());
+            return deviceJson.toString();
         } else {
             System.out.println(con.getResponseMessage());
             Log.d("Server response", sb.toString());

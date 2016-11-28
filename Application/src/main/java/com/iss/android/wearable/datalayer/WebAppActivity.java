@@ -18,7 +18,7 @@ public class WebAppActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_app);
-        WebsiteURL = getString(R.string.testserver_website_port);
+        WebsiteURL = getString(R.string.server_website_port);
 
         webView = (WebView) findViewById(R.id.webView1);
         webView.setWebViewClient(new WebViewClient());

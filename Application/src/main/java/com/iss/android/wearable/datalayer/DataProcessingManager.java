@@ -394,4 +394,51 @@ public class DataProcessingManager {
         return result;
     }
 
+    public static Double getSamplingrate(ArrayList<ISSRecordData> data) {
+
+        Calendar startTime = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
+
+
+        Calendar currentTime = Calendar.getInstance();
+
+        ArrayList<Double> heartRates = new ArrayList<>();
+        ArrayList<Double> times = new ArrayList<>();
+
+        // convert sequence to arrays X and Y of time and corresponding values
+        for (ISSRecordData record : data) {
+
+            if (record.MeasurementType != 21) {
+                continue;
+            }
+
+            try {
+                currentTime.setTime(sdf.parse(record.Date + "_" + record.Timestamp));
+            } catch (ParseException e) {
+                Log.d("why?", e.toString());
+            }
+
+            if (startTime == null) {
+                try {
+                    startTime = Calendar.getInstance();
+                    startTime.setTime(sdf.parse(record.Date + "_" + record.Timestamp));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            double time = (currentTime.getTime().getTime() - startTime.getTime().getTime()) / 1000;
+
+            double hr = record.Value1;
+
+            heartRates.add(hr);
+            times.add(time);
+
+        }
+
+        if (heartRates.size() == 0)
+            return 0d;
+
+        return (times.get(times.size()-1)-times.get(0))/(heartRates.size()-1)*1000;
+    }
 }

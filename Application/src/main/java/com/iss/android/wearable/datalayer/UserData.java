@@ -11,6 +11,7 @@ public class UserData {
     private static String name = "default";
     private static UserProfile profile;
     private static String refreshToken;
+    private static String deviceID;
 
     public static String getIdToken() {
         return UserData.idToken;
@@ -50,5 +51,15 @@ public class UserData {
 
     public static Object getUserProfile() {
         return UserData.profile;
+    }
+
+    static String getUserID() { return UserData.profile.getId(); }
+
+    public static String getDeviceID() {
+        return UserData.deviceID;
+    }
+
+    public static void putDeviceID(String string) {
+        UserData.deviceID = string;
     }
 }
