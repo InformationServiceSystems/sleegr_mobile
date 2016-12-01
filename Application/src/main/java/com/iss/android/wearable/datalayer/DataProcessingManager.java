@@ -439,6 +439,6 @@ public class DataProcessingManager {
         if (heartRates.size() == 0)
             return 0d;
 
-        return (times.get(times.size()-1)-times.get(0))/(heartRates.size()-1)*1000;
+        return (heartRates.size()-1)/(times.get(times.size()-1)-times.get(0));
     }
 }

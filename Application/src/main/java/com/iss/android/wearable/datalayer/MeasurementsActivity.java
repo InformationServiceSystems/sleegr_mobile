@@ -22,6 +22,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,9 +80,11 @@ public class MeasurementsActivity extends ListActivity {
         } else {
             while (mCursor.moveToNext()) {
                 if (ISSDictionary.dateToDayString(ISSDictionary.DateStringToDate(mCursor.getString(1))).equals(intentDate)) {
-                    measurementIDs.add(mCursor.getInt(0));
-                    timestampList.add(ISSDictionary.makeTimestampBeautiful(mCursor.getString(1)));
-                    typeList.add(mCursor.getString(2));
+                    if(measurementNotEmpty(mCursor.getInt(0))) {
+                        measurementIDs.add(mCursor.getInt(0));
+                        timestampList.add(ISSDictionary.makeTimestampBeautiful(mCursor.getString(1)));
+                        typeList.add(mCursor.getString(2));
+                    }
                 }
             }
             mCursor.close();
@@ -109,6 +112,49 @@ public class MeasurementsActivity extends ListActivity {
 
         // Assign adapter to List
         MeasurementsList.setAdapter(customAdapter);
+    }
+
+    private boolean measurementNotEmpty(int MID) {
+        Uri CONTENT_URI = ISSContentProvider.RECORDS_CONTENT_URI;
+
+        String mSelectionClause = ISSContentProvider.MEASUREMENT_ID + " = " + MID + " AND " + ISSContentProvider.MEASUREMENT + " = 21";
+        String[] mSelectionArgs = {};
+        String[] mProjection =
+                {
+                        ISSContentProvider._ID,
+                        ISSContentProvider.USERID,
+                        ISSContentProvider.MEASUREMENT,
+                        ISSContentProvider.DATE,
+                        ISSContentProvider.TIMESTAMP,
+                        ISSContentProvider.EXTRA,
+                        ISSContentProvider.VALUE1,
+                        ISSContentProvider.VALUE2,
+                        ISSContentProvider.VALUE3,
+                        ISSContentProvider.SENSOR,
+                        ISSContentProvider.MEASUREMENT_ID
+                };
+        String mSortOrder = ISSContentProvider.TIMESTAMP + " ASC";
+
+        // Does a query against the table and returns a Cursor object
+        Cursor mCursor = getContext().getContentResolver().query(
+                CONTENT_URI,                       // The content URI of the database table
+                mProjection,                       // The columns to return for each row
+                mSelectionClause,                  // Either null, or the word the user entered
+                mSelectionArgs,                    // Either empty, or the string the user entered
+                mSortOrder);                       // The sort order for the returned rows
+
+        // Some providers return null if an error occurs, others throw an exception
+        if (null == mCursor) {
+            // If the Cursor is empty, the provider found no matches
+            return false;
+        } else if (mCursor.getCount() < 1) {
+            // If the Cursor is empty, the provider found no matches
+            mCursor.close();
+            return false;
+        } else {
+            mCursor.close();
+            return true;
+        }
     }
 
     public class ExpandableListAdapter extends BaseExpandableListAdapter {
@@ -162,7 +208,7 @@ public class MeasurementsActivity extends ListActivity {
                 DailyData dailyData = new DailyData(date.getTime());
                 Log.d("Requested view for", String.valueOf(p));
                 GraphView graph = (GraphView) v.findViewById(R.id.output);
-                new PlotGraphsTask(graph, v.getContext(), p, SamplingField, AValue, TValue, CValue, Load).execute(dailyData);
+                new PlotGraphsTask(v, graph, v.getContext(), p, SamplingField, AValue, TValue, CValue, Load).execute(dailyData);
             }
             return v;
         }
@@ -232,10 +278,12 @@ public class MeasurementsActivity extends ListActivity {
             private TextView TValue;
             private TextView CValue;
             private TextView Load;
+            private View v;
             private Double samplingRate;
 
-            PlotGraphsTask(GraphView arggraph, Context argcontext, Integer p, TextView SamplingField, TextView AValue, TextView TValue, TextView CValue, TextView Load) {
+            PlotGraphsTask(View v, GraphView arggraph, Context argcontext, Integer p, TextView SamplingField, TextView AValue, TextView TValue, TextView CValue, TextView Load) {
                 this.graph = arggraph;
+                this.v = v;
                 this.context = argcontext;
                 this.MID = p;
                 Times = new ArrayList<>();
@@ -311,6 +359,7 @@ public class MeasurementsActivity extends ListActivity {
             @Override
             protected void onPostExecute(Void result) {
                 if (measurementType != null) {
+                    DecimalFormat makeDecimalsLookGreatAgain = new DecimalFormat("#.###");
                     if (measurementType.equals("Cooldown")) {
                         graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
                             @Override
@@ -350,11 +399,15 @@ public class MeasurementsActivity extends ListActivity {
                             graph.addSeries(FittedCurveSeries);
                             graph.addSeries(series);
                         }
-                        this.SamplingField.setText("Sampling rate: " + String.valueOf(samplingRate));
-                        this.AValue.setText("A: " + String.valueOf(CDParams[0]));
-                        this.TValue.setText("T: " + String.valueOf(CDParams[1]));
-                        this.CValue.setText("C: " + String.valueOf(CDParams[2]));
-                        this.Load.setText("Load: " + String.valueOf(CDParams[0] * CDParams[2]));
+                        this.SamplingField.setText("Sampling rate: " + String.valueOf(makeDecimalsLookGreatAgain.format(samplingRate)) + "Hz");
+                        this.AValue.setVisibility(View.VISIBLE);
+                        this.TValue.setVisibility(View.VISIBLE);
+                        this.CValue.setVisibility(View.VISIBLE);
+                        this.Load.setVisibility(View.VISIBLE);
+                        this.AValue.setText("A: " + String.valueOf(makeDecimalsLookGreatAgain.format(CDParams[0])));
+                        this.TValue.setText("T: " + String.valueOf(makeDecimalsLookGreatAgain.format(CDParams[1])));
+                        this.CValue.setText("C: " + String.valueOf(makeDecimalsLookGreatAgain.format(CDParams[2])));
+                        this.Load.setText("Load: " + String.valueOf(makeDecimalsLookGreatAgain.format(CDParams[0] * CDParams[2])));
                     } else if (measurementType.equals("TrainingHR") || measurementType.equals("Recovery") || measurementType.equals("EveningHR") || measurementType.equals("MorningHR")) {
                         graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
                             @Override
@@ -395,6 +448,11 @@ public class MeasurementsActivity extends ListActivity {
                             //graph.addSeries(FittedCurveSeries);
                             graph.addSeries(series);
                         }
+                        this.SamplingField.setText("Sampling rate: " + String.valueOf(makeDecimalsLookGreatAgain.format(samplingRate)) + "Hz");
+                        this.AValue.setVisibility(View.GONE);
+                        this.TValue.setVisibility(View.GONE);
+                        this.CValue.setVisibility(View.GONE);
+                        this.Load.setVisibility(View.GONE);
                     }
                 }
 

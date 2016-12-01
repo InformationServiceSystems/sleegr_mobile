@@ -1,6 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -28,12 +29,30 @@ import static com.iss.android.wearable.datalayer.MainActivity.getContext;
 
 public class Auth0Activity extends Activity {
 
+    private static Context itself;
+
     private final LockCallback mCallback = new AuthenticationCallback() {
         @Override
         public void onAuthentication(Credentials credentials) {
             Toast.makeText(getApplicationContext(), "Log In - Success", Toast.LENGTH_SHORT).show();
             CredentialsManager.saveCredentials(getApplicationContext(), credentials);
             startActivity(new Intent(Auth0Activity.this, MainActivity.class));
+            AuthenticationAPIClient client = new AuthenticationAPIClient(
+                   new Auth0(getString(R.string.auth0_client_id), getString(R.string.auth0_domain)));
+            client.tokenInfo(CredentialsManager.getCredentials(Auth0Activity.getContext()).getIdToken())
+                    .start(new BaseCallback<UserProfile, AuthenticationException>() {
+                        @Override
+                        public void onSuccess(UserProfile payload){
+                            UserData.setProfile(payload);
+                            UserData.setName(payload.getName());
+                            UserData.setEmail(payload.getEmail());
+                        }
+
+                        @Override
+                        public void onFailure(AuthenticationException error){
+                            Log.d("Auth0Activity", "Failed to retrieve User Data");
+                        }
+                    });
             finish();
         }
 
@@ -49,8 +68,13 @@ public class Auth0Activity extends Activity {
     };
     private Lock mLock;
 
+    public static Context getContext() {
+        return itself;
+    }
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        itself = this;
         Auth0 auth0 = new Auth0(getString(R.string.auth0_client_id), getString(R.string.auth0_domain));
         //Request a refresh token along with the id token.
         Map<String, Object> parameters = new HashMap<>();
@@ -67,7 +91,7 @@ public class Auth0Activity extends Activity {
             return;
         }
 
-        AuthenticationAPIClient aClient = new AuthenticationAPIClient(auth0);
+        final AuthenticationAPIClient aClient = new AuthenticationAPIClient(auth0);
         aClient.tokenInfo(CredentialsManager.getCredentials(this).getIdToken())
                 .start(new BaseCallback<UserProfile, AuthenticationException>() {
                     /**
@@ -84,6 +108,25 @@ public class Auth0Activity extends Activity {
                                 UserData.setEmail(payload.getEmail());
                             }
                         });
+
+                        String idToken = CredentialsManager.getCredentials(getContext()).getIdToken();
+
+                        aClient.delegationWithIdToken(idToken)
+                                .start(new BaseCallback<Delegation, AuthenticationException>() {
+
+                                    @Override
+                                    public void onSuccess(Delegation payload) {
+                                        String idToken = payload.getIdToken(); // New ID Token
+                                        CredentialsManager.setIdToken(idToken, getContext());
+                                        long expiresIn = payload.getExpiresIn(); // New ID Token Expire Date
+                                    }
+
+                                    @Override
+                                    public void onFailure(AuthenticationException error) {
+                                        //Show error to the user
+                                    }
+                                });
+
                         startActivity(new Intent(getApplicationContext(), MainActivity.class));
                         finish();
                     }
@@ -95,8 +138,6 @@ public class Auth0Activity extends Activity {
 
                     @Override
                     public void onFailure(AuthenticationException error) {
-                        Auth0 auth0 = new Auth0(getString(R.string.auth0_client_id), getString(R.string.auth0_domain));
-                        AuthenticationAPIClient aClient = new AuthenticationAPIClient(auth0);
                         String refreshToken = UserData.getRefreshToken();
                         Log.d("Automatic Login failed", "Trying to get a new idToken");
 
@@ -105,8 +146,6 @@ public class Auth0Activity extends Activity {
 
                                     @Override
                                     public void onSuccess(Delegation payload) {
-                                        Auth0 auth0 = new Auth0(getString(R.string.auth0_client_id), getString(R.string.auth0_domain));
-                                        AuthenticationAPIClient aClient = new AuthenticationAPIClient(auth0);
                                         Log.d("Success", "Got a new idToken with the refreshToken");
                                         String idToken = payload.getIdToken(); // New ID Token
                                         UserData.setIdToken(idToken);

@@ -37,6 +37,14 @@ public class CredentialsManager {
         return credentials;
     }
 
+    public static void setIdToken(String idToken, Context context){
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                context.getString(R.string.auth0_preferences), Context.MODE_PRIVATE);
+
+        sharedPref.edit()
+            .putString(Constants.ID_TOKEN, idToken);
+    }
+
     public static void deleteCredentials(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.auth0_preferences), Context.MODE_PRIVATE);

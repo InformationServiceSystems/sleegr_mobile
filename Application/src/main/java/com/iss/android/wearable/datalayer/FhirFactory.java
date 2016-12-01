@@ -168,7 +168,7 @@ class FhirFactory {
         value1Decimal = round(value1, 2);
         value2Decimal = round(value2, 2);
         value3Decimal = round(value3, 2);
-        BigDecimal result = new BigDecimal(1000000).multiply(value1Decimal).add(new BigDecimal(1000).multiply(value2Decimal)).add(value3Decimal);
+        BigDecimal result = new BigDecimal(100000000).multiply(value1Decimal).add(new BigDecimal(10000).multiply(value2Decimal)).add(value3Decimal);
         return result;
     }
 }
