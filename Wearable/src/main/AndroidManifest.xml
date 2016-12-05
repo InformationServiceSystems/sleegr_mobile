@@ -51,7 +51,7 @@
     <!-- the smartphone app needs to have all of the permissions of wear app -->
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/sleegr_logo"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.DeviceDefault">
         <meta-data
