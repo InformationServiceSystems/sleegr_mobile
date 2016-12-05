@@ -515,6 +515,26 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             devices.add(record.Sensor);
         }
 
+        // TODO: Create a JSON in the following format:
+
+        /*
+        [{id: AndroidID
+          type: "SM G920F Android 6.0"
+          measures: ["gyroscope", "accelerometer"]
+         },
+         {id: Rhythm+234651
+          type: "BLE sensor"
+          measures: ["heart rate"]
+         }]
+
+        Stuff that needs to be known:
+        - Every sensor that has contributed values to the current measurement
+        - What kind of value it has contributed
+        - What kind of sensor it is, a description
+        - If one sensor measures different things, e.g. gyroscope and accelerometer being built into the smartphone,
+          store the second type of measurement as part of the array.
+         */
+
         JSONArray arrayOfDeviceNames = new JSONArray();
         for (String device: devices) {
             arrayOfDeviceNames.put(device);
