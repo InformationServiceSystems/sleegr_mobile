@@ -180,9 +180,9 @@
     <string name="too_late_for_morning">It is no longer morning.</string>
     <string name="too_early_for_evening">It is not yet evening.</string>
     <string name="title_activity_web_app">WebAppActivity</string>
-    <string name="server_website_port">http://web01.iss.uni-saarland.de</string>
-    <string name="server_json">http://web01.iss.uni-saarland.de:3000/post_json</string>
-    <string name="server_json_get_device" >http://web01.iss.uni-saarland.de:3000/get_device_code</string>
-    <string name="server_logout" >http://web01.iss.uni-saarland.de:3000/logout</string>
+    <string name="server_website_port">http://iot01.iss.uni-saarland.de</string>
+    <string name="server_json">http://iot01.iss.uni-saarland.de:81/post_json</string>
+    <string name="server_json_get_device" >http://iot01.iss.uni-saarland.de:81/get_device_code</string>
+    <string name="server_logout" >http://iot01.iss.uni-saarland.de:81/logout</string>
 
 </resources>

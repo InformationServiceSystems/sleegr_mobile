@@ -1,6 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -23,17 +24,32 @@ import com.iss.android.wearable.datalayer.utils.CredentialsManager;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.iss.android.wearable.datalayer.MainActivity.getContext;
-
 
 public class Auth0Activity extends Activity {
 
+    private static Context itself;
     private final LockCallback mCallback = new AuthenticationCallback() {
         @Override
         public void onAuthentication(Credentials credentials) {
             Toast.makeText(getApplicationContext(), "Log In - Success", Toast.LENGTH_SHORT).show();
             CredentialsManager.saveCredentials(getApplicationContext(), credentials);
             startActivity(new Intent(Auth0Activity.this, MainActivity.class));
+            AuthenticationAPIClient client = new AuthenticationAPIClient(
+                    new Auth0(getString(R.string.auth0_client_id), getString(R.string.auth0_domain)));
+            client.tokenInfo(CredentialsManager.getCredentials(Auth0Activity.getContext()).getIdToken())
+                    .start(new BaseCallback<UserProfile, AuthenticationException>() {
+                        @Override
+                        public void onSuccess(UserProfile payload) {
+                            UserData.setProfile(payload);
+                            UserData.setName(payload.getName());
+                            UserData.setEmail(payload.getEmail());
+                        }
+
+                        @Override
+                        public void onFailure(AuthenticationException error) {
+                            Log.d("Auth0Activity", "Failed to retrieve User Data");
+                        }
+                    });
             finish();
         }
 
@@ -49,12 +65,17 @@ public class Auth0Activity extends Activity {
     };
     private Lock mLock;
 
+    public static Context getContext() {
+        return itself;
+    }
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Auth0 auth0 = new Auth0(getString(R.string.auth0_client_id), getString(R.string.auth0_domain));
         //Request a refresh token along with the id token.
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("scope", "openid offline_access");
+        itself = this;
         parameters.put("device", Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID));
         UserData.putDeviceID(Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID));
         mLock = Lock.newBuilder(auth0, mCallback)
