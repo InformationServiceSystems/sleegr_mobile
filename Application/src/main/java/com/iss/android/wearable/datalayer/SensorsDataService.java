@@ -11,6 +11,8 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -534,30 +536,45 @@ public class SensorsDataService extends Service implements GoogleApiClient.Conne
             return;
         }
         alarm.SetAlarm(getApplicationContext());
+        Calendar cal = new GregorianCalendar();
+        Date time = cal.getTime();
 
         if (state.equals("MorningHR")) {
             timerTimeout = RESTING_MEASUREMENT_TIME;
             editor.putBoolean(date + state, true);
-            OutputMessage("Invalidate Morning Colors");
+            String timeAsString = pref.getString("Sleep Start", "");
+            if (!timeAsString.equals("")){
+                Date oldTime = ISSDictionary.DateStringToDate(timeAsString);
+                editor.remove("Sleep Start");
+                StoreSleepingTime(oldTime, time);
+                OutputMessage("Invalidate Morning Colors");
+            }
         } else if (state.equals("EveningHR")) {
             timerTimeout = RESTING_MEASUREMENT_TIME;
             editor.putBoolean(date + state, true);
+            editor.putString("Sleep Start", ISSDictionary.DateToDateString(time));
             OutputMessage("Invalidate Evening Colors");
         } else if (state.equals("TrainingHR")) {
             timerTimeout = TRAINING_MEASUREMENT_TIME;
             editor.putBoolean(date + state, true);
             OutputMessage("Invalidate Training Colors");
+            StartMeasuring();
         } else if (state.equals("Cooldown")) {
             timerTimeout = RESTING_MEASUREMENT_TIME;
             editor.putBoolean(date + state, true);
             OutputMessage("Invalidate Cooldown Colors");
-        } else if (state.contains("Recovery")) {
-            timerTimeout = RESTING_MEASUREMENT_TIME;
-            editor.putBoolean(date + state, true);
-            OutputMessage("Invalidate Recovery Colors");
+            StartMeasuring();
         }
         editor.apply();
-        StartMeasuring();
+    }
+
+    private void StoreSleepingTime(Date oldTime, Date time) {
+        ContentResolver resolver = MainActivity.getContext().getContentResolver();
+        ContentValues values = new ContentValues();
+        values.put(ISSContentProvider.START, oldTime.toString());
+        values.put(ISSContentProvider.END, time.toString());
+        Log.d("SensorsDataService", "Storing" + oldTime.toString() + time.toString());
+        resolver.insert(ISSContentProvider.SLEEP_CONTENT_URI, values);
     }
 
     // Starts measuring the heart rate and, during that time, holds wakelock

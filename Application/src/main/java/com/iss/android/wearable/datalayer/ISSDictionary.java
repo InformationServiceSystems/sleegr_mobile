@@ -57,6 +57,12 @@ class ISSDictionary {
         return date;
     }
 
+    static String DateToDateString(Date date) {
+        DateFormat format = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy", Locale.US);
+        String s = format.format(date);
+        return s;
+    }
+
     static byte[] MapToByteArray(HashMap<String, Integer> answers) {
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         ObjectOutputStream out = null;

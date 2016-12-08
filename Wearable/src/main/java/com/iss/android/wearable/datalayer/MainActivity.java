@@ -223,17 +223,11 @@ public class MainActivity extends Activity {
         // get measured states
         HashMap<String, Boolean> recordedActivities = SensorsDataService.getRecordedActivities();
 
-        ImageButton morningHR = (ImageButton) findViewById(R.id.morningHR);
         ImageButton trainingHR = (ImageButton) findViewById(R.id.trainingHR);
         ImageButton startCooldown = (ImageButton) findViewById(R.id.startCooldown);
-        ImageButton continueCooldown = (ImageButton) findViewById(R.id.continueCooldown);
-        ImageButton eveningHR = (ImageButton) findViewById(R.id.eveningHR);
 
-        morningHR.setBackgroundColor(recordedActivities.containsKey("MorningHR") ? Color.GREEN : Color.GRAY);
         trainingHR.setBackgroundColor(recordedActivities.containsKey("TrainingHR") ? Color.GREEN : Color.GRAY);
         startCooldown.setBackgroundColor(recordedActivities.containsKey("Cooldown") ? Color.GREEN : Color.GRAY);
-        continueCooldown.setBackgroundColor(recordedActivities.containsKey("Recovery") ? Color.GREEN : Color.GRAY);
-        eveningHR.setBackgroundColor(recordedActivities.containsKey("EveningHR") ? Color.GREEN : Color.GRAY);
 
         int inProgressColor = Color.argb(255, 255, 165, 0);
 
@@ -242,15 +236,6 @@ public class MainActivity extends Activity {
         }
         if (SensorsDataService.itself.currentState.equals("TrainingHR")) {
             trainingHR.setBackgroundColor(inProgressColor);
-        }
-        if (SensorsDataService.itself.currentState.equals("Recovery")) {
-            continueCooldown.setBackgroundColor(inProgressColor);
-        }
-        if (SensorsDataService.itself.currentState.equals("MorningHR")) {
-            morningHR.setBackgroundColor(inProgressColor);
-        }
-        if (SensorsDataService.itself.currentState.equals("EveningHR")) {
-            eveningHR.setBackgroundColor(inProgressColor);
         }
     }
 
@@ -426,15 +411,6 @@ public class MainActivity extends Activity {
 
     public void onClicked(View view) {
         switch (view.getId()) {
-            case R.id.morningHR:
-
-                if (SensorsDataService.itself != null) {
-
-                    if (!SensorsDataService.isNowASleepingHour())
-                        SensorsDataService.itself.SwitchSportsAction("MorningHR");
-                }
-
-                break;
             case R.id.trainingHR:
 
                 if (SensorsDataService.itself != null) {
@@ -447,23 +423,6 @@ public class MainActivity extends Activity {
                 if (SensorsDataService.itself != null) {
                     SensorsDataService.itself.SwitchSportsAction("Cooldown");
                 }
-
-                break;
-            case R.id.continueCooldown:
-
-                if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction("Recovery");
-                }
-
-
-                break;
-            case R.id.eveningHR:
-
-                if (SensorsDataService.itself != null) {
-                    if (SensorsDataService.isNowASleepingHour())
-                        SensorsDataService.itself.SwitchSportsAction("EveningHR");
-                }
-
 
                 break;
             case R.id.searchForHRM:
@@ -490,8 +449,6 @@ public class MainActivity extends Activity {
             if (intent.getAction().equals(SensorsDataService.NEW_MESSAGE_AVAILABLE)) {
                 //UpdateButtonText was called from here, but  that method didn't do anything.
             }
-
-
         }
     }
 }

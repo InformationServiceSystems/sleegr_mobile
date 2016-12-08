@@ -32,6 +32,8 @@ public class ISSContentProvider extends ContentProvider {
     static final Uri SCHEDULE_CONTENT_URI = Uri.parse(SCHEDULE_URL);
     static final String RPE_URL = "content://" + PROVIDER_NAME + "/rpeanswers";
     static final Uri RPE_CONTENT_URI = Uri.parse(RPE_URL);
+    static final String SLEEP_URL = "content://" + PROVIDER_NAME + "/sleep";
+    static final Uri SLEEP_CONTENT_URI = Uri.parse(SLEEP_URL);
 
     static final String _ID = "_id";
     static final String USERID = "user_id";
@@ -48,6 +50,8 @@ public class ISSContentProvider extends ContentProvider {
     static final String TYPE = "type";
     static final String SENT = "sent";
     static final String VALUE = "value";
+    static final String START = "start";
+    static final String END = "end";
     static final int RECORDSTYPE = 1;
     static final int RECORD_IDTYPE = 2;
     static final int MEASUREMENTSTYPE = 3;
@@ -56,13 +60,16 @@ public class ISSContentProvider extends ContentProvider {
     static final int RPE_IDTYPE = 6;
     static final int SCHEDULESTYPE = 7;
     static final int SCHEDULE_IDTYPE = 8;
+    static final int SLEEPTYPE = 9;
+    static final int SLEEP_IDTYPE = 10;
     static final UriMatcher uriMatcher;
     static final String DATABASE_NAME = "ISSRecordData";
     static final String RECORDS_TABLE_NAME = "records";
     static final String MEASUREMENTS_TABLE_NAME = "measurements";
     static final String RPE_TABLE_NAME = "RPESets";
     static final String SCHEDULE_TABLE_NAME = "schedules";
-    static final int DATABASE_VERSION = 43;
+    static final String SLEEP_TABLE_NAME = "sleep";
+    static final int DATABASE_VERSION = 45;
     static final String CREATE_RECORDS_DB_TABLE =
             " CREATE TABLE " + RECORDS_TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + //id of the specific value
@@ -93,6 +100,11 @@ public class ISSContentProvider extends ContentProvider {
                     _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     DATE + " TEXT NOT NULL, " +
                     VALUE + " BLOB);";
+    static final String CREATE_SLEEP_TABLE =
+            " CREATE TABLE " + SLEEP_TABLE_NAME + " (" +
+                    _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    START + " TEXT NOT NULL, " +
+                    END + " BLOB);";
     private static HashMap<String, String> RECORDS_PROJECTION_MAP;
 
     static {
@@ -105,6 +117,8 @@ public class ISSContentProvider extends ContentProvider {
         uriMatcher.addURI(PROVIDER_NAME, "rpeanswers/#", RPE_IDTYPE);
         uriMatcher.addURI(PROVIDER_NAME, "schedule", SCHEDULESTYPE);
         uriMatcher.addURI(PROVIDER_NAME, "schedule/#", SCHEDULE_IDTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "sleep", SLEEPTYPE);
+        uriMatcher.addURI(PROVIDER_NAME, "sleep/#", SLEEP_IDTYPE);
     }
 
     /**
@@ -171,6 +185,16 @@ public class ISSContentProvider extends ContentProvider {
                 qb.appendWhere(_ID + "=" + uri.getPathSegments().get(1));
                 break;
 
+            case SLEEPTYPE:
+                qb.setTables(SLEEP_TABLE_NAME);
+                qb.setProjectionMap(RECORDS_PROJECTION_MAP);
+                break;
+
+            case SLEEP_IDTYPE:
+                qb.setTables(SLEEP_TABLE_NAME);
+                qb.appendWhere(_ID + "=" + uri.getPathSegments().get(1));
+                break;
+
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -225,6 +249,12 @@ public class ISSContentProvider extends ContentProvider {
             case SCHEDULE_IDTYPE:
                 return "vnd.android.cursor.item/vnd.example.schedules";
 
+            case SLEEPTYPE:
+                return "vnd.android.cursor.dir/vnd.example.sleep";
+
+            case SLEEP_IDTYPE:
+                return "vnd.android.cursor.item/vnd.example.sleep";
+
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
@@ -278,6 +308,15 @@ public class ISSContentProvider extends ContentProvider {
                     return _uri;
                 }
                 throw new SQLException("Failed to add a record into " + uri);
+            case SLEEPTYPE:
+                rowID = db.insert(SLEEP_TABLE_NAME, "", values);
+
+                if (rowID > 0) {
+                    Uri _uri = ContentUris.withAppendedId(SLEEP_CONTENT_URI, rowID);
+                    getContext().getContentResolver().notifyChange(_uri, null);
+                    return _uri;
+                }
+                throw new SQLException("Failed to add a record into " + uri);
         }
         throw new SQLException("Failed to add a record into " + uri);
     }
@@ -325,6 +364,16 @@ public class ISSContentProvider extends ContentProvider {
                 count = db.delete(SCHEDULE_TABLE_NAME, _ID + " = " + id +
                         (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
                 break;
+
+            case SLEEPTYPE:
+                count = db.delete(SLEEP_TABLE_NAME, selection, selectionArgs);
+                break;
+
+            case SLEEP_IDTYPE:
+                id = uri.getPathSegments().get(1);
+                count = db.delete(SLEEP_TABLE_NAME, _ID + " = " + id +
+                        (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -362,6 +411,14 @@ public class ISSContentProvider extends ContentProvider {
                 count = db.update(SCHEDULE_TABLE_NAME, values, _ID + " = " + uri.getPathSegments().get(1) +
                         (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
                 break;
+            case SLEEPTYPE:
+                count = db.update(SLEEP_TABLE_NAME, values, selection, selectionArgs);
+                break;
+
+            case SLEEP_IDTYPE:
+                count = db.update(SLEEP_TABLE_NAME, values, _ID + " = " + uri.getPathSegments().get(1) +
+                        (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
+                break;
 
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
@@ -385,6 +442,7 @@ public class ISSContentProvider extends ContentProvider {
             db.execSQL(CREATE_MEASUREMENT_DB_TABLE);
             db.execSQL(CREATE_RPE_DB_TABLE);
             db.execSQL(CREATE_SCHEDULE_TABLE);
+            db.execSQL(CREATE_SLEEP_TABLE);
         }
 
         @Override
@@ -393,6 +451,7 @@ public class ISSContentProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + MEASUREMENTS_TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + RPE_TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + SCHEDULE_TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + SLEEP_TABLE_NAME);
             onCreate(db);
         }
     }

@@ -78,9 +78,6 @@ public class MeasuringActivity extends Activity {
                 } else if (intent.getStringExtra("message").equals("Invalidate Cooldown Colors")) {
                     ImageButton button = (ImageButton) findViewById(R.id.cooldownHR);
                     button.setBackgroundColor(Color.GREEN);
-                } else if (intent.getStringExtra("message").equals("Invalidate Recovery Colors")) {
-                    ImageButton button = (ImageButton) findViewById(R.id.recoveryHR);
-                    button.setBackgroundColor(Color.GREEN);
                 } else if (intent.getStringExtra("message").equals("Invalidate Button Colors, Finished")) {
                     // The measurement has finished, fade all buttons that have been used today.
                     if (pref.getBoolean(date + "Cooldown", false)) {
@@ -92,11 +89,6 @@ public class MeasuringActivity extends Activity {
                         ImageButton button = (ImageButton) findViewById(R.id.eveningHR);
                         button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
                         button.setImageResource(R.drawable.ic_hotel_black_24dp);
-                    }
-                    if (pref.getBoolean(date + "Recovery", false)) {
-                        ImageButton button = (ImageButton) findViewById(R.id.recoveryHR);
-                        button.setBackgroundColor(getResources().getColor(R.color.com_facebook_button_background_color_disabled));
-                        button.setImageResource(R.drawable.ic_trending_down_black_24dp);
                     }
                     if (pref.getBoolean(date + "TrainingHR", false)) {
                         ImageButton button = (ImageButton) findViewById(R.id.trainingHR);
@@ -277,12 +269,7 @@ public class MeasuringActivity extends Activity {
 
                 // Button to start morning measurement
                 if (SensorsDataService.itself != null) {
-
-                    if (!SensorsDataService.isNowASleepingHour()) {
-                        SensorsDataService.itself.SwitchSportsAction("MorningHR");
-                    } else {
-                        Toast.makeText(this, R.string.too_late_for_morning, Toast.LENGTH_SHORT).show();
-                    }
+                    SensorsDataService.itself.SwitchSportsAction("MorningHR");
                 }
 
                 break;
@@ -302,24 +289,11 @@ public class MeasuringActivity extends Activity {
                 }
 
                 break;
-            case R.id.recoveryHR:
-
-                // Button to start recovery measurement
-                if (SensorsDataService.itself != null) {
-                    SensorsDataService.itself.SwitchSportsAction("Recovery");
-                }
-
-
-                break;
             case R.id.eveningHR:
 
                 // Button to start evening measurement
                 if (SensorsDataService.itself != null) {
-                    if (SensorsDataService.isNowASleepingHour()) {
-                        SensorsDataService.itself.SwitchSportsAction("EveningHR");
-                    } else {
-                        Toast.makeText(this, R.string.too_early_for_evening, Toast.LENGTH_SHORT).show();
-                    }
+                    SensorsDataService.itself.SwitchSportsAction("EveningHR");
                 }
 
 
