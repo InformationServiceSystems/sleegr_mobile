@@ -360,6 +360,7 @@ public class DataSyncService extends Service implements DataApi.DataListener,
     // uploading json to server
     public String send_record_as_json(JSONObject jsonForServer, ArrayList<Integer> arrayOfMeasurementIDs) {
         String uri = getString(R.string.server_json);//"http://web01.iss.uni-saarland.de/post_json";
+        Log.d("dataSyncService", getString(R.string.server_json));
         Boolean server_transac_successful = false;
 
         String data = jsonForServer.toString();
@@ -481,11 +482,48 @@ public class DataSyncService extends Service implements DataApi.DataListener,
             mCursor.close();
         }
 
-        if (arrayOfMeasurementIDs.size() > 0) {
+        JSONArray arrayOfSleepObservations = new JSONArray();
+        CONTENT_URI = ISSContentProvider.SLEEP_CONTENT_URI;
+        String nSelectionClause = "";
+        String[] nSelectionArgs = {};
+        String[] nProjection =
+                {
+                        ISSContentProvider._ID,
+                        ISSContentProvider.START,
+                        ISSContentProvider.END
+                };
+        String nSortOrder = ISSContentProvider._ID + " DESC";
+
+        // Does a query against the table and returns a Cursor object
+        Cursor nCursor = MainActivity.getContext().getContentResolver().query(
+                CONTENT_URI,                       // The content URI of the database table
+                nProjection,                       // The columns to return for each row
+                nSelectionClause,                  // Either null, or the word the user entered
+                nSelectionArgs,                    // Either empty, or the string the user entered
+                nSortOrder);                       // The sort order for the returned rows
+
+        // Some providers return null if an error occurs, others throw an exception
+        if (null == nCursor) {
+            // If the Cursor is empty, the provider found no matches
+        } else if (nCursor.getCount() < 1) {
+            // If the Cursor is empty, the provider found no matches
+            nCursor.close();
+        } else {
+            while (nCursor.moveToNext()) {
+                Log.d("DataSyncService", nCursor.getString(1));
+                Log.d("DataSyncService", nCursor.getString(2));
+                JSONObject sleep = FhirFactory.constructSleepFhir(nCursor.getString(1), nCursor.getString(2));
+                arrayOfSleepObservations.put(sleep);
+            }
+            mCursor.close();
+        }
+
+        if (arrayOfMeasurementIDs.size() > 0 || !arrayOfSleepObservations.equals(new JSONArray())) {
             // This if clause guarantees, that if there are no new records, transmitting to the server will stop.
 
             try {
                 jsonForServer.put("arrayOfFhirObservations", arrayOfFhirObservations);
+                jsonForServer.put("arrayOfSleepObservations", arrayOfSleepObservations);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

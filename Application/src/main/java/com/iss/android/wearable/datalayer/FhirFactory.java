@@ -1,6 +1,7 @@
 package com.iss.android.wearable.datalayer;
 
 import android.database.Cursor;
+import android.provider.Settings;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -170,5 +171,71 @@ class FhirFactory {
         value3Decimal = round(value3, 2);
         BigDecimal result = new BigDecimal(100000000).multiply(value1Decimal).add(new BigDecimal(10000).multiply(value2Decimal)).add(value3Decimal);
         return result;
+    }
+
+    static JSONObject constructSleepFhir(String string, String string1) {
+        JSONObject mainObject = new JSONObject();
+
+        try {
+            mainObject.put("status", "final");
+
+            JSONObject category = new JSONObject();
+            JSONArray coding = new JSONArray();
+            JSONObject categoryObject = new JSONObject();
+            categoryObject.put("display", "Sleep Tracking");
+            coding.put(categoryObject);
+            category.put("coding", coding);
+            mainObject.put("category", category);
+
+
+            JSONObject subject = new JSONObject();
+            subject.put("display", UserData.getEmail()); //We could switch to name; but email is required, name isn't.
+            mainObject.put("subject", subject);
+
+            JSONObject device = new JSONObject();
+            device.put("reference", getContext().getResources().getString(R.string.server_json_get_device));
+            device.put("display", Settings.Secure.getString(MainActivity.getContext().getContentResolver(), Settings.Secure.ANDROID_ID));
+            mainObject.put("device", device);
+
+            mainObject.put("effectiveDateTime", ISSDictionary.convertToFhirDate(string1));
+            JSONObject componentElements = constructSleepComponent(string, string1);
+            mainObject.put("component", componentElements);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.d("JSONObject", mainObject.toString());
+
+
+        return mainObject;
+
+    }
+
+    private static JSONObject constructSleepComponent(String string, String string1) {
+        JSONObject json = new JSONObject();
+        try {
+            JSONArray coding = new JSONArray();
+            JSONObject codingElement = new JSONObject();
+            codingElement.put("system", "http://loinc.org");
+            codingElement.put("code", "8867-4");
+            codingElement.put("display", "Sleep");
+            coding.put(codingElement);
+            JSONObject code = new JSONObject();
+            code.put("coding", coding);
+            json.put("code", code);
+
+            json.put("valueDateTime", ISSDictionary.convertToFhirDate(string));
+            double d = (ISSDictionary.DateStringToDate(string1).getTime() - ISSDictionary.DateStringToDate(string).getTime())/1000;
+
+            JSONObject valueQuantity = new JSONObject();
+            valueQuantity.put("unit", "date");
+            valueQuantity.put("system", "http://unitsofmeasure.org");
+            valueQuantity.put("code", "date");
+            valueQuantity.put("value", d);
+            json.put("valueQuantity", valueQuantity);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
     }
 }
