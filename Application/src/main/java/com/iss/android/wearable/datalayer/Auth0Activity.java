@@ -33,7 +33,6 @@ public class Auth0Activity extends Activity {
         public void onAuthentication(Credentials credentials) {
             Toast.makeText(getApplicationContext(), "Log In - Success", Toast.LENGTH_SHORT).show();
             CredentialsManager.saveCredentials(getApplicationContext(), credentials);
-            startActivity(new Intent(Auth0Activity.this, MainActivity.class));
             AuthenticationAPIClient client = new AuthenticationAPIClient(
                     new Auth0(getString(R.string.auth0_client_id), getString(R.string.auth0_domain)));
             client.tokenInfo(CredentialsManager.getCredentials(Auth0Activity.getContext()).getIdToken())
@@ -50,6 +49,7 @@ public class Auth0Activity extends Activity {
                             Log.d("Auth0Activity", "Failed to retrieve User Data");
                         }
                     });
+            startActivity(new Intent(Auth0Activity.this, MainActivity.class));
             finish();
         }
 
